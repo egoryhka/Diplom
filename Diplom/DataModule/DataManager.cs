@@ -51,5 +51,23 @@ namespace Diplom.DataModule
             }
         }
 
+        public static void LoadEbsdFromExcel(string pathToFile)
+        {
+            if (!ValidateExcel()) throw new ExcelNotValidException();
+
+        }
+
+        private static bool ValidateExcel()
+        {
+            bool valid = true;
+
+
+            return valid;
+        }
+
+    }
+
+    public class ExcelNotValidException : Exception
+    {
     }
 }

@@ -18,7 +18,9 @@
             <MenuItem Header="Файл" Height="20">
                 <MenuItem Header="Сохранить" x:Name="SaveCurrentFileButton" Click="SaveCurrentFileButton_Click"></MenuItem>
                 <MenuItem Header="Сохранить как" x:Name="SaveFileButton" Click="SaveFileButton_Click"></MenuItem>
-                <MenuItem Header="Открыть" x:Name="OpenFileButton" Click="OpenFileButton_Click"></MenuItem>
+                <MenuItem Header="Открыть"  x:Name="OpenFileButton" Click="OpenFileButton_Click"></MenuItem>
+                <MenuItem Header="Импорт Ebsd из Excel" x:Name="ExcelImportButton" Click="ExcelImportButton_Click"></MenuItem>
+
                 <MenuItem Header="Настройки" x:Name="SettingsButton" Click="SettingsButton_Click"></MenuItem>
             </MenuItem>
         </Menu>

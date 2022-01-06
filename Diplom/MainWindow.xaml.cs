@@ -91,9 +91,29 @@ namespace Diplom
             }
         }
 
+        private void ExcelImportButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "Excel files (*.xslx)|*.xlsx";
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    string pathToFile = openFileDialog.FileName;
+                    DataManager.LoadEbsdFromExcel(pathToFile);
+                }
+            }
+            catch (ExcelNotValidException)
+            {
+                MessageBox.Show("Выбранный файл не подходит!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+        }
+
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
             new SettingsWindow().Show();
         }
+
     }
 }
