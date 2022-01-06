@@ -1,10 +1,13 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.OleDb;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Office.Interop.Excel;
 
 namespace Diplom.DataModule
 {
@@ -53,14 +56,52 @@ namespace Diplom.DataModule
 
         public static void LoadEbsdFromExcel(string pathToFile)
         {
-            if (!ValidateExcel()) throw new ExcelNotValidException();
+            string excelConnectString = 
+                $@"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={pathToFile};Extended Properties=""Excel 8.0;HDR=YES;""";
+
+            OleDbConnection connection = new OleDbConnection(excelConnectString);
+            OleDbDataAdapter adapter = new OleDbDataAdapter();
+            DataSet dataSet = new DataSet();
+
+            try
+            {
+                connection.Open();
+
+                System.Data.DataTable Sheets = connection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
+                string sheetName = Sheets.Rows[0][2].ToString().Replace("'", "");
+                OleDbCommand command = new OleDbCommand($"Select * From [{sheetName}]", connection);
+
+                adapter.SelectCommand = command;
+                adapter.Fill(dataSet);
+
+                if (!ValidateExcel(dataSet.Tables[0].Columns)) throw new ExcelNotValidException();
+
+
+
+            }
+            finally
+            {
+                connection.Close();
+                adapter.Dispose();
+            }
 
         }
 
-        private static bool ValidateExcel()
+        private static bool ValidateExcel(DataColumnCollection dataColumns)
         {
+            string[] validColumns = new string[] { "Index", "Phase", "Xpos", "Ypos",
+                                                   "Euler1(°)", "Euler2(°)", "Euler3(°)",
+                                                   "MAD(°)", "AFI", "BC", "BS", "Status", };
             bool valid = true;
 
+            foreach (var col in validColumns)
+            {
+                if (!dataColumns.Contains(col))
+                {
+                    valid = false;
+                    break;
+                }
+            }
 
             return valid;
         }
