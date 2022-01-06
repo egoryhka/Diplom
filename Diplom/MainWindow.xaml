@@ -8,5 +8,14 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
 
+        <Menu Height="20" VerticalAlignment="Top">
+            <MenuItem Header="Файл" Height="20">
+                <MenuItem Header="Сохранить" x:Name="SaveCurrentFileButton" Click="SaveCurrentFileButton_Click"></MenuItem>
+                <MenuItem Header="Сохранить как" x:Name="SaveFileButton" Click="SaveFileButton_Click"></MenuItem>
+                <MenuItem Header="Открыть" x:Name="OpenFileButton" Click="OpenFileButton_Click"></MenuItem>
+                <MenuItem Header="Настройки" x:Name="SettingsButton" Click="SettingsButton_Click"></MenuItem>
+            </MenuItem>
+        </Menu>
+
     </Grid>
 </Window>
