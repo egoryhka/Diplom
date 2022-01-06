@@ -6,6 +6,12 @@
         xmlns:local="clr-namespace:Diplom"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    <Window.InputBindings>
+        <KeyBinding Command="local:HotKeys.SaveCommand" Gesture="Ctrl+S" />
+    </Window.InputBindings>
+    <Window.CommandBindings>
+        <CommandBinding Command="local:HotKeys.SaveCommand" Executed="SaveCurrentFileButton_Click" />
+    </Window.CommandBindings>
     <Grid>
 
         <Menu Height="20" VerticalAlignment="Top">
