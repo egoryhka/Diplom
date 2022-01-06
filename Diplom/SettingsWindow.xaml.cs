@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,16 +21,23 @@ namespace Diplom
     /// </summary>
     public partial class SettingsWindow : Window
     {
-        private Settings _settings = new Settings();
+        private static readonly Regex _numericOnlyRegex = new Regex("[^0-9.-]+");
+
+        public Settings _settings { get; set; } = new Settings();
 
         public SettingsWindow()
         {
+            LoadCurrentSettings();
+
             InitializeComponent();
+
+            TextBox_A.PreviewTextInput += (object sender, TextCompositionEventArgs e) => { e.Handled = !CheckNumeric(e.Text); };
+
         }
+
 
         private void ApplySettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            //Apply
             DataManager.CurrentData.settings = _settings;
             Close();
         }
@@ -39,8 +47,18 @@ namespace Diplom
             Close();
         }
 
-        //DataManager.CurrentData
+        private void LoadCurrentSettings()
+        {
+            var currentSettings = DataManager.CurrentData.settings;
+            _settings.A = currentSettings.A;
 
 
+
+        }
+
+        private static bool CheckNumeric(string text)
+        {
+            return !_numericOnlyRegex.IsMatch(text);
+        }
     }
 }

@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Diplom"
         mc:Ignorable="d"
+        x:Name="SetWin"
         Title="SettingsWindow" Height="300" Width="500">
     <Grid>
         <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal">
@@ -13,8 +14,8 @@
         </StackPanel>
 
         <StackPanel>
-            
+            <TextBox x:Name="TextBox_A" Text="{Binding _settings.A, ElementName=SetWin}"/>
         </StackPanel>
-        
+
     </Grid>
 </Window>

@@ -8,7 +8,7 @@ namespace Diplom.DataModule
 {
     public class Settings
     {
-        public int A = 10;
+        public int A { get; set; } = 999999;
 
     }
 }

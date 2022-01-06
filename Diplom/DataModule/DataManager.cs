@@ -20,12 +20,11 @@ namespace Diplom.DataModule
         {
             serializer = JsonSerializer.Create();
             currentPathToFile = "";
+            if (CurrentData == null) CurrentData = new Data();
         }
 
         public static void Save(string pathToFile)
         {
-            if (CurrentData == null) CurrentData = new Data();
-
             using (StreamWriter writer = new StreamWriter(pathToFile))
             {
                 serializer.Serialize(writer, CurrentData);
