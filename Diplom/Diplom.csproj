@@ -7,12 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\26679737.jpeg" />
+    <None Remove="Resources\EFXSes9UCfsyRVoNeQ2ZTB.png" />
     <None Remove="Resources\ExcelImportIcon.png" />
     <None Remove="Resources\OpenIcon.png" />
+    <None Remove="Resources\ResetImageSize.png" />
     <None Remove="Resources\SaveIcon.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\26679737.jpeg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\EFXSes9UCfsyRVoNeQ2ZTB.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Resources\ExcelImportIcon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
@@ -20,7 +29,6 @@
 
   <ItemGroup>
     <Folder Include="FuncModule\" />
-    <Folder Include="UI\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +40,9 @@
 
   <ItemGroup>
     <Resource Include="Resources\OpenIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\ResetImageSize.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\SaveIcon.png">

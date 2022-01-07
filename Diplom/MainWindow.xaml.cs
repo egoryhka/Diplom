@@ -122,5 +122,10 @@ namespace Diplom
             new SettingsWindow().Show();
         }
 
+        private void ResetImageSize_Click(object sender, RoutedEventArgs e)
+        {
+            MainImageContainer.Reset();
+        }
+
     }
 }
