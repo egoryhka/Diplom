@@ -14,6 +14,16 @@ namespace Diplom.DataModule
     public static class DataManager
     {
         public static Data CurrentData;
+        public static string ProjectName
+        {
+            get
+            {
+                string name = "Проект: ";
+                string projectFileName = Path.GetFileName(currentPathToFile);
+                name += projectFileName.Remove(projectFileName.Length - 11, 11);
+                return name;
+            }
+        }
 
         private static JsonSerializer serializer;
 

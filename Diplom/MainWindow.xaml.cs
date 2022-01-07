@@ -23,6 +23,7 @@ namespace Diplom
     /// </summary>
     public partial class MainWindow : Window
     {
+
         public MainWindow()
         {
             InitializeComponent();
@@ -51,15 +52,22 @@ namespace Diplom
             }
         }
 
-        private void SaveFileButton_Click(object sender, RoutedEventArgs e)
+        private void SaveFile()
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
+
             saveFileDialog.Filter = "diplomData files (*.diplomData)|*.diplomData";
             if (saveFileDialog.ShowDialog() == true)
             {
                 string pathToFile = saveFileDialog.FileName;
                 DataManager.Save(pathToFile);
+                Title = DataManager.ProjectName;
             }
+        }
+
+        private void SaveFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFile();
         }
 
         private void SaveCurrentFileButton_Click(object sender, RoutedEventArgs e)
@@ -70,13 +78,7 @@ namespace Diplom
             }
             catch (FileNotFoundException)
             {
-                SaveFileDialog saveFileDialog = new SaveFileDialog();
-                saveFileDialog.Filter = "diplomData files (*.diplomData)|*.diplomData";
-                if (saveFileDialog.ShowDialog() == true)
-                {
-                    string pathToFile = saveFileDialog.FileName;
-                    DataManager.Save(pathToFile);
-                }
+                SaveFile();
             }
         }
 
@@ -88,6 +90,7 @@ namespace Diplom
             {
                 string pathToFile = openFileDialog.FileName;
                 DataManager.Load(pathToFile);
+                Title = DataManager.ProjectName;
             }
         }
 
