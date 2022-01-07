@@ -56,7 +56,7 @@ namespace Diplom.DataModule
 
         public static void LoadEbsdFromExcel(string pathToFile)
         {
-            string excelConnectString = 
+            string excelConnectString =
                 $@"Provider=Microsoft.ACE.OLEDB.12.0; Data Source={pathToFile};Extended Properties=""Excel 8.0;HDR=YES;""";
 
             OleDbConnection connection = new OleDbConnection(excelConnectString);
@@ -75,7 +75,36 @@ namespace Diplom.DataModule
                 adapter.Fill(dataSet);
 
                 if (!ValidateExcel(dataSet.Tables[0].Columns)) throw new ExcelNotValidException();
+                else
+                {
+                    CurrentData.Points = new EBSD[dataSet.Tables[0].Rows.Count];
+                    var rows = dataSet.Tables[0].AsEnumerable().ToArray();
+                    for (int i = 0; i < rows.Length; i++)
+                    {
+                        var rowData = rows[i].ItemArray;
+                        EBSD point = new EBSD();
+                        point.Index = Convert.ToInt32(rowData[0]);
+                        point.Phase = Convert.ToInt32(rowData[1]);
+                        point.Pos.x = float.Parse(rowData[2].ToString());
+                        point.Pos.y = float.Parse(rowData[3].ToString());
+                        point.Euler.x = float.Parse(rowData[4].ToString());
+                        point.Euler.y = float.Parse(rowData[5].ToString());
+                        point.Euler.z = float.Parse(rowData[6].ToString());
+                        point.MAD = float.Parse(rowData[7].ToString());
+                        point.AFI = Convert.ToInt32(rowData[8]);
+                        point.BC = Convert.ToInt32(rowData[9]);
+                        point.BS = Convert.ToInt32(rowData[10]);
+                        point.Status = Convert.ToInt32(rowData[11]);
 
+                        CurrentData.Points[i] = point;
+                    }
+
+                    foreach (int phase in CurrentData.Points.Select(x => x.Phase).Distinct().OrderBy(x => x))
+                    {
+                        CurrentData.Settings.Phases.Add(phase, "phaseName");
+                    }
+
+                }
 
 
             }

@@ -38,7 +38,7 @@ namespace Diplom
 
         private void ApplySettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            DataManager.CurrentData.settings = _settings;
+            DataManager.CurrentData.Settings = _settings;
             Close();
         }
 
@@ -49,8 +49,11 @@ namespace Diplom
 
         private void LoadCurrentSettings()
         {
-            var currentSettings = DataManager.CurrentData.settings;
-            _settings.A = currentSettings.A;
+            var currentSettings = DataManager.CurrentData.Settings;
+            foreach(var phase in currentSettings.Phases)
+            {
+                _settings.Phases.Add(phase.Key, phase.Value);
+            }
 
 
 

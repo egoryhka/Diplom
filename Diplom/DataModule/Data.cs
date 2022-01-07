@@ -9,7 +9,7 @@ namespace Diplom.DataModule
     [Serializable]
     public class Data
     {
-        public Settings settings = new Settings();
-        public int N = 100;
+        public Settings Settings = new Settings();
+        public EBSD[] Points;
     }
 }

@@ -8,7 +8,10 @@ namespace Diplom.DataModule
 {
     public class Settings
     {
-        public int A { get; set; } = 999999;
+        public Dictionary<int, string> Phases { get; set; } = new Dictionary<int, string>();
+
 
     }
+
+    
 }
