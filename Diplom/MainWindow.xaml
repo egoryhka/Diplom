@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Diplom"
         mc:Ignorable="d"
-        Title="Проект: " Height="450" Width="800">
+        Title="Проект: " Height="450" Width="800" >
     <Window.InputBindings>
         <KeyBinding Command="local:HotKeys.SaveCommand" Gesture="Ctrl+S" />
     </Window.InputBindings>
@@ -14,16 +14,32 @@
     </Window.CommandBindings>
     <Grid>
 
-        <Menu Height="20" VerticalAlignment="Top">
-            <MenuItem Header="Файл" Height="20">
-                <MenuItem Header="Сохранить" x:Name="SaveCurrentFileButton" Click="SaveCurrentFileButton_Click"></MenuItem>
+        <Menu Height="22" VerticalAlignment="Top">
+            <MenuItem Header="Файл" Background="#DADADA" Height="20" Width="auto" BorderThickness="0" Margin="1">
+                <MenuItem Header="Открыть"  x:Name="OpenFileButton" Click="OpenFileButton_Click">
+                    <MenuItem.Icon>
+                        <Image Source="Resources/OpenIcon.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Сохранить" x:Name="SaveCurrentFileButton" Click="SaveCurrentFileButton_Click">
+                    <MenuItem.Icon>
+                        <Image Source="Resources/SaveIcon.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="Сохранить как" x:Name="SaveFileButton" Click="SaveFileButton_Click"></MenuItem>
-                <MenuItem Header="Открыть"  x:Name="OpenFileButton" Click="OpenFileButton_Click"></MenuItem>
-                <MenuItem Header="Импорт Ebsd из Excel" x:Name="ExcelImportButton" Click="ExcelImportButton_Click"></MenuItem>
+                <MenuItem Header="Импорт Ebsd из Excel" x:Name="ExcelImportButton" Click="ExcelImportButton_Click">
+                    <MenuItem.Icon>
+                        <Image Source="Resources/ExcelImportIcon.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
 
                 <MenuItem Header="Настройки" x:Name="SettingsButton" Click="SettingsButton_Click"></MenuItem>
             </MenuItem>
-        </Menu>
 
+        </Menu>
+        <Button Height="20" Width="20" BorderThickness="0" Background="#E0E0E0" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="50,1" Click="SaveCurrentFileButton_Click">
+            <Image RenderOptions.BitmapScalingMode="NearestNeighbor" Height="15" Width="15" Source="Resources/SaveIcon.png" />
+        </Button>
+      
     </Grid>
 </Window>
