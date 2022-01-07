@@ -15,16 +15,9 @@
             <TabItem Header="Фазы">
                 <Grid Background="#FFE5E5E5">
                     <ScrollViewer Background="#AAA5A5A5" Margin="0,0,0,25">
-                        <StackPanel  x:Name="SettingsStackPanel">
+                        <StackPanel x:Name="PhasesStackPanel">
                             <Label Content="Фазы"/>
-                            <DockPanel LastChildFill="True">
-                                <TextBlock Text="0" Margin="5" DockPanel.Dock="Left" VerticalAlignment="Center"/>
-                                <TextBox Height="25" Width="Auto"/>
-                            </DockPanel >
-                            <DockPanel LastChildFill="True">
-                                <TextBlock Text="0" Margin="5" DockPanel.Dock="Left" VerticalAlignment="Center"/>
-                                <TextBox Height="25" Width="Auto"/>
-                            </DockPanel >
+                            
                         </StackPanel>
 
                     </ScrollViewer>

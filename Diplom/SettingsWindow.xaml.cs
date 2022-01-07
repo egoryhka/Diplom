@@ -28,10 +28,14 @@ namespace Diplom
         public SettingsWindow()
         {
             LoadCurrentSettings();
-
             InitializeComponent();
 
-           // t.PreviewTextInput += (object sender, TextCompositionEventArgs e) => { e.Handled = !CheckNumeric(e.Text); };
+            MinGrainSizeTextBox.PreviewTextInput += (object sender, TextCompositionEventArgs e) => { e.Handled = !CheckNumeric(e.Text); };
+
+            foreach(var phase in _settings.Phases)
+            {
+                CreatePhaseNameEditor(phase);
+            }
 
         }
 
@@ -50,7 +54,7 @@ namespace Diplom
         private void LoadCurrentSettings()
         {
             var currentSettings = DataManager.CurrentData.Settings;
-            foreach(var phase in currentSettings.Phases)
+            foreach (var phase in currentSettings.Phases)
             {
                 _settings.Phases.Add(phase.Key, phase.Value);
             }
@@ -58,6 +62,39 @@ namespace Diplom
             _settings.MinGrainSize = currentSettings.MinGrainSize;
 
         }
+
+        private void CreatePhaseNameEditor(KeyValuePair<int, string> phase)
+        {
+            DockPanel EditorPanel = new DockPanel() { LastChildFill = true };
+
+            TextBlock phaseNumberText = new TextBlock();
+            phaseNumberText.Text = phase.Key.ToString();
+            phaseNumberText.Margin = new Thickness(5);
+            phaseNumberText.VerticalAlignment = VerticalAlignment.Center;
+            DockPanel.SetDock(phaseNumberText, Dock.Left);
+
+            TextBox phaseNameTextBox = new TextBox();
+            phaseNameTextBox.Height = 25;
+            phaseNameTextBox.Width = Double.NaN;
+            
+            Binding binding = new Binding()
+            {
+                Source = _settings,
+                Path = new PropertyPath($"Phases[{phase.Key}]"),
+                Mode = BindingMode.TwoWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+
+            phaseNameTextBox.SetBinding(TextBox.TextProperty, binding);
+
+            EditorPanel.Children.Add(phaseNumberText);
+            EditorPanel.Children.Add(phaseNameTextBox);
+
+            PhasesStackPanel.Children.Add(EditorPanel);
+
+        }
+
+     
 
         private static bool CheckNumeric(string text)
         {
