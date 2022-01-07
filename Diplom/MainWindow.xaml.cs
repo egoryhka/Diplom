@@ -107,6 +107,10 @@ namespace Diplom
             {
                 MessageBox.Show("Выбранный файл не подходит!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            catch (ReadExcelException)
+            {
+                MessageBox.Show("Ошибка чтения файла!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
         }
 

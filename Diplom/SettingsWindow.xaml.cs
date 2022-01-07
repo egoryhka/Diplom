@@ -31,7 +31,7 @@ namespace Diplom
 
             InitializeComponent();
 
-            TextBox_A.PreviewTextInput += (object sender, TextCompositionEventArgs e) => { e.Handled = !CheckNumeric(e.Text); };
+           // t.PreviewTextInput += (object sender, TextCompositionEventArgs e) => { e.Handled = !CheckNumeric(e.Text); };
 
         }
 
@@ -54,8 +54,8 @@ namespace Diplom
             {
                 _settings.Phases.Add(phase.Key, phase.Value);
             }
-
-
+            _settings.GrainBorderColor = currentSettings.GrainBorderColor;
+            _settings.MinGrainSize = currentSettings.MinGrainSize;
 
         }
 
@@ -63,5 +63,6 @@ namespace Diplom
         {
             return !_numericOnlyRegex.IsMatch(text);
         }
+
     }
 }

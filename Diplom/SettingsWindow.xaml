@@ -4,17 +4,51 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Diplom"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         x:Name="SetWin"
-        Title="SettingsWindow" Height="300" Width="500">
+        Title="SettingsWindow" Height="400" Width="300"
+        ResizeMode="NoResize">
     <Grid>
+
+        <TabControl>
+            <TabItem Header="Фазы">
+                <Grid Background="#FFE5E5E5">
+                    <ScrollViewer Background="#AAA5A5A5" Margin="0,0,0,25">
+                        <StackPanel  x:Name="SettingsStackPanel">
+                            <Label Content="Фазы"/>
+                            <DockPanel LastChildFill="True">
+                                <TextBlock Text="0" Margin="5" DockPanel.Dock="Left" VerticalAlignment="Center"/>
+                                <TextBox Height="25" Width="Auto"/>
+                            </DockPanel >
+                            <DockPanel LastChildFill="True">
+                                <TextBlock Text="0" Margin="5" DockPanel.Dock="Left" VerticalAlignment="Center"/>
+                                <TextBox Height="25" Width="Auto"/>
+                            </DockPanel >
+                        </StackPanel>
+
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Зерна">
+                <Grid Background="#FFE5E5E5">
+                    <ScrollViewer Background="#AAA5A5A5" Margin="0,0,0,25">
+                        <StackPanel>
+                            <Label Content="Минимальный размер (px)"/>
+                            <TextBox x:Name="MinGrainSizeTextBox" Text="{Binding ElementName=SetWin, Path=_settings.MinGrainSize}" Height="25" Width="Auto"/>
+                            <Label Content="Цвет выделения"/>
+                            <xctk:ColorPicker Name="GrainBorderColorPicker" SelectedColor="{Binding ElementName=SetWin, Path=_settings.GrainBorderColor}" ></xctk:ColorPicker>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+
         <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal">
             <Button x:Name="ApplySettingsButton" Content="Ok"  Width="50" Margin="5" Click="ApplySettingsButton_Click"/>
             <Button x:Name="DenySettingsButton" Content="Cancel" Width="50" Margin="5" Click="DenySettingsButton_Click"/>
-        </StackPanel>
-
-        <StackPanel>
-            <TextBox x:Name="TextBox_A" Text="{Binding _settings.A, ElementName=SetWin}"/>
         </StackPanel>
 
     </Grid>
