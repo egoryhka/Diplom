@@ -24,12 +24,24 @@ namespace Diplom
     /// </summary>
     public partial class MainWindow : Window
     {
+        private Functions functions;
 
         public MainWindow()
         {
             InitializeComponent();
 
             Closing += MainWindow_Closing;
+
+            try
+            {
+                functions = new Functions();
+            }
+            catch (ProgramBuildException)
+            {
+                MessageBox.Show("Ошибка сборки!\nВозможно файл 'GpuCode.c'\nотсутствует или поврежден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                Closing -= MainWindow_Closing;
+                Close();
+            }
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -90,7 +102,15 @@ namespace Diplom
             if (openFileDialog.ShowDialog() == true)
             {
                 string pathToFile = openFileDialog.FileName;
-                DataManager.Load(pathToFile);
+                try
+                {
+                    DataManager.Load(pathToFile);
+                }
+                catch (JsonLoadException)
+                {
+                    MessageBox.Show("Ошибка чтения файла проекта\nФайл поврежден!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
                 Title = DataManager.ProjectName;
             }
         }
@@ -120,7 +140,7 @@ namespace Diplom
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            new SettingsWindow().Show();
+            new SettingsWindow().ShowDialog();
         }
 
         private void ResetImageSize_Click(object sender, RoutedEventArgs e)

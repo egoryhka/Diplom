@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace Diplom.FuncModule
 {
-    public static class Functions
+    public class Functions
     {
-        public static readonly GPU GPU;
-        public static readonly CPU CPU;
+        public readonly GPU GPU;
+        public readonly CPU CPU;
 
-        static Functions()
+        public Functions()
         {
             GPU = new GPU();
             CPU = new CPU();
         }
-      
+
 
     }
 }

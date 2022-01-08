@@ -25,6 +25,8 @@ namespace Diplom.DataModule
             }
         }
 
+        public static bool HasCurrentPathToFile => !string.IsNullOrEmpty(currentPathToFile);
+
         private static JsonSerializer serializer;
 
         private static string currentPathToFile;
@@ -57,10 +59,18 @@ namespace Diplom.DataModule
 
         public static void Load(string pathToFile)
         {
-            using (JsonTextReader reader = new JsonTextReader(new StreamReader(pathToFile)))
+            try
             {
-                CurrentData = serializer.Deserialize<Data>(reader);
-                currentPathToFile = pathToFile;
+                using (JsonTextReader reader = new JsonTextReader(new StreamReader(pathToFile)))
+                {
+
+                    CurrentData = serializer.Deserialize<Data>(reader);
+                    currentPathToFile = pathToFile;
+                }
+            }
+            catch
+            {
+                throw new JsonLoadException();
             }
         }
 
@@ -153,5 +163,7 @@ namespace Diplom.DataModule
 
     public class ExcelNotValidException : Exception { }
     public class ReadExcelException : Exception { }
+    public class JsonLoadException : Exception { }
+
 
 }

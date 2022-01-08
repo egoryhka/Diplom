@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="GpuCode.c" />
+    <None Remove="gpu_code.c" />
     <None Remove="Resources\EFXSes9UCfsyRVoNeQ2ZTB.png" />
     <None Remove="Resources\ExcelImportIcon.png" />
     <None Remove="Resources\OpenIcon.png" />
@@ -15,6 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="GpuCode.c">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Resources\EFXSes9UCfsyRVoNeQ2ZTB.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
@@ -28,6 +33,12 @@
     <PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1000" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Data.OleDb" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Cloo">
+      <HintPath>..\..\..\..\SUMMER_PRACTICE\EBSD_Analyse\Cloo.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
