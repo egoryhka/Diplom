@@ -14,7 +14,14 @@ namespace Diplom.FuncModule
         private ComputeContext Context;
         private ComputeProgram Program;
 
+        private ComputeCommandQueue CommandQueue;
+
         public GPU()
+        {
+            BuildProgramm();
+        }
+
+        private void BuildProgramm()
         {
             ComputeContextPropertyList Properties = new ComputeContextPropertyList(ComputePlatform.Platforms[0]);
             Context = new ComputeContext(ComputeDeviceTypes.All, Properties, null, IntPtr.Zero);
@@ -30,6 +37,8 @@ namespace Diplom.FuncModule
                 Program.Build(Devices, "", null, IntPtr.Zero);
             }
             catch { throw new ProgramBuildException(); }
+
+            CommandQueue = new ComputeCommandQueue(Context, Devices[0], ComputeCommandQueueFlags.None);
         }
 
 
