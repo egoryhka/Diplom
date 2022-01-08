@@ -25,10 +25,23 @@ namespace Diplom.DataModule
         public float x, y;
     }
 
+    public struct Vector2Int
+    {
+        public Vector2Int(int _x, int _y) { x = _x; y = _y; }
+        public int x, y;
+    }
+
     public struct Euler
     {
         public Euler(float _x, float _y, float _z) { x = _x; y = _y; z = _z; }
         public float x, y, z;
     }
 
+    public struct Grain
+    {
+        public float Size => Points.Count + Edges.Count;
+
+        public List<Vector2> Points;
+        public List<Vector2> Edges;
+    }
 }

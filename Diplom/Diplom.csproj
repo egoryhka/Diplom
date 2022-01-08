@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\26679737.jpeg" />
     <None Remove="Resources\EFXSes9UCfsyRVoNeQ2ZTB.png" />
     <None Remove="Resources\ExcelImportIcon.png" />
     <None Remove="Resources\OpenIcon.png" />
@@ -16,19 +15,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\26679737.jpeg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
     <Resource Include="Resources\EFXSes9UCfsyRVoNeQ2ZTB.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\ExcelImportIcon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="FuncModule\" />
   </ItemGroup>
 
   <ItemGroup>

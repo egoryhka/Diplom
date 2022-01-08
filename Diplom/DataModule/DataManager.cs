@@ -111,10 +111,13 @@ namespace Diplom.DataModule
                             CurrentData.Points[i] = point;
                         }
 
+                        CurrentData.Settings.Phases.Clear();
                         foreach (int phase in CurrentData.Points.Select(x => x.Phase).Distinct().OrderBy(x => x))
                         {
                             CurrentData.Settings.Phases.Add(phase, "phaseName");
                         }
+
+                        CurrentData.Initialize();
                     }
                     catch { throw new ReadExcelException(); }
                 }

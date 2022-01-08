@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Diplom.DataModule;
+using Diplom.FuncModule;
 using Microsoft.Win32;
 
 namespace Diplom
@@ -127,5 +128,15 @@ namespace Diplom
             MainImageContainer.Reset();
         }
 
+        private void MainImage_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Point pt = e.GetPosition(MainImage);
+            pt.X *= MainImage.Source.Width / MainImage.ActualWidth;
+            pt.Y *= MainImage.Source.Height / MainImage.ActualHeight;
+
+            Vector2 intPoint = new Vector2((int)pt.X, (int)pt.Y);
+            X.Content = intPoint.x;
+            Y.Content = intPoint.y;
+        }
     }
 }
