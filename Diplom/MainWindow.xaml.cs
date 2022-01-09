@@ -155,9 +155,15 @@ namespace Diplom
 
 
             if (DataManager.CurrentData.Eulers == null) return;
+
+            Mask mask = functions.GPU.GetGrainMask(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size, 10);
             byte[] colors = functions.GPU.GetColorMapEuler(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size);
-            var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, colors);
+            byte[] maskedColors = functions.GPU.ApplyMask(colors, mask);
+            var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, maskedColors);
             MainImage.Source = functions.BitmapFunc.CreateBitmapSource(bmp);
+
+
+
         }
 
         private void MainImage_MouseRightButtonUp(object sender, MouseButtonEventArgs e)

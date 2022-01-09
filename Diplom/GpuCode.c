@@ -107,17 +107,17 @@ __kernel void Extrapolate(__global euler* out, int width, int height, __global e
 
 
 
-float3 rotateVector(float3 a, float3 eul)
+float3 rotateVector(float3 a, euler eul)
 {
-	eul = (float3)(radians(eul.x), radians(eul.y), radians(eul.z));
-	a = (float3)(a.x * cos(eul.x) - a.y * sin(eul.x), a.x * sin(eul.x) + a.y * cos(eul.x), a.z); // Z - rotation
-	a = (float3)(a.x * cos(eul.y) - a.z * sin(eul.y), a.y, -a.x * sin(eul.y) + a.z * cos(eul.y)); // Y - rotation
-	a = (float3)(a.x, a.y * cos(eul.z) - a.z * sin(eul.z), a.y * sin(eul.z) + a.z * cos(eul.z)); // X - rotation
+	float3 angles = (float3)(radians(eul.x), radians(eul.y), radians(eul.z));
+	a = (float3)(a.x * cos(angles.x) - a.y * sin(angles.x), a.x * sin(angles.x) + a.y * cos(angles.x), a.z); // Z - rotation
+	a = (float3)(a.x * cos(angles.y) - a.z * sin(angles.y), a.y, -a.x * sin(angles.y) + a.z * cos(angles.y)); // Y - rotation
+	a = (float3)(a.x, a.y * cos(angles.z) - a.z * sin(angles.z), a.y * sin(angles.z) + a.z * cos(angles.z)); // X - rotation
 	return a;
 }
 
 
-float angleBetween(float3 eul1, float3 eul2) {
+float angleBetween(euler eul1, euler eul2) {
 
 	float3 a = (float3)(1, 1, 1);
 	float3 b = (float3)(1, 1, 1);
@@ -129,38 +129,43 @@ float angleBetween(float3 eul1, float3 eul2) {
 }
 
 
-__kernel void GetGrainMask(__global char* out, int width, int height, __global euler* in, float MissOrientationTreshold)
+__kernel void GetGrainMask(__global euler* in, int width, int height, float MissOrientationTreshold, __global char* out)
 {
-	int id = get_global_id(0);
+	int inId = get_global_id(0);
 
-	float3 eul = (float3)(in[id].x, in[id].y, in[id].z);
+	euler eul = in[inId];
 
-	float isEdge = 0;
+	bool isEdge = false;
 
-	bool can_up = id > width;
-	bool can_left = (id % width) != 0;
-	bool can_right = ((id + 1) % width) != 0;
-	bool can_down = id < (width* height - width);
+	bool can_up = inId > width;
+	bool can_left = inId % width != 0;
+	bool can_right = (inId + 1) % width != 0;
+	bool can_down = inId < width* height - width;
 
-	int up = id - width;
-	int left = id - 1;
-	int right = id + 1;
-	int down = id + width;
+	int upId = inId - width;
+	int leftId = inId - 1;
+	int rightId = inId + 1;
+	int downId = inId + width;
 
-	if (can_up && isEdge == 0) { float3 upEuler = (float3)(in[up].x, in[up].y, in[up].z); if (angleBetween(eul, upEuler) > MissOrientationTreshold) isEdge = 1; }
-	if (can_left && isEdge == 0) { float3 leftEuler = (float3)(in[left].x, in[left].y, in[left].z); if (angleBetween(eul, leftEuler) > MissOrientationTreshold) isEdge = 1; }
-	if (can_right && isEdge == 0) { float3 rightEuler = (float3)(in[right].x, in[right].y, in[right].z); if (angleBetween(eul, rightEuler) > MissOrientationTreshold) isEdge = 1; }
-	if (can_down && isEdge == 0) { float3 downEuler = (float3)(in[down].x, in[down].y, in[down].z); if (angleBetween(eul, downEuler) > MissOrientationTreshold) isEdge = 1; }
+	if (can_up && isEdge == 0) { if (angleBetween(eul, in[upId]) > MissOrientationTreshold) isEdge = true; }
+	if (can_left && isEdge == 0) { if (angleBetween(eul, in[leftId]) > MissOrientationTreshold) isEdge = true; }
+	if (can_right && isEdge == 0) { if (angleBetween(eul, in[rightId]) > MissOrientationTreshold) isEdge = true; }
+	if (can_down && isEdge == 0) { if (angleBetween(eul, in[downId]) > MissOrientationTreshold) isEdge = true; }
 
-	out[id] = isEdge;
+	if (isEdge) {
+		int outId = inId * 4;
+		out[outId] = 255;
+		out[outId + 1] = 255;
+		out[outId + 2] = 255;
+		out[outId + 3] = 255;
+	}
 }
 
 
-__kernel void GrainMaskFilter(__global char* out, int width, int height, __global char* in, __global char* grainMask)
+__kernel void ApplyMask(__global char* in, __global char* mask, __global char* out)
 {
 	int id = get_global_id(0);
-	int maskId = id / 4;
-	if (grainMask[maskId] == 0) out[id] = in[id];
-	else out[id] = 255;
+	if (mask[id] == 0) out[id] = in[id];
+	else out[id] = mask[id];
 }
 

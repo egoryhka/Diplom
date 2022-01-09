@@ -92,8 +92,58 @@ namespace Diplom.FuncModule
             return outColors;
         }
 
+        public byte[] ApplyMask(byte[] inputColors, Mask mask)
+        {
+            ComputeKernel kernel = Program.CreateKernel("ApplyMask");
 
+            ComputeBuffer<byte> inputBuffer
+                = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, inputColors);
+            ComputeBuffer<byte> maskBuffer
+                = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, mask.colors);
+            ComputeBuffer<byte> outputBuffer
+                = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new byte[inputColors.Length]);
+
+            kernel.SetMemoryArgument(0, inputBuffer);
+            kernel.SetMemoryArgument(1, maskBuffer);
+            kernel.SetMemoryArgument(2, outputBuffer);
+
+            CommandQueue.Execute(kernel, null, new long[] { inputColors.Length }, null, null);
+
+            byte[] res = new byte[inputColors.Length];
+            CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
+
+            inputBuffer.Dispose(); maskBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
+
+            return res;
+        }
+
+        public Mask GetGrainMask(Euler[] eulers, Vector2Int size, float treshold)
+        {
+            ComputeKernel kernel = Program.CreateKernel("GetGrainMask");
+
+            ComputeBuffer<Euler> inputBuffer
+                = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
+            ComputeBuffer<byte> outputBuffer
+                = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new byte[eulers.Length * 4]);
+
+            kernel.SetMemoryArgument(0, inputBuffer);
+            kernel.SetValueArgument(1, size.x);
+            kernel.SetValueArgument(2, size.y);
+            kernel.SetValueArgument(3, treshold);
+            kernel.SetMemoryArgument(4, outputBuffer);
+
+            CommandQueue.Execute(kernel, null, new long[] { eulers.Length }, null, null);
+
+            byte[] res = new byte[eulers.Length * 4];
+            CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
+
+            inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
+
+            return new Mask() { colors = res };
+        }
     }
+
+    public class Mask { public byte[] colors; }
 
     public class ProgramBuildException : Exception { }
 }
