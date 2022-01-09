@@ -7,7 +7,7 @@
         xmlns:ui="clr-namespace:Diplom.UI"
         xmlns:converters="clr-namespace:Diplom.UI"
         mc:Ignorable="d"
-        Title="Проект: " Height="450" Width="800" x:Name="MainWin">
+        Title="Проект: " Height="450" Width="680" x:Name="MainWin">
     <Window.InputBindings>
         <KeyBinding Command="local:HotKeys.SaveCommand" Gesture="Ctrl+S" />
     </Window.InputBindings>
@@ -39,7 +39,7 @@
                 <MenuItem Header="Настройки" x:Name="SettingsButton" Click="SettingsButton_Click"></MenuItem>
             </MenuItem>
         </Menu>
-        
+
         <Button Height="20" Width="20" BorderThickness="0" Background="#E0E0E0" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="50,1" Click="SaveCurrentFileButton_Click">
             <Image  Height="15" Width="15" Source="Resources/SaveIcon.png" />
         </Button>
@@ -54,6 +54,7 @@
                 </Button>
                 <Label x:Name="X"/>
                 <Label x:Name="Y"/>
+                <Label x:Name="timeText"></Label>
 
             </StackPanel>
         </StackPanel>

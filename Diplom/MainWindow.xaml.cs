@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -146,6 +147,17 @@ namespace Diplom
         private void ResetImageSize_Click(object sender, RoutedEventArgs e)
         {
             MainImageContainer.Reset();
+
+            //if (DataManager.CurrentData.BC == null) return;
+            //byte[] colors = functions.GPU.GetColorMapBC(DataManager.CurrentData.BC, DataManager.CurrentData.Size);
+            //var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, colors);
+            //MainImage.Source = functions.BitmapFunc.CreateBitmapSource(bmp);
+
+
+            if (DataManager.CurrentData.Eulers == null) return;
+            byte[] colors = functions.GPU.GetColorMapEuler(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size);
+            var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, colors);
+            MainImage.Source = functions.BitmapFunc.CreateBitmapSource(bmp);
         }
 
         private void MainImage_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
