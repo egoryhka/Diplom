@@ -21,7 +21,9 @@
     <None Remove="Resources\ExcelImportIcon.png" />
     <None Remove="Resources\OpenIcon.png" />
     <None Remove="Resources\ResetImageSize.png" />
+    <None Remove="Resources\SaveAsIcon.png" />
     <None Remove="Resources\SaveIcon.png" />
+    <None Remove="Resources\SettingsIcon.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -56,7 +58,13 @@
     <Resource Include="Resources\ResetImageSize.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Resources\SaveAsIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Resources\SaveIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\SettingsIcon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

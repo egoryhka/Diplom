@@ -22,9 +22,9 @@ __kernel void Euler2Color(__global euler* in, int width, int height, __global uc
 	int4 col = convert_int4((float4)(255.0f * eul.x / 360.0f, 255.0f * eul.y / 90.0f, 255.0f * eul.z / 90.0f, 0));
 
 	int outlinearId = (int)((x + y * width) * 4);
-	out[outlinearId] = col.x; // R
+	out[outlinearId] = col.z; // R
 	out[outlinearId + 1] = col.y; // G
-	out[outlinearId + 2] = col.z; // B
+	out[outlinearId + 2] = col.x; // B
 	out[outlinearId + 3] = 255; // A
 }
 
@@ -40,9 +40,9 @@ __kernel void Bc2Color(__global int* in, int width, int height, __global char* o
 	int4 col = (int4)(BC, BC, BC, 0);
 
 	int outlinearId = (int)((x + y * width) * 4);
-	out[outlinearId] = col.x; // R
+	out[outlinearId] = col.z; // R
 	out[outlinearId + 1] = col.y; // G
-	out[outlinearId + 2] = col.z; // B
+	out[outlinearId + 2] = col.x; // B
 	out[outlinearId + 3] = 255; // A
 }
 
