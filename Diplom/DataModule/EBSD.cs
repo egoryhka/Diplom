@@ -31,6 +31,12 @@ namespace Diplom.DataModule
         public int x, y;
     }
 
+    public struct GpuColor
+    {
+        public GpuColor(float _r, float _g, float _b, float _a) { r = _r; g = _g; b = _b;  a = _a; }
+        public float r, g, b, a;
+    }
+
     public struct Euler
     {
         public Euler(float _x, float _y, float _z) { x = _x; y = _y; z = _z; }

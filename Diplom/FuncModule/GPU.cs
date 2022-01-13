@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -78,12 +77,8 @@ namespace Diplom.FuncModule
             kernel.SetValueArgument(2, size.y);
             kernel.SetMemoryArgument(3, outColorBuffer);
 
-
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
             CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
-            sw.Stop();
-
+            
             byte[] outColors = new byte[size.x * size.y * 4]; // output
             CommandQueue.ReadFromBuffer(outColorBuffer, ref outColors, true, null);
 
@@ -117,7 +112,7 @@ namespace Diplom.FuncModule
             return res;
         }
 
-        public Mask GetGrainMask(Euler[] eulers, Vector2Int size, float treshold)
+        public Mask GetGrainMask(Euler[] eulers, Vector2Int size, float treshold, GpuColor grainMaskColor)
         {
             ComputeKernel kernel = Program.CreateKernel("GetGrainMask");
 
@@ -130,7 +125,8 @@ namespace Diplom.FuncModule
             kernel.SetValueArgument(1, size.x);
             kernel.SetValueArgument(2, size.y);
             kernel.SetValueArgument(3, treshold);
-            kernel.SetMemoryArgument(4, outputBuffer);
+            kernel.SetValueArgument(4, grainMaskColor);
+            kernel.SetMemoryArgument(5, outputBuffer);
 
             CommandQueue.Execute(kernel, null, new long[] { eulers.Length }, null, null);
 

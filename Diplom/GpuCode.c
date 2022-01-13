@@ -11,8 +11,7 @@ euler eul_sum(euler a, euler b) {
 	return (euler) { a.x + b.x, a.y + b.y, a.z + b.z };
 }
 
-
-__kernel void Euler2Color(__global euler* in, int width, int height, __global char* out)
+__kernel void Euler2Color(__global euler* in, int width, int height, __global uchar* out)
 {
 	int x = get_global_id(0);
 	int y = get_global_id(1);
@@ -129,7 +128,7 @@ float angleBetween(euler eul1, euler eul2) {
 }
 
 
-__kernel void GetGrainMask(__global euler* in, int width, int height, float MissOrientationTreshold, __global char* out)
+__kernel void GetGrainMask(__global euler* in, int width, int height, float MissOrientationTreshold, float4 grainMaskColor, __global uchar* out)
 {
 	int inId = get_global_id(0);
 
@@ -152,20 +151,46 @@ __kernel void GetGrainMask(__global euler* in, int width, int height, float Miss
 	if (can_right && isEdge == 0) { if (angleBetween(eul, in[rightId]) > MissOrientationTreshold) isEdge = true; }
 	if (can_down && isEdge == 0) { if (angleBetween(eul, in[downId]) > MissOrientationTreshold) isEdge = true; }
 
+	int outId = inId * 4;
 	if (isEdge) {
-		int outId = inId * 4;
-		out[outId] = 255;
-		out[outId + 1] = 255;
-		out[outId + 2] = 255;
-		out[outId + 3] = 255;
+		out[outId] = convert_int(grainMaskColor.z);
+		out[outId + 1] = convert_int(grainMaskColor.y);
+		out[outId + 2] = convert_int(grainMaskColor.x);
+		out[outId + 3] = convert_int(grainMaskColor.w);
 	}
 }
 
 
-__kernel void ApplyMask(__global char* in, __global char* mask, __global char* out)
+__kernel void ApplyMask(__global uchar* in, __global uchar* mask, __global uchar* out)
 {
-	int id = get_global_id(0);
-	if (mask[id] == 0) out[id] = in[id];
-	else out[id] = mask[id];
+	int id = get_global_id(0) * 4;
+
+	if (mask[id + 3] > 0 && mask[id + 3] < 255) {
+
+		int R = convert_int(in[id] * (1.0f - (mask[id + 3] / 255.0f))) + convert_int(mask[id] * (mask[id + 3] / 255.0f));
+		int G = convert_int(in[id + 1] * (1.0f - (mask[id + 3] / 255.0f))) + convert_int(mask[id + 1] * (mask[id + 3] / 255.0f));
+		int B = convert_int(in[id + 2] * (1.0f - (mask[id + 3] / 255.0f))) + convert_int(mask[id + 2] * (mask[id + 3] / 255.0f));
+
+		out[id] = R;
+		out[id + 1] = G;
+		out[id + 2] = B;
+		out[id + 3] = 255;
+	}
+	else {
+		if (mask[id] == 0 && mask[id + 1] == 0 && mask[id + 2] == 0 && mask[id + 3] == 0) {
+			out[id] = in[id];
+			out[id + 1] = in[id + 1];
+			out[id + 2] = in[id + 2];
+			out[id + 3] = in[id + 3];
+		}
+		else {
+			out[id] = convert_int(mask[id]);
+			out[id + 1] = convert_int(mask[id + 1]);
+			out[id + 2] = convert_int(mask[id + 2]);
+			out[id + 3] = convert_int(mask[id + 3]);
+		}
+	}
+
+
 }
 
