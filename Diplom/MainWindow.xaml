@@ -69,7 +69,15 @@
         <StackPanel x:Name="ImageStackPanel" Background="Aqua" HorizontalAlignment="Right" Width="{Binding ElementName=MainWin, Path=ActualWidth, Converter={converters:PercentageConverter}, ConverterParameter='0,5'}" Orientation="Vertical" Margin="0,22,0,0">
 
             <ui:ZoomBorder x:Name="MainImageContainer" Background="#F0F0F0" ClipToBounds="True" BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="2" Margin="3">
-                <Image x:Name="MainImage" ClipToBounds="True" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="Resources/EFXSes9UCfsyRVoNeQ2ZTB.png" MouseRightButtonUp="MainImage_MouseRightButtonUp"/>
+                <Image x:Name="MainImage" ClipToBounds="True" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="Resources/EFXSes9UCfsyRVoNeQ2ZTB.png" MouseRightButtonUp="MainImage_MouseRightButtonUp">
+                    <!--<Image.RenderTransform>
+                        <TransformGroup>
+                            <TranslateTransform X="-130" Y="0" />
+                            <ScaleTransform ScaleX="1.5" ScaleY="1.5"/>
+                        </TransformGroup>
+                    </Image.RenderTransform>-->
+                    
+                </Image>
             </ui:ZoomBorder>
 
             <Button x:Name="ResetImageSize"  BorderThickness="1" HorizontalAlignment="Right" Margin="0,10,15,0" Height="25" Width="25" Click="ResetImageSize_Click">
@@ -78,8 +86,8 @@
                     <ToolTip>Вернуть размер</ToolTip>
                 </Button.ToolTip>
             </Button>
-            <Label x:Name="X"/>
-            <Label x:Name="Y"/>
+            <Label x:Name="X" Content="{Binding ElementName=MainImage, Path=ActualWidth}"/>
+            <Label x:Name="Y" Content="{Binding ElementName=MainImage, Path=ActualHeight}"/>
 
 
         </StackPanel>

@@ -52,7 +52,6 @@ namespace Diplom.UI
                 this.MouseLeftButtonDown += child_MouseLeftButtonDown;
                 this.MouseLeftButtonUp += child_MouseLeftButtonUp;
                 this.MouseMove += child_MouseMove;
-                //this.PreviewMouseRightButtonDown += new MouseButtonEventHandler(child_PreviewMouseRightButtonDown);
             }
         }
 
@@ -82,24 +81,29 @@ namespace Diplom.UI
                 var tt = GetTranslateTransform(child);
 
                 double zoom = e.Delta > 0 ? .2 : -.2;
-                if (!(e.Delta > 0) && (st.ScaleX <= 1 || st.ScaleY <= 1))
+                double zoomCorrected = zoom * st.ScaleX;
+                double nextScaleX = st.ScaleX + zoomCorrected;
+                double nextScaleY = st.ScaleY + zoomCorrected;
+
+                if (!(e.Delta > 0) && (nextScaleX <= 1 || nextScaleY <= 1))
+                {
+                    Reset();
                     return;
+                }
 
 
                 Point relative = e.GetPosition(child);
-                double absoluteX;
-                double absoluteY;
+                double absoluteX = relative.X * st.ScaleX + tt.X;
+                double absoluteY = relative.Y * st.ScaleY + tt.Y;
 
-                absoluteX = relative.X * st.ScaleX + tt.X;
-                absoluteY = relative.Y * st.ScaleY + tt.Y;
-
-                double zoomCorrected = zoom * st.ScaleX;
-
-                st.ScaleX += zoomCorrected; 
+                st.ScaleX += zoomCorrected;
                 st.ScaleY += zoomCorrected;
 
-                tt.X = absoluteX - relative.X * st.ScaleX;
-                tt.Y = absoluteY - relative.Y * st.ScaleY;
+                double childWidth = (double)child.GetValue(ActualWidthProperty);
+                double childHeight = (double)child.GetValue(ActualHeightProperty);
+
+                tt.X = Math.Clamp(absoluteX - relative.X * st.ScaleX, childWidth - childWidth * st.ScaleX, 0);
+                tt.Y = Math.Clamp(absoluteY - relative.Y * st.ScaleY, childHeight - childHeight * st.ScaleY, 0);
             }
         }
 
@@ -124,21 +128,22 @@ namespace Diplom.UI
             }
         }
 
-        //void child_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        //{
-        //    this.Reset();
-        //}
-
         private void child_MouseMove(object sender, MouseEventArgs e)
         {
             if (child != null)
             {
                 if (child.IsMouseCaptured)
                 {
+                    var st = GetScaleTransform(child);
+
                     var tt = GetTranslateTransform(child);
                     Vector v = start - e.GetPosition(this);
-                    tt.X = origin.X - v.X;
-                    tt.Y = origin.Y - v.Y;
+
+                    double childWidth = (double)child.GetValue(ActualWidthProperty);
+                    double childHeight = (double)child.GetValue(ActualHeightProperty);
+
+                    tt.X = Math.Clamp(origin.X - v.X, childWidth - childWidth * st.ScaleX, 0);
+                    tt.Y = Math.Clamp(origin.Y - v.Y, childHeight - childHeight * st.ScaleY, 0);
                 }
             }
         }
