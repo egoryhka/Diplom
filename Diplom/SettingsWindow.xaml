@@ -7,19 +7,18 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         x:Name="SetWin"
-        Title="SettingsWindow" Height="400" Width="300"
+        Title="Настройки" Height="400" Width="300"
         ResizeMode="NoResize">
     <Grid>
 
         <TabControl>
-            <TabItem Header="Фазы">
+            <TabItem Header="Общие">
                 <Grid Background="#FFE5E5E5">
                     <ScrollViewer Background="#AAA5A5A5" Margin="0,0,0,25">
-                        <StackPanel x:Name="PhasesStackPanel">
-                            <Label Content="Фазы"/>
-                            
+                        <StackPanel>
+                            <Label Content="μm/px"/>
+                            <TextBox x:Name="NmPpx" Text="{Binding ElementName=SetWin, Path=_settings.MinGrainSize}" Height="25" Width="Auto"/>
                         </StackPanel>
-
                     </ScrollViewer>
                 </Grid>
             </TabItem>
@@ -29,11 +28,22 @@
                         <StackPanel>
                             <Label Content="Минимальный размер (px)"/>
                             <TextBox x:Name="MinGrainSizeTextBox" Text="{Binding ElementName=SetWin, Path=_settings.MinGrainSize}" Height="25" Width="Auto"/>
-                            <Label Content="Цвет границ"/>
-                            <xctk:ColorPicker Name="GrainBorderColorPicker" SelectedColor="{Binding ElementName=SetWin, Path=_settings.GrainBorderColor}" ></xctk:ColorPicker>
+                            <!--<Label Content="Цвет границ"/>
+                            <xctk:ColorPicker Name="GrainBorderColorPicker" SelectedColor="{Binding ElementName=SetWin, Path=_settings.GrainBorderColor}" ></xctk:ColorPicker>-->
                             <Label Content="Цвет выделения"/>
                             <xctk:ColorPicker Name="GrainSelectBorderColorPicker" SelectedColor="{Binding ElementName=SetWin, Path=_settings.GrainSelectBorderColor}" ></xctk:ColorPicker>
                         </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Фазы">
+                <Grid Background="#FFE5E5E5">
+                    <ScrollViewer Background="#AAA5A5A5" Margin="0,0,0,25">
+                        <StackPanel x:Name="PhasesStackPanel">
+                            <Label Content="Фазы"/>
+
+                        </StackPanel>
+
                     </ScrollViewer>
                 </Grid>
             </TabItem>

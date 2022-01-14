@@ -6,9 +6,28 @@ struct Euler
 	float z;
 }; typedef struct Euler euler;
 
-
 euler eul_sum(euler a, euler b) {
 	return (euler) { a.x + b.x, a.y + b.y, a.z + b.z };
+}
+
+float3 rotateVector(float3 a, euler eul)
+{
+	float3 angles = (float3)(radians(eul.x), radians(eul.y), radians(eul.z));
+	a = (float3)(a.x * cos(angles.x) - a.y * sin(angles.x), a.x * sin(angles.x) + a.y * cos(angles.x), a.z); // Z - rotation
+	a = (float3)(a.x * cos(angles.y) - a.z * sin(angles.y), a.y, -a.x * sin(angles.y) + a.z * cos(angles.y)); // Y - rotation
+	a = (float3)(a.x, a.y * cos(angles.z) - a.z * sin(angles.z), a.y * sin(angles.z) + a.z * cos(angles.z)); // X - rotation
+	return a;
+}
+
+float angleBetween(euler eul1, euler eul2) {
+
+	float3 a = (float3)(1, 1, 1);
+	float3 b = (float3)(1, 1, 1);
+
+	a = rotateVector(a, eul1);
+	b = rotateVector(b, eul2);
+
+	return degrees(acos(dot(a, b) / (length(a) * length(b))));
 }
 
 __kernel void Euler2Color(__global euler* in, int width, int height, __global uchar* out)
@@ -28,7 +47,6 @@ __kernel void Euler2Color(__global euler* in, int width, int height, __global uc
 	out[outlinearId + 3] = 255; // A
 }
 
-
 __kernel void Bc2Color(__global int* in, int width, int height, __global char* out)
 {
 	int x = get_global_id(0);
@@ -45,6 +63,70 @@ __kernel void Bc2Color(__global int* in, int width, int height, __global char* o
 	out[outlinearId + 2] = col.x; // B
 	out[outlinearId + 3] = 255; // A
 }
+
+__kernel void ApplyMask(__global uchar* in, __global uchar* mask, __global uchar* out)
+{
+	int id = get_global_id(0) * 4;
+
+	if (mask[id + 3] > 0 && mask[id + 3] < 255) {
+
+		int R = convert_int(in[id] * (1.0f - (mask[id + 3] / 255.0f))) + convert_int(mask[id] * (mask[id + 3] / 255.0f));
+		int G = convert_int(in[id + 1] * (1.0f - (mask[id + 3] / 255.0f))) + convert_int(mask[id + 1] * (mask[id + 3] / 255.0f));
+		int B = convert_int(in[id + 2] * (1.0f - (mask[id + 3] / 255.0f))) + convert_int(mask[id + 2] * (mask[id + 3] / 255.0f));
+
+		out[id] = R;
+		out[id + 1] = G;
+		out[id + 2] = B;
+		out[id + 3] = 255;
+	}
+	else {
+		if (mask[id] == 0 && mask[id + 1] == 0 && mask[id + 2] == 0 && mask[id + 3] == 0) {
+			out[id] = in[id];
+			out[id + 1] = in[id + 1];
+			out[id + 2] = in[id + 2];
+			out[id + 3] = in[id + 3];
+		}
+		else {
+			out[id] = convert_int(mask[id]);
+			out[id + 1] = convert_int(mask[id + 1]);
+			out[id + 2] = convert_int(mask[id + 2]);
+			out[id + 3] = convert_int(mask[id + 3]);
+		}
+	}
+}
+
+__kernel void GetGrainMask(__global euler* in, int width, int height, float MissOrientationTreshold, float4 grainMaskColor, __global uchar* out)
+{
+	int inId = get_global_id(0);
+
+	euler eul = in[inId];
+
+	bool isEdge = false;
+
+	bool can_up = inId > width;
+	bool can_left = inId % width != 0;
+	bool can_right = (inId + 1) % width != 0;
+	bool can_down = inId < width* height - width;
+
+	int upId = inId - width;
+	int leftId = inId - 1;
+	int rightId = inId + 1;
+	int downId = inId + width;
+
+	if (can_up && isEdge == 0) { if (angleBetween(eul, in[upId]) > MissOrientationTreshold) isEdge = true; }
+	if (can_left && isEdge == 0) { if (angleBetween(eul, in[leftId]) > MissOrientationTreshold) isEdge = true; }
+	if (can_right && isEdge == 0) { if (angleBetween(eul, in[rightId]) > MissOrientationTreshold) isEdge = true; }
+	if (can_down && isEdge == 0) { if (angleBetween(eul, in[downId]) > MissOrientationTreshold) isEdge = true; }
+
+	int outId = inId * 4;
+	if (isEdge) {
+		out[outId] = convert_int(grainMaskColor.z);
+		out[outId + 1] = convert_int(grainMaskColor.y);
+		out[outId + 2] = convert_int(grainMaskColor.x);
+		out[outId + 3] = convert_int(grainMaskColor.w);
+	}
+}
+
 
 
 __kernel void Extrapolate(__global euler* out, int width, int height, __global euler* in)
@@ -106,91 +188,7 @@ __kernel void Extrapolate(__global euler* out, int width, int height, __global e
 
 
 
-float3 rotateVector(float3 a, euler eul)
-{
-	float3 angles = (float3)(radians(eul.x), radians(eul.y), radians(eul.z));
-	a = (float3)(a.x * cos(angles.x) - a.y * sin(angles.x), a.x * sin(angles.x) + a.y * cos(angles.x), a.z); // Z - rotation
-	a = (float3)(a.x * cos(angles.y) - a.z * sin(angles.y), a.y, -a.x * sin(angles.y) + a.z * cos(angles.y)); // Y - rotation
-	a = (float3)(a.x, a.y * cos(angles.z) - a.z * sin(angles.z), a.y * sin(angles.z) + a.z * cos(angles.z)); // X - rotation
-	return a;
-}
 
 
-float angleBetween(euler eul1, euler eul2) {
 
-	float3 a = (float3)(1, 1, 1);
-	float3 b = (float3)(1, 1, 1);
-
-	a = rotateVector(a, eul1);
-	b = rotateVector(b, eul2);
-
-	return degrees(acos(dot(a, b) / (length(a) * length(b))));
-}
-
-
-__kernel void GetGrainMask(__global euler* in, int width, int height, float MissOrientationTreshold, float4 grainMaskColor, __global uchar* out)
-{
-	int inId = get_global_id(0);
-
-	euler eul = in[inId];
-
-	bool isEdge = false;
-
-	bool can_up = inId > width;
-	bool can_left = inId % width != 0;
-	bool can_right = (inId + 1) % width != 0;
-	bool can_down = inId < width* height - width;
-
-	int upId = inId - width;
-	int leftId = inId - 1;
-	int rightId = inId + 1;
-	int downId = inId + width;
-
-	if (can_up && isEdge == 0) { if (angleBetween(eul, in[upId]) > MissOrientationTreshold) isEdge = true; }
-	if (can_left && isEdge == 0) { if (angleBetween(eul, in[leftId]) > MissOrientationTreshold) isEdge = true; }
-	if (can_right && isEdge == 0) { if (angleBetween(eul, in[rightId]) > MissOrientationTreshold) isEdge = true; }
-	if (can_down && isEdge == 0) { if (angleBetween(eul, in[downId]) > MissOrientationTreshold) isEdge = true; }
-
-	int outId = inId * 4;
-	if (isEdge) {
-		out[outId] = convert_int(grainMaskColor.z);
-		out[outId + 1] = convert_int(grainMaskColor.y);
-		out[outId + 2] = convert_int(grainMaskColor.x);
-		out[outId + 3] = convert_int(grainMaskColor.w);
-	}
-}
-
-
-__kernel void ApplyMask(__global uchar* in, __global uchar* mask, __global uchar* out)
-{
-	int id = get_global_id(0) * 4;
-
-	if (mask[id + 3] > 0 && mask[id + 3] < 255) {
-
-		int R = convert_int(in[id] * (1.0f - (mask[id + 3] / 255.0f))) + convert_int(mask[id] * (mask[id + 3] / 255.0f));
-		int G = convert_int(in[id + 1] * (1.0f - (mask[id + 3] / 255.0f))) + convert_int(mask[id + 1] * (mask[id + 3] / 255.0f));
-		int B = convert_int(in[id + 2] * (1.0f - (mask[id + 3] / 255.0f))) + convert_int(mask[id + 2] * (mask[id + 3] / 255.0f));
-
-		out[id] = R;
-		out[id + 1] = G;
-		out[id + 2] = B;
-		out[id + 3] = 255;
-	}
-	else {
-		if (mask[id] == 0 && mask[id + 1] == 0 && mask[id + 2] == 0 && mask[id + 3] == 0) {
-			out[id] = in[id];
-			out[id + 1] = in[id + 1];
-			out[id + 2] = in[id + 2];
-			out[id + 3] = in[id + 3];
-		}
-		else {
-			out[id] = convert_int(mask[id]);
-			out[id + 1] = convert_int(mask[id + 1]);
-			out[id + 2] = convert_int(mask[id + 2]);
-			out[id + 3] = convert_int(mask[id + 3]);
-		}
-	}
-
-
-}
 

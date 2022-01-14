@@ -58,10 +58,11 @@ namespace Diplom
             {
                 _settings.Phases.Add(phase.Key, phase.Value);
             }
-            _settings.GrainBorderColor = currentSettings.GrainBorderColor;
+            //_settings.GrainBorderColor = currentSettings.GrainBorderColor;
             _settings.GrainSelectBorderColor = currentSettings.GrainSelectBorderColor;
 
             _settings.MinGrainSize = currentSettings.MinGrainSize;
+            _settings.NmPpx = currentSettings.NmPpx;
 
         }
 

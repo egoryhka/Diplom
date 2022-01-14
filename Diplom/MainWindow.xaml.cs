@@ -155,8 +155,8 @@ namespace Diplom
 
 
             if (DataManager.CurrentData.Eulers == null) return;
-            var maskCol = DataManager.CurrentData.Settings.GrainBorderColor;
-            Mask mask = functions.GPU.GetGrainMask(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size, 10, new GpuColor(maskCol.R, maskCol.G, maskCol.B, maskCol.A));
+            //var maskCol = DataManager.CurrentData.Settings.GrainBorderColor;
+            Mask mask = functions.GPU.GetGrainMask(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size, 10, new GpuColor(255, 255, 255, 128));
             byte[] colors = functions.GPU.GetColorMapEuler(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size);
             byte[] maskedColors = functions.GPU.ApplyMask(colors, mask);
             var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, maskedColors);
