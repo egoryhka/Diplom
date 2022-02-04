@@ -131,7 +131,7 @@ namespace Diplom.FuncModule
             kernel.SetValueArgument(4, grainMaskColor);
             kernel.SetMemoryArgument(5, outputBuffer);
 
-            CommandQueue.Execute(kernel, null, new long[] { /*eulers.Length*/ size.x, size.y }, null, null);
+            CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 
             byte[] res = new byte[eulers.Length * 4];
             CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
@@ -139,6 +139,31 @@ namespace Diplom.FuncModule
             inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
 
             return new Mask() { colors = res };
+        }
+
+        public Euler[] AutomaticCleanUp(Euler[] eulers, Vector2Int size, int maxIterations)
+        {
+            int i = 0;
+            int unsolvedCount = CPU.CountUnsolved(eulers);
+            while (i++ < maxIterations)
+            {
+                if (unsolvedCount == 0) return eulers;
+
+                eulers = KuwaharaCleanUp(eulers, size, 1);
+
+                int newUnsolvedCount = CPU.CountUnsolved(eulers);
+
+                if (newUnsolvedCount == unsolvedCount) break;
+                unsolvedCount = newUnsolvedCount;
+            }
+
+            while (unsolvedCount > 0)
+            {
+                eulers = StandartCleanUp(eulers, size, 1);
+                unsolvedCount = CPU.CountUnsolved(eulers);
+            }
+
+            return eulers;
         }
 
         public Euler[] StandartCleanUp(Euler[] eulers, Vector2Int size, int iterations)
@@ -200,8 +225,6 @@ namespace Diplom.FuncModule
 
             return res;
         }
-
-
 
     }
 

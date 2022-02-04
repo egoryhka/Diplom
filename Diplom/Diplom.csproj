@@ -4,6 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Resources\Diplom.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -18,7 +19,6 @@
   <ItemGroup>
     <None Remove="GpuCode.c" />
     <None Remove="gpu_code.c" />
-    <None Remove="Resources\6519067.png" />
     <None Remove="Resources\EFXSes9UCfsyRVoNeQ2ZTB.png" />
     <None Remove="Resources\ExcelImportIcon.png" />
     <None Remove="Resources\OpenIcon.png" />
@@ -32,7 +32,7 @@
     <Content Include="GpuCode.c">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Resource Include="Resources\6519067.png">
+    <Resource Include="Resources\Diplom.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\EFXSes9UCfsyRVoNeQ2ZTB.png">

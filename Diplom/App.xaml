@@ -19,11 +19,9 @@
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
 
-
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource baseStyle}">
             <Setter Property="Background" Value="#FF333337"/>
         </Style>
-
 
         <Style TargetType="{x:Type TabControl}" BasedOn="{StaticResource baseStyle}">
             <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -42,7 +40,7 @@
           Name="HeaderPanel"
           Grid.Row="0"
           Panel.ZIndex="1" 
-          Margin="0,0,4,-1" 
+          Margin="0,0,4,0" 
           IsItemsHost="True"
           KeyboardNavigation.TabIndex="1"
           Background="Transparent" />
@@ -69,7 +67,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
 
         <Style TargetType="{x:Type Button}" BasedOn="{StaticResource baseStyle}">
             <Setter Property="Background" Value="Transparent"/>
@@ -126,20 +123,6 @@
             </Setter>
         </Style>
 
-
-        <!--<Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource baseStyle}">
-            <Setter Property="Background" Value="#FF2D2D30"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF3E3E40"/>
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#FF007ACC"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>-->
-
         <Style TargetType="{x:Type xctk:ColorPicker}" BasedOn="{StaticResource baseStyle}">
             <Setter Property="HeaderBackground" Value="#FF333337"/>
             <Setter Property="TabBackground" Value="#FF333337"/>
@@ -178,7 +161,6 @@
             </Setter>
         </Style>
 
-        <!--SCROLLBARS-->
         <Style x:Key="{x:Type ScrollBar}" TargetType="{x:Type ScrollBar}">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
@@ -257,7 +239,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type MenuItem}">
-                        <Border  BorderThickness="0">
+                        <Border x:Name="border" BorderThickness="0" BorderBrush="#007acc">
                             <Grid x:Name="panel">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition x:Name="Col0" MinWidth="17" Width="Auto" SharedSizeGroup="MenuItemIconColumnGroup"/>
@@ -355,9 +337,11 @@
                             <!-- Using the system colors for the Menu Highlight and IsEnabled-->
                             <Trigger Property="IsMouseOver" Value="true">
                                 <Setter Property="Background" Value="#3e3e40" TargetName="panel"/>
+                                <Setter  Property="BorderThickness" Value="1,0,0,0"  TargetName="border"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="false">
                                 <Setter Property="Background" Value="#2d2d30" TargetName="panel"/>
+                                <Setter  Property="BorderThickness" Value="0"  TargetName="border"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="false">
                                 <Setter Property="Foreground" Value="LightGray"/>

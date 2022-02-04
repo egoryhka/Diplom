@@ -8,7 +8,8 @@
         xmlns:controls="clr-namespace:Diplom.UI.Controls"
         xmlns:converters="clr-namespace:Diplom.UI"
         mc:Ignorable="d"
-        Title="Проект: " Width="1280" Height="720"  x:Name="MainWin" >
+        Title="Проект: " Width="1280" Height="720"  x:Name="MainWin"
+        Icon="Resources/Diplom.ico">
     <Window.InputBindings>
         <KeyBinding Command="local:HotKeys.SaveCommand" Gesture="Ctrl+S" />
     </Window.InputBindings>
@@ -63,7 +64,7 @@
                 <ColumnDefinition Width="2*" MinWidth="{Binding ElementName=MainWin, Path=ActualWidth, Converter={converters:PercentageConverter}, ConverterParameter='0,25'}"/>
             </Grid.ColumnDefinitions>
 
-            <Border BorderThickness="0, 0.3, 0.3,0" BorderBrush="#FFACACAC">
+            <Border BorderThickness="0.3" Margin="2" BorderBrush="#FFACACAC">
                 <TabControl Grid.Column="0" Grid.ColumnSpan="2" Background="#FF2D2D30">
 
                     <TabItem Header="Функции">
@@ -89,9 +90,9 @@
                 </TabControl>
             </Border>
 
-            <GridSplitter  Grid.Column="1" ResizeBehavior="PreviousAndNext" BorderThickness="0"  Width="5" Background="#FF252526" Margin="0,0,0,0.3" HorizontalAlignment="Center"/>
+            <GridSplitter  Grid.Column="1" ResizeBehavior="PreviousAndNext" BorderThickness="0"  Width="5" Background="#FF252526" Margin="2" HorizontalAlignment="Center"/>
 
-            <Border BorderBrush="#FFACACAC" BorderThickness="0.3, 0.3, 0, 0" Grid.Column="2" HorizontalAlignment="Center">
+            <Border BorderBrush="#FFACACAC" BorderThickness="0.3" Margin="2" Grid.Column="2" HorizontalAlignment="Center">
                 <StackPanel x:Name="ImageStackPanel"  Orientation="Vertical">
 
                     <ui:ZoomBorder x:Name="MainImageContainer" Background="#FFD4D4D4" ClipToBounds="True" BorderThickness="0" HorizontalAlignment="Right" VerticalAlignment="Top"  Margin="3">
