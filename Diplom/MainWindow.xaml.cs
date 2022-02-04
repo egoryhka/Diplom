@@ -27,6 +27,14 @@ namespace Diplom
     {
         private Functions functions;
 
+        private Vector2Int GetPixelCoordinate(Image image, MouseEventArgs e)
+        {
+            Point pt = e.GetPosition(image);
+            pt.X *= image.Source.Width / image.ActualWidth;
+            pt.Y *= image.Source.Height / image.ActualHeight;
+            return new Vector2Int((int)pt.X, (int)pt.Y);
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -43,6 +51,7 @@ namespace Diplom
                 Closing -= MainWindow_Closing;
                 Close();
             }
+
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -150,32 +159,29 @@ namespace Diplom
 
             //if (DataManager.CurrentData.BC == null) return;
             //byte[] colors = functions.GPU.GetColorMapBC(DataManager.CurrentData.BC, DataManager.CurrentData.Size);
-            //var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, colors);
+            //Mask mask = functions.GPU.GetGrainMask(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size, 5, new GpuColor(0, 0, 0, 0));
+            //byte[] maskedColors = functions.GPU.ApplyMask(colors, mask);
+            //var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, maskedColors);
             //MainImage.Source = functions.BitmapFunc.CreateBitmapSource(bmp);
 
 
             if (DataManager.CurrentData.Eulers == null) return;
-            //var maskCol = DataManager.CurrentData.Settings.GrainBorderColor;
-            Mask mask = functions.GPU.GetGrainMask(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size, 10, new GpuColor(255, 255, 255, 128));
+            var color = DataManager.CurrentData.Settings.GrainSelectBorderColor;
+            DataManager.CurrentData.Eulers = functions.GPU.CleanUp(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size, 1);
+            Mask mask = functions.GPU.GetGrainMask(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size, DataManager.CurrentData.Settings.MinGrainSize, new GpuColor(color.R, color.G, color.B, color.A));
             byte[] colors = functions.GPU.GetColorMapEuler(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size);
-            byte[] maskedColors = functions.GPU.ApplyMask(colors, mask);
-            var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, maskedColors);
+            byte[] maskedColors = functions.GPU.ApplyMask(colors, mask, DataManager.CurrentData.Size);
+            var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, colors);
 
             MainImage.Source = functions.BitmapFunc.CreateBitmapSource(bmp);
 
-
-
         }
 
-        private void MainImage_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        private void MainImage_MouseMove(object sender, MouseEventArgs e)
         {
-            Point pt = e.GetPosition(MainImage);
-            pt.X *= MainImage.Source.Width / MainImage.ActualWidth;
-            pt.Y *= MainImage.Source.Height / MainImage.ActualHeight;
-
-            Vector2 intPoint = new Vector2((int)pt.X, (int)pt.Y);
-            X.Content = intPoint.x;
-            Y.Content = intPoint.y;
+            Vector2Int coords = GetPixelCoordinate(MainImage, e);
+            X.Content = coords.x;
+            Y.Content = coords.y;
         }
     }
 }

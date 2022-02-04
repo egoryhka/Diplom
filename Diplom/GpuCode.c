@@ -6,9 +6,45 @@ struct Euler
 	float z;
 }; typedef struct Euler euler;
 
+bool isUnSolved(euler e) {
+	return e.x == 0 && e.y == 0 && e.z == 0;
+}
+
 euler eul_sum(euler a, euler b) {
 	return (euler) { a.x + b.x, a.y + b.y, a.z + b.z };
 }
+
+euler eul_subtract(euler a, euler b) {
+	return (euler) { a.x - b.x, a.y - b.y, a.z - b.z };
+}
+
+int4 eulerToColor(euler eul) {
+	return convert_int4((float4)(255.0f * eul.x / 360.0f, 255.0f * eul.y / 90.0f, 255.0f * eul.z / 90.0f, 0));
+}
+
+euler averageEuler(euler e1, euler e2, euler e3)
+{
+	euler sum = eul_sum(e3, eul_sum(e1, e2));
+	euler av = (euler){ sum.x / 3.0, sum.y / 3.0, sum.z / 3.0 };
+	return av;
+}
+
+float brightness(int4 col) {
+	return 0.2126 * col.x + 0.7152 * col.y + 0.0722 * col.z;
+}
+
+float deviation(euler e1, euler e2, euler e3, euler M)
+{
+	int4 mCol = eulerToColor(M);
+	int4 e1Col = eulerToColor(e1);
+	int4 e2Col = eulerToColor(e2);
+	int4 e3Col = eulerToColor(e3);
+	float _e1 = (float)(brightness(e1Col) - brightness(mCol)) * (brightness(e1Col) - brightness(mCol));
+	float _e2 = (float)(brightness(e2Col) - brightness(mCol)) * (brightness(e2Col) - brightness(mCol));
+	float _e3 = (float)(brightness(e3Col) - brightness(mCol)) * (brightness(e3Col) - brightness(mCol));
+	return (_e1 + _e2 + _e3) / 3.0;
+}
+
 
 float3 rotateVector(float3 a, euler eul)
 {
@@ -30,6 +66,7 @@ float angleBetween(euler eul1, euler eul2) {
 	return degrees(acos(dot(a, b) / (length(a) * length(b))));
 }
 
+
 __kernel void Euler2Color(__global euler* in, int width, int height, __global uchar* out)
 {
 	int x = get_global_id(0);
@@ -38,7 +75,7 @@ __kernel void Euler2Color(__global euler* in, int width, int height, __global uc
 	int inlinearId = (int)(x + y * width);
 	euler eul = in[inlinearId];
 
-	int4 col = convert_int4((float4)(255.0f * eul.x / 360.0f, 255.0f * eul.y / 90.0f, 255.0f * eul.z / 90.0f, 0));
+	int4 col = eulerToColor(eul);
 
 	int outlinearId = (int)((x + y * width) * 4);
 	out[outlinearId] = col.z; // R
@@ -47,7 +84,7 @@ __kernel void Euler2Color(__global euler* in, int width, int height, __global uc
 	out[outlinearId + 3] = 255; // A
 }
 
-__kernel void Bc2Color(__global int* in, int width, int height, __global char* out)
+__kernel void Bc2Color(__global int* in, int width, int height, __global uchar* out)
 {
 	int x = get_global_id(0);
 	int y = get_global_id(1);
@@ -64,9 +101,12 @@ __kernel void Bc2Color(__global int* in, int width, int height, __global char* o
 	out[outlinearId + 3] = 255; // A
 }
 
-__kernel void ApplyMask(__global uchar* in, __global uchar* mask, __global uchar* out)
+__kernel void ApplyMask(__global uchar* in, __global uchar* mask, int width, int height, __global uchar* out)
 {
-	int id = get_global_id(0) * 4;
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+
+	int id = (int)(x + y * width) * 4;
 
 	if (mask[id + 3] > 0 && mask[id + 3] < 255) {
 
@@ -95,30 +135,26 @@ __kernel void ApplyMask(__global uchar* in, __global uchar* mask, __global uchar
 	}
 }
 
+
 __kernel void GetGrainMask(__global euler* in, int width, int height, float MissOrientationTreshold, float4 grainMaskColor, __global uchar* out)
 {
-	int inId = get_global_id(0);
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+	int id = (int)(x + y * width);
 
-	euler eul = in[inId];
+	int idUp = (int)(x + (y + 1) * width);
+	int idDown = (int)(x + (y - 1) * width);
+	int idLeft = (int)((x - 1) + y * width);
+	int idRight = (int)((x + 1) + y * width);
 
 	bool isEdge = false;
 
-	bool can_up = inId > width;
-	bool can_left = inId % width != 0;
-	bool can_right = (inId + 1) % width != 0;
-	bool can_down = inId < width* height - width;
+	if (!isEdge && y > 0) { if (angleBetween(in[id], in[idUp]) > MissOrientationTreshold) isEdge = true; }
+	if (!isEdge && y < height) { if (angleBetween(in[id], in[idDown]) > MissOrientationTreshold) isEdge = true; }
+	if (!isEdge && x > 0) { if (angleBetween(in[id], in[idLeft]) > MissOrientationTreshold) isEdge = true; }
+	if (!isEdge && x < width) { if (angleBetween(in[id], in[idRight]) > MissOrientationTreshold) isEdge = true; }
 
-	int upId = inId - width;
-	int leftId = inId - 1;
-	int rightId = inId + 1;
-	int downId = inId + width;
-
-	if (can_up && isEdge == 0) { if (angleBetween(eul, in[upId]) > MissOrientationTreshold) isEdge = true; }
-	if (can_left && isEdge == 0) { if (angleBetween(eul, in[leftId]) > MissOrientationTreshold) isEdge = true; }
-	if (can_right && isEdge == 0) { if (angleBetween(eul, in[rightId]) > MissOrientationTreshold) isEdge = true; }
-	if (can_down && isEdge == 0) { if (angleBetween(eul, in[downId]) > MissOrientationTreshold) isEdge = true; }
-
-	int outId = inId * 4;
+	int outId = id * 4;
 	if (isEdge) {
 		out[outId] = convert_int(grainMaskColor.z);
 		out[outId + 1] = convert_int(grainMaskColor.y);
@@ -128,67 +164,133 @@ __kernel void GetGrainMask(__global euler* in, int width, int height, float Miss
 }
 
 
-
-__kernel void Extrapolate(__global euler* out, int width, int height, __global euler* in)
+__kernel void StandartCleanUp(__global euler* in, int width, int height, __global euler* out)
 {
-	int id = get_global_id(0);
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+	int id = (int)(x + y * width);
+
+	int idUp = (int)(x + (y + 1) * width);
+	int idDown = (int)(x + (y - 1) * width);
+	int idLeft = (int)((x - 1) + y * width);
+	int idRight = (int)((x + 1) + y * width);
+
+	int idUpLeft = (int)((x - 1) + (y + 1) * width);
+	int idDownLeft = (int)((x - 1) + (y - 1) * width);
+	int idUpRight = (int)((x + 1) + (y + 1) * width);
+	int idDownRight = (int)((x + 1) + (y - 1) * width);
 
 	euler eul = in[id];
+	if (eul.x != 0 || eul.y != 0 || eul.z != 0) out[id] = eul;
+	else {
 
-	if (eul.x > 0 && eul.y > 0 && eul.z > 0)
-	{
-		out[id] = eul;
-	}
-	else
-	{
+		euler sum = (euler){ 0,0,0 };
+
+		//Standart ----------------
 		int k = 0;
-		euler sum = { 0, 0, 0 };
 
-		bool can_up = id > width;
-		bool can_left = (id % width) != 0;
-		bool can_right = ((id + 1) % width) != 0;
-		bool can_down = id < (width* height - width);
+		if (in[idUp].x != 0 || in[idUp].y != 0 || in[idUp].z != 0) {
+			sum = eul_sum(sum, in[idUp]);
+			k++;
+		}
+		if (in[idDown].x != 0 || in[idDown].y != 0 || in[idDown].z != 0) {
+			sum = eul_sum(sum, in[idDown]);
+			k++;
+		}
+		if (in[idLeft].x != 0 || in[idLeft].y != 0 || in[idLeft].z != 0) {
+			sum = eul_sum(sum, in[idLeft]);
+			k++;
+		}
+		if (in[idRight].x != 0 || in[idRight].y != 0 || in[idRight].z != 0) {
+			sum = eul_sum(sum, in[idRight]);
+			k++;
+		}
 
-		bool can_upLeft = can_up && can_left;
-		bool can_upRifht = can_up && can_right;
-		bool can_downLeft = can_down && can_left;
-		bool can_downRight = can_down && can_right;
+		if (in[idUpLeft].x != 0 || in[idUpLeft].y != 0 || in[idUpLeft].z != 0) {
+			sum = eul_sum(sum, in[idUpLeft]);
+			k++;
+		}
+		if (in[idDownLeft].x != 0 || in[idDownLeft].y != 0 || in[idDownLeft].z != 0) {
+			sum = eul_sum(sum, in[idDownLeft]);
+			k++;
+		}
+		if (in[idUpRight].x != 0 || in[idUpRight].y != 0 || in[idUpRight].z != 0) {
+			sum = eul_sum(sum, in[idUpRight]);
+			k++;
+		}
+		if (in[idDownRight].x != 0 || in[idDownRight].y != 0 || in[idDownRight].z != 0) {
+			sum = eul_sum(sum, in[idDownRight]);
+			k++;
+		}
 
-		int up = id - width;
-		int left = id - 1;
-		int right = id + 1;
-		int down = id + width;
-
-		int upLeft = id - width - 1;
-		int upRight = id - width + 1;
-		int downLeft = id + width - 1;
-		int downRight = id + width + 1;
-
-		if (can_up && (in[up].x > 0 || in[up].y > 0 || in[up].z > 0)) { out[id] = in[up]; }
-		if (can_left && (in[left].x > 0 || in[left].y > 0 || in[left].z > 0)) { out[id] = in[left]; }
-		if (can_right && (in[right].x > 0 || in[right].y > 0 || in[right].z > 0)) { out[id] = in[right]; }
-		if (can_down && (in[down].x > 0 || in[down].y > 0 || in[down].z > 0)) { out[id] = in[down]; }
-
-		//if(can_up && (in[up].x > 0 || in[up].y > 0 || in[up].z >0)) {k++; sum = eul_sum(sum, in[up]); }    
-		//if(can_left && (in[left].x > 0 || in[left].y > 0 || in[left].z >0)) {k++; sum = eul_sum(sum, in[left]); }    
-		//if(can_right && (in[right].x > 0 || in[right].y > 0 || in[right].z >0)) {k++; sum = eul_sum(sum, in[right]); }    
-		//if(can_down && (in[down].x > 0 || in[down].y > 0 || in[down].z >0)) {k++; sum = eul_sum(sum, in[down]); }    
-
-		//if(can_upLeft && (in[upLeft].x > 0 || in[upLeft].y > 0 || in[upLeft].z >0)) {k++; sum = eul_sum(sum, in[upLeft]); }    
-		//if(can_upRifht && (in[upRight].x > 0 || in[upRight].y > 0 || in[upRight].z >0)) {k++; sum = eul_sum(sum, in[upRight]); }    
-		//if(can_downLeft && (in[downLeft].x > 0 || in[downLeft].y > 0 || in[downLeft].z >0)) {k++; sum = eul_sum(sum, in[downLeft]); }    
-		//if(can_downRight && (in[downRight].x > 0 || in[downRight].y > 0 || in[downRight].z >0)) {k++; sum = eul_sum(sum, in[downRight]); }    
-
-		//if(k >= 4){
-		//    out[id] = (euler){ sum.x / k, sum.y / k, sum.z / k};
-		//}
+		if (k > 0) {
+			out[id] = (euler){ sum.x / k, sum.y / k, sum.z / k };
+		}
 
 	}
 }
 
 
+__kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __global euler* out)
+{
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+	int id = (int)(x + y * width);
 
+	int idUp = (int)(x + (y + 1) * width);
+	int idDown = (int)(x + (y - 1) * width);
+	int idLeft = (int)((x - 1) + y * width);
+	int idRight = (int)((x + 1) + y * width);
 
+	int idUpLeft = (int)((x - 1) + (y + 1) * width);
+	int idDownLeft = (int)((x - 1) + (y - 1) * width);
+	int idUpRight = (int)((x + 1) + (y + 1) * width);
+	int idDownRight = (int)((x + 1) + (y - 1) * width);
 
+	euler eul = in[id];
+	if (eul.x != 0 || eul.y != 0 || eul.z != 0) out[id] = eul;
+	else {
+
+		euler average = (euler){ 0,0,0 };
+
+		//Kuwahara ----------------
+		float minD = 10000;
+
+		if (x > 0 && y > 0 && !isUnSolved(in[idUp]) && !isUnSolved(in[idLeft]) && !isUnSolved(in[idUpLeft])) {
+			euler M1 = averageEuler(in[idUp], in[idLeft], in[idUpLeft]);
+			float D1 = deviation(in[idUp], in[idLeft], in[idUpLeft], M1);
+			if (D1 < minD) {
+				minD = D1;
+				average = M1;
+			}
+		}
+		if (x < width && y > 0 && !isUnSolved(in[idUp]) && !isUnSolved(in[idRight]) && !isUnSolved(in[idUpRight])) {
+			euler M2 = averageEuler(in[idUp], in[idRight], in[idUpRight]);
+			float D2 = deviation(in[idUp], in[idRight], in[idUpRight], M2);
+			if (D2 < minD) {
+				minD = D2;
+				average = M2;
+			}
+		}
+		if (x < width && y < height && !isUnSolved(in[idDown]) && !isUnSolved(in[idRight]) && !isUnSolved(in[idDownRight])) {
+			euler M3 = averageEuler(in[idDown], in[idRight], in[idDownRight]);
+			float D3 = deviation(in[idDown], in[idRight], in[idDownRight], M3);
+			if (D3 < minD) {
+				minD = D3;
+				average = M3;
+			}
+		}
+		if (x > 0 && y < height && !isUnSolved(in[idDown]) && !isUnSolved(in[idLeft]) && !isUnSolved(in[idDownLeft])) {
+			euler M4 = averageEuler(in[idDown], in[idLeft], in[idDownLeft]);
+			float D4 = deviation(in[idDown], in[idLeft], in[idDownLeft], M4);
+			if (D4 < minD) {
+				minD = D4;
+				average = M4;
+			}
+		}
+
+		out[id] = average;
+	}
+}
 
 

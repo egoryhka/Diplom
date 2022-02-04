@@ -9,50 +9,52 @@
         x:Name="SetWin"
         Title="Настройки" Height="400" Width="300"
         ResizeMode="NoResize">
-    <Grid>
+    <Grid Background="#FF2D2D30">
 
-        <TabControl>
+        <TabControl Margin="2,2,2,30" >
             <TabItem Header="Общие">
-                <Grid Background="#FFE5E5E5">
-                    <ScrollViewer Background="#AAA5A5A5" Margin="0,0,0,25">
+                <Grid Background="#FF2D2D30">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                             <Label Content="μm/px"/>
-                            <TextBox x:Name="NmPpx" Text="{Binding ElementName=SetWin, Path=_settings.MinGrainSize}" Height="25" Width="Auto"/>
+                            <TextBox x:Name="NmPpx" Text="{Binding ElementName=SetWin, Path=_settings.NmPpx}" Height="25" Width="Auto"/>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
             </TabItem>
             <TabItem Header="Зерна">
-                <Grid Background="#FFE5E5E5">
-                    <ScrollViewer Background="#AAA5A5A5" Margin="0,0,0,25">
+                <Grid Background="#FF2D2D30">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                             <Label Content="Минимальный размер (px)"/>
                             <TextBox x:Name="MinGrainSizeTextBox" Text="{Binding ElementName=SetWin, Path=_settings.MinGrainSize}" Height="25" Width="Auto"/>
-                            <!--<Label Content="Цвет границ"/>
-                            <xctk:ColorPicker Name="GrainBorderColorPicker" SelectedColor="{Binding ElementName=SetWin, Path=_settings.GrainBorderColor}" ></xctk:ColorPicker>-->
                             <Label Content="Цвет выделения"/>
-                            <xctk:ColorPicker Name="GrainSelectBorderColorPicker" SelectedColor="{Binding ElementName=SetWin, Path=_settings.GrainSelectBorderColor}" ></xctk:ColorPicker>
+                            <xctk:ColorPicker Name="GrainSelectBorderColorPicker" SelectedColor="{Binding ElementName=SetWin, Path=_settings.GrainSelectBorderColor}" >
+                            </xctk:ColorPicker>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
             </TabItem>
             <TabItem Header="Фазы">
-                <Grid Background="#FFE5E5E5">
-                    <ScrollViewer Background="#AAA5A5A5" Margin="0,0,0,25">
+                <Grid Background="#FF2D2D30">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel x:Name="PhasesStackPanel">
                             <Label Content="Фазы"/>
-
+                            <!--Phases editors here-->
+                            <!--<DockPanel LastChildFill="True">
+                                <TextBlock Text="0" Margin="5" Width="20" DockPanel.Dock="Left" VerticalAlignment="Center"/>
+                                <TextBox Height="25" Width="Auto"/>
+                            </DockPanel >-->
                         </StackPanel>
-
                     </ScrollViewer>
                 </Grid>
             </TabItem>
         </TabControl>
 
 
-        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal">
-            <Button x:Name="ApplySettingsButton" Content="Ok"  Width="50" Margin="5" Click="ApplySettingsButton_Click"/>
-            <Button x:Name="DenySettingsButton" Content="Cancel" Width="50" Margin="5" Click="DenySettingsButton_Click"/>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Bottom" Orientation="Horizontal">
+            <Button x:Name="ApplySettingsButton" Height="30" Content="Ok" Width="148" Margin="2,0,0,0" Click="ApplySettingsButton_Click"/>
+            <Button x:Name="DenySettingsButton" Height="30" Content="Cancel" Width="148" Margin="0,0,2,0" Click="DenySettingsButton_Click"/>
         </StackPanel>
 
     </Grid>

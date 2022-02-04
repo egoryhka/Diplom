@@ -72,6 +72,7 @@ namespace Diplom
 
             TextBlock phaseNumberText = new TextBlock();
             phaseNumberText.Text = phase.Key.ToString();
+            phaseNumberText.Width = 20;
             phaseNumberText.Margin = new Thickness(5);
             phaseNumberText.VerticalAlignment = VerticalAlignment.Center;
             DockPanel.SetDock(phaseNumberText, Dock.Left);

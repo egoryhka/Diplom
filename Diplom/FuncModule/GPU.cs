@@ -27,7 +27,8 @@ namespace Diplom.FuncModule
             Context = new ComputeContext(ComputeDeviceTypes.All, Properties, null, IntPtr.Zero);
 
             List<ComputeDevice> Devices = new List<ComputeDevice>();
-            Devices.Add(ComputePlatform.Platforms[0].Devices[0]);
+            Devices.AddRange(ComputePlatform.Platforms[0].Devices);
+
 
             try
             {
@@ -56,7 +57,7 @@ namespace Diplom.FuncModule
 
             CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 
-            byte[] outColors = new byte[size.x * size.y * 4]; // output
+            byte[] outColors = new byte[outColorBuffer.Count]; // output
             CommandQueue.ReadFromBuffer(outColorBuffer, ref outColors, true, null);
 
             kernel.Dispose(); outColorBuffer.Dispose(); bcBuffer.Dispose();
@@ -78,8 +79,8 @@ namespace Diplom.FuncModule
             kernel.SetMemoryArgument(3, outColorBuffer);
 
             CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
-            
-            byte[] outColors = new byte[size.x * size.y * 4]; // output
+
+            byte[] outColors = new byte[outColorBuffer.Count]; // output
             CommandQueue.ReadFromBuffer(outColorBuffer, ref outColors, true, null);
 
             kernel.Dispose(); outColorBuffer.Dispose(); eulerBuffer.Dispose();
@@ -87,7 +88,7 @@ namespace Diplom.FuncModule
             return outColors;
         }
 
-        public byte[] ApplyMask(byte[] inputColors, Mask mask)
+        public byte[] ApplyMask(byte[] inputColors, Mask mask, Vector2Int size)
         {
             ComputeKernel kernel = Program.CreateKernel("ApplyMask");
 
@@ -100,9 +101,11 @@ namespace Diplom.FuncModule
 
             kernel.SetMemoryArgument(0, inputBuffer);
             kernel.SetMemoryArgument(1, maskBuffer);
-            kernel.SetMemoryArgument(2, outputBuffer);
+            kernel.SetValueArgument(2, size.x);
+            kernel.SetValueArgument(3, size.y);
+            kernel.SetMemoryArgument(4, outputBuffer);
 
-            CommandQueue.Execute(kernel, null, new long[] { inputColors.Length }, null, null);
+            CommandQueue.Execute(kernel, null, new long[] { /*inputColors.Length*/size.x, size.y }, null, null);
 
             byte[] res = new byte[inputColors.Length];
             CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
@@ -128,7 +131,7 @@ namespace Diplom.FuncModule
             kernel.SetValueArgument(4, grainMaskColor);
             kernel.SetMemoryArgument(5, outputBuffer);
 
-            CommandQueue.Execute(kernel, null, new long[] { eulers.Length }, null, null);
+            CommandQueue.Execute(kernel, null, new long[] { /*eulers.Length*/ size.x, size.y }, null, null);
 
             byte[] res = new byte[eulers.Length * 4];
             CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
@@ -137,6 +140,69 @@ namespace Diplom.FuncModule
 
             return new Mask() { colors = res };
         }
+
+        public Euler[] StandartCleanUp(Euler[] eulers, Vector2Int size, int iterations)
+        {
+            ComputeKernel kernel = Program.CreateKernel("StandartCleanUp");
+
+            ComputeBuffer<Euler> inputBuffer
+                = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
+            ComputeBuffer<Euler> outputBuffer
+                = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new Euler[eulers.Length]);
+
+            kernel.SetMemoryArgument(0, inputBuffer);
+            kernel.SetValueArgument(1, size.x);
+            kernel.SetValueArgument(2, size.y);
+            kernel.SetMemoryArgument(3, outputBuffer);
+
+            CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+
+            for (int i = 0; i < iterations - 1; i++)
+            {
+                CommandQueue.CopyBuffer(outputBuffer, inputBuffer, null);
+                CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+            }
+
+            Euler[] res = new Euler[eulers.Length];
+            CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
+
+            inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
+
+            return res;
+        }
+
+        public Euler[] KuwaharaCleanUp(Euler[] eulers, Vector2Int size, int iterations)
+        {
+            ComputeKernel kernel = Program.CreateKernel("KuwaharaCleanUp");
+
+            ComputeBuffer<Euler> inputBuffer
+                = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
+            ComputeBuffer<Euler> outputBuffer
+                = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new Euler[eulers.Length]);
+
+            kernel.SetMemoryArgument(0, inputBuffer);
+            kernel.SetValueArgument(1, size.x);
+            kernel.SetValueArgument(2, size.y);
+            kernel.SetMemoryArgument(3, outputBuffer);
+
+            CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+
+            for (int i = 0; i < iterations - 1; i++)
+            {
+                CommandQueue.CopyBuffer(outputBuffer, inputBuffer, null);
+                CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+            }
+
+            Euler[] res = new Euler[eulers.Length];
+            CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
+
+            inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
+
+            return res;
+        }
+
+
+
     }
 
     public class Mask { public byte[] colors; }
