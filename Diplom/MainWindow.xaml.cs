@@ -35,6 +35,16 @@ namespace Diplom
             return new Vector2Int((int)pt.X, (int)pt.Y);
         }
 
+        private void OpenFileUsingCommandLineArgs()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length >= 2)
+            {
+                string pathToFile = args[1];
+                OpenFile(pathToFile);
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -52,6 +62,7 @@ namespace Diplom
                 Close();
             }
 
+            OpenFileUsingCommandLineArgs();
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -88,6 +99,20 @@ namespace Diplom
             }
         }
 
+        private void OpenFile(string pathToFile)
+        {
+            try
+            {
+                DataManager.Load(pathToFile);
+            }
+            catch (JsonLoadException)
+            {
+                MessageBox.Show("Ошибка чтения файла проекта\nФайл поврежден!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            Title = DataManager.ProjectName;
+        }
+
         private void SaveFileButton_Click(object sender, RoutedEventArgs e)
         {
             SaveFile();
@@ -112,16 +137,7 @@ namespace Diplom
             if (openFileDialog.ShowDialog() == true)
             {
                 string pathToFile = openFileDialog.FileName;
-                try
-                {
-                    DataManager.Load(pathToFile);
-                }
-                catch (JsonLoadException)
-                {
-                    MessageBox.Show("Ошибка чтения файла проекта\nФайл поврежден!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-                Title = DataManager.ProjectName;
+                OpenFile(pathToFile);
             }
         }
 
