@@ -20,7 +20,7 @@ namespace Diplom.DataModule
             {
                 string name = "Проект: ";
                 string projectFileName = Path.GetFileName(currentPathToFile);
-                name += projectFileName.Remove(projectFileName.Length - 11, 11);
+                name += projectFileName.Remove(projectFileName.Length - 4, 4);
                 return name;
             }
         }

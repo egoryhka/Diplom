@@ -13,7 +13,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Diplom.DataModule;
 using Diplom.FuncModule;
 using Microsoft.Win32;
@@ -33,6 +32,24 @@ namespace Diplom
             pt.X *= image.Source.Width / image.ActualWidth;
             pt.Y *= image.Source.Height / image.ActualHeight;
             return new Vector2Int((int)pt.X, (int)pt.Y);
+        }
+
+        private void MainWin_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                string path = files[0];
+                string extension = Path.GetExtension(path);
+                if (extension == ".dip")
+                {
+                    OpenFile(path);
+                }
+                if (Path.GetExtension(path) == ".xlsx")
+                {
+                    ExcelImport(path);
+                }
+            }
         }
 
         private void OpenFileUsingCommandLineArgs()
@@ -76,7 +93,7 @@ namespace Diplom
                 catch (FileNotFoundException)
                 {
                     SaveFileDialog saveFileDialog = new SaveFileDialog();
-                    saveFileDialog.Filter = "diplomData files (*.diplomData)|*.diplomData";
+                    saveFileDialog.Filter = "diplom files (*.dip)|*.dip";
                     if (saveFileDialog.ShowDialog() == true)
                     {
                         string pathToFile = saveFileDialog.FileName;
@@ -86,11 +103,27 @@ namespace Diplom
             }
         }
 
+        private void ExcelImport(string pathToFile)
+        {
+            try
+            {
+                DataManager.LoadEbsdFromExcel(pathToFile);
+            }
+            catch (ExcelNotValidException)
+            {
+                MessageBox.Show("Выбранный файл не подходит!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (ReadExcelException)
+            {
+                MessageBox.Show("Ошибка чтения файла!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void SaveFile()
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
 
-            saveFileDialog.Filter = "diplomData files (*.diplomData)|*.diplomData";
+            saveFileDialog.Filter = "diplom files (*.dip)|*.dip";
             if (saveFileDialog.ShowDialog() == true)
             {
                 string pathToFile = saveFileDialog.FileName;
@@ -133,7 +166,7 @@ namespace Diplom
         private void OpenFileButton_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "diplomData files (*.diplomData)|*.diplomData";
+            openFileDialog.Filter = "diplom files (*.dip)|*.dip";
             if (openFileDialog.ShowDialog() == true)
             {
                 string pathToFile = openFileDialog.FileName;
@@ -143,25 +176,13 @@ namespace Diplom
 
         private void ExcelImportButton_Click(object sender, RoutedEventArgs e)
         {
-            try
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Excel files (*.xlsx)|*.xlsx";
+            if (openFileDialog.ShowDialog() == true)
             {
-                OpenFileDialog openFileDialog = new OpenFileDialog();
-                openFileDialog.Filter = "Excel files (*.xslx)|*.xlsx";
-                if (openFileDialog.ShowDialog() == true)
-                {
-                    string pathToFile = openFileDialog.FileName;
-                    DataManager.LoadEbsdFromExcel(pathToFile);
-                }
+                string pathToFile = openFileDialog.FileName;
+                ExcelImport(pathToFile);
             }
-            catch (ExcelNotValidException)
-            {
-                MessageBox.Show("Выбранный файл не подходит!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            catch (ReadExcelException)
-            {
-                MessageBox.Show("Ошибка чтения файла!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -201,5 +222,7 @@ namespace Diplom
             X.Content = coords.x;
             Y.Content = coords.y;
         }
+
+
     }
 }

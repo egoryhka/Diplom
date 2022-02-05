@@ -9,7 +9,10 @@
         xmlns:converters="clr-namespace:Diplom.UI"
         mc:Ignorable="d"
         Title="Проект: " Width="1280" Height="720"  x:Name="MainWin"
-        Icon="Resources/Diplom.ico">
+        Icon="Resources/Diplom.ico"
+        AllowDrop="True"
+        Drop="MainWin_Drop"
+        >
     <Window.InputBindings>
         <KeyBinding Command="local:HotKeys.SaveCommand" Gesture="Ctrl+S" />
     </Window.InputBindings>
