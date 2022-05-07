@@ -19,6 +19,5 @@ namespace Diplom.FuncModule
             BitmapFunc = new BitmapFunc();
         }
 
-
     }
 }

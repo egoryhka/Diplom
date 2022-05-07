@@ -8,7 +8,7 @@
         xmlns:controls="clr-namespace:Diplom.UI.Controls"
         xmlns:converters="clr-namespace:Diplom.UI"
         mc:Ignorable="d"
-        Title="Проект: " Width="1280" Height="720"  x:Name="MainWin"
+        Title="Проект: " Width="800" Height="500"  x:Name="MainWin"
         Icon="Resources/Diplom.ico"
         AllowDrop="True"
         Drop="MainWin_Drop"
@@ -22,43 +22,48 @@
 
     <Grid Background="#FF2D2D30">
 
-        <Menu Height="22" VerticalAlignment="Top" Background="#FF2D2D30">
-            <MenuItem Header="Файл" Background="#FF2D2D30" Height="20" Width="auto" BorderThickness="0" Margin="1">
-                <MenuItem Header="Открыть" x:Name="OpenFileButton" Click="OpenFileButton_Click">
-                    <MenuItem.Icon>
-                        <Image Source="Resources/OpenIcon.png"/>
-                    </MenuItem.Icon>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Height="22" VerticalAlignment="Top">
+            <Menu  VerticalAlignment="Center" HorizontalAlignment="Left"  Background="#FF2D2D30" Margin="2,0,0,0">
+                <MenuItem Header="Файл" Background="#FF2D2D30" BorderThickness="0" Height="20">
+                    <MenuItem Header="Открыть" x:Name="OpenFileButton" Click="OpenFileButton_Click">
+                        <MenuItem.Icon>
+                            <Image Source="Resources/OpenIcon.png"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Сохранить" x:Name="SaveCurrentFileButton" Click="SaveCurrentFileButton_Click">
+                        <MenuItem.Icon>
+                            <Image Source="Resources/SaveIcon.png"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Сохранить как" x:Name="SaveFileButton" Click="SaveFileButton_Click">
+                        <MenuItem.Icon>
+                            <Image Source="Resources/SaveAsIcon.png"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Импорт Ebsd из Excel" x:Name="ExcelImportButton" Click="ExcelImportButton_Click">
+                        <MenuItem.Icon>
+                            <Image Source="Resources/ExcelImportIcon.png"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Настройки" x:Name="SettingsButton" Click="SettingsButton_Click">
+                        <MenuItem.Icon>
+                            <Image Source="Resources/SettingsIcon.png"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </MenuItem>
-                <MenuItem Header="Сохранить" x:Name="SaveCurrentFileButton" Click="SaveCurrentFileButton_Click">
-                    <MenuItem.Icon>
-                        <Image Source="Resources/SaveIcon.png"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Сохранить как" x:Name="SaveFileButton" Click="SaveFileButton_Click">
-                    <MenuItem.Icon>
-                        <Image Source="Resources/SaveAsIcon.png"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Импорт Ebsd из Excel" x:Name="ExcelImportButton" Click="ExcelImportButton_Click">
-                    <MenuItem.Icon>
-                        <Image Source="Resources/ExcelImportIcon.png"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Настройки" x:Name="SettingsButton" Click="SettingsButton_Click">
-                    <MenuItem.Icon>
-                        <Image Source="Resources/SettingsIcon.png"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-            </MenuItem>
-        </Menu>
+            </Menu>
 
-        <Button Height="20" Width="20" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="50,1" Click="SaveCurrentFileButton_Click">
-            <Image Width="13" Height="13" Source="Resources/SaveIcon.png"/>
+            <Button Height="20" Width="20" Margin="2,0" Click="SaveCurrentFileButton_Click">
+                <Image Width="13" Height="13" Source="Resources/SaveIcon.png"/>
+                <Button.ToolTip>
+                    <ToolTip>Сохранить (Ctrl+S)</ToolTip>
+                </Button.ToolTip>
+            </Button>
 
-            <Button.ToolTip>
-                <ToolTip>Сохранить (Ctrl+S)</ToolTip>
-            </Button.ToolTip>
-        </Button>
+            <ProgressBar Height="20" Value="50" Margin="0"/>
+        </StackPanel>
+
+
 
         <Grid Margin="0,22,0,0">
             <Grid.ColumnDefinitions>
