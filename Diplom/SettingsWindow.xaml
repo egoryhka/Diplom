@@ -18,6 +18,8 @@
                         <StackPanel>
                             <Label Content="μm/px"/>
                             <TextBox x:Name="NmPpx" Text="{Binding ElementName=SetWin, Path=_settings.NmPpx}" Height="25" Width="Auto"/>
+                            <Label Content="AutoUpdate"/>
+                            <CheckBox x:Name="AutoUpdate" IsChecked="{Binding ElementName=SetWin, Path=_settings.AutoUpdate}" Height="25" Width="Auto"/>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>

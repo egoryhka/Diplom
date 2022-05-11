@@ -24,8 +24,8 @@
         <DataTemplate DataType="{x:Type ui:IntArgument}">
             <StackPanel Orientation="Horizontal">
                 <Label Content="{Binding Path=Name}"/>
-                <Slider Width="100" Minimum="{Binding Path=Min}" Maximum="{Binding Path=Max}" Value="{Binding Path=Value}"/>
-                <TextBox Width="100" Text="{Binding Path=Value}" />
+                <Slider Width="100" Minimum="{Binding Path=Min}" Maximum="{Binding Path=Max}" Value="{Binding Path=Value}" ValueChanged="AutoUpdateSlider"/>
+                <TextBox Width="100" Text="{Binding Path=Value}" TextChanged="AutoUpdateTextBox" />
             </StackPanel>
         </DataTemplate>
 
@@ -33,8 +33,8 @@
         <DataTemplate DataType="{x:Type ui:FloatArgument}">
             <StackPanel Orientation="Horizontal">
                 <Label Content="{Binding Path=Name}"/>
-                <Slider TickFrequency="{Binding TickFrequency}" IsSnapToTickEnabled="True" Width="100" Minimum="{Binding Path=Min }" Maximum="{Binding Path=Max }" Value="{Binding Path=Value}"/>
-                <TextBox Width="100" Text="{Binding Path=Value}" />
+                <Slider TickFrequency="{Binding TickFrequency}" IsSnapToTickEnabled="True" Width="100" Minimum="{Binding Path=Min }" Maximum="{Binding Path=Max }" Value="{Binding Path=Value}" ValueChanged="AutoUpdateSlider"/>
+                <TextBox Width="100" Text="{Binding Path=Value}" TextChanged="AutoUpdateTextBox"/>
             </StackPanel>
         </DataTemplate>
 
@@ -42,15 +42,22 @@
         <DataTemplate DataType="{x:Type ui:BoolArgument}">
             <StackPanel Orientation="Horizontal">
                 <Label Content="{Binding Path=Name}"/>
-                <CheckBox IsChecked="{Binding Path=Value}" />
+                <CheckBox IsChecked="{Binding Path=Value}" Checked="AutoUpdateCheckbox" Unchecked="AutoUpdateCheckbox" />
             </StackPanel>
         </DataTemplate>
 
+        <!-- DataTemplate for EnumArgument -->
+        <DataTemplate DataType="{x:Type ui:MapVariantArgument}">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="{Binding Path=Name}"/>
+                <ComboBox ItemsSource="{Binding Path=AllValues}" Width="150" SelectedItem="{Binding Path=Value}" SelectionChanged="AutoUpdateCombobox"/>
+            </StackPanel>
+        </DataTemplate>
 
         <!-- DataTemplate for Function -->
         <DataTemplate DataType="{x:Type ui:FunctionContainer}">
 
-            <Expander Margin="10,0,0,10" Background="#252526" Foreground="WhiteSmoke" BorderBrush="#acacac" BorderThickness="0.3" Header="{Binding Name}">
+            <Expander Header="{Binding Name}" IsExpanded="True" Margin="10,0,0,10" Background="#252526" Foreground="WhiteSmoke" BorderBrush="#acacac" BorderThickness="0.3">
                 <Expander.ContextMenu>
                     <ContextMenu>
                         <MenuItem Icon="▲" Header="Наверх" Command="{Binding MoveUP}" CommandParameter="{Binding Path=.}"></MenuItem>
@@ -68,7 +75,7 @@
 
         </DataTemplate>
     </Window.Resources>
-    
+
 
     <Grid Background="#FF2D2D30">
 
@@ -126,7 +133,7 @@
                 <TabControl Grid.Column="0" Grid.ColumnSpan="2" Background="#FF2D2D30">
 
                     <TabItem Header="Функции">
-                        
+
                         <!--NEW ///////////////////////////-->
                         <Grid>
                             <Grid.ContextMenu>
@@ -134,19 +141,19 @@
                                     <MenuItem Icon="➕" Header="Добавить функцию" ></MenuItem>
                                 </ContextMenu>
                             </Grid.ContextMenu>
-                            
+
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                                 <StackPanel x:Name="FunctionsTab" Orientation="Vertical" Margin="0,10,0,0">
                                     <Grid>
                                         <!--<ScrollViewer>-->
-                                            <ItemsControl x:Name="FunctionsContainer" ItemsSource="{Binding Functions, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
-                                                <ItemsControl.ItemsPanel>
-                                                    <ItemsPanelTemplate>
-                                                        <StackPanel Width="300" HorizontalAlignment="Left" Orientation="Vertical">
-                                                        </StackPanel>
-                                                    </ItemsPanelTemplate>
-                                                </ItemsControl.ItemsPanel>
-                                            </ItemsControl>
+                                        <ItemsControl x:Name="FunctionsContainer" ItemsSource="{Binding Functions, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Width="300" HorizontalAlignment="Left" Orientation="Vertical">
+                                                    </StackPanel>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
                                         <!--</ScrollViewer>-->
 
                                     </Grid>

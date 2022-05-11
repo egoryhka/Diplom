@@ -32,6 +32,13 @@ namespace Diplom
 
         public BindableCollection<FunctionContainer> Functions { get; set; } = new BindableCollection<FunctionContainer>();
 
+        private byte[] colors = new byte[0];
+        private Mask grainMask = new Mask();
+        private byte[] maskedColors = new byte[0];
+        private Euler[] bufferEulers = new Euler[0];
+        private Euler[] rawEulers = new Euler[0];
+
+        private bool someParameterChanged = false;
         //-------------------------------------------
 
         private void InitializeFunctions()
@@ -75,96 +82,160 @@ namespace Diplom
                 (
                 new FunctionContainer[] {
 
-                    new FunctionContainer("Func1", new BindableCollection<Argument>{
-                        new IntArgument("Итераций",0,10,1),
-                        new BoolArgument("useKuwahara",true),
-                        new FloatArgument("FloatArg", -5, 5, 0, 0.1d),
+                     new FunctionContainer("Стандартная Очистка", new BindableCollection<Argument>{
+                        new IntArgument("Число шагов", 1, 50, 5),
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
+                            if (DataManager.CurrentData.Eulers == null) return;
+
                             var ar = args as BindableCollection<Argument>;
-                            MessageBox.Show((ar[0] as IntArgument).Value.ToString() + (ar[2] as FloatArgument).Value.ToString());
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+
+                            FunctionContainer fcThis = Functions.FirstOrDefault(x => x.Name == "Стандартная Очистка");
+                            if(fcThis != null && Functions.IndexOf(fcThis) == 0)
+                                rawEulers = DataManager.CurrentData.Eulers;
+
+                            int maxIterations = (ar[0] as IntArgument).Value;
+                            rawEulers = functions.GPU.StandartCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations);
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
                         removeFunc
                     ),
 
-                    new FunctionContainer("Func2", new BindableCollection<Argument>{
-                        new IntArgument("Итераций",0,10,1),
-                        new BoolArgument("useKuwahara",true),
-                        new FloatArgument("FloatArg", -5, 5, 0, 0.75d),
+                    new FunctionContainer("Kuwahara Очистка", new BindableCollection<Argument>{
+                        new IntArgument("Число шагов", 1, 30, 15),
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
+                            if (DataManager.CurrentData.Eulers == null) return;
+
                             var ar = args as BindableCollection<Argument>;
-                            MessageBox.Show((ar[0] as IntArgument).Value.ToString() + (ar[2] as FloatArgument).Value.ToString());
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+
+                            FunctionContainer fcThis = Functions.FirstOrDefault(x => x.Name == "Kuwahara Очистка");
+                            if(fcThis != null && Functions.IndexOf(fcThis) == 0)
+                                rawEulers = DataManager.CurrentData.Eulers;
+
+                            int maxIterations = (ar[0] as IntArgument).Value;
+                            rawEulers = functions.GPU.KuwaharaCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations);
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
                         removeFunc
                     ),
 
-                    new FunctionContainer("Func3", new BindableCollection<Argument>{
-                        new IntArgument("Итераций",0,10,1),
-                        new BoolArgument("useKuwahara",true),
-                        new FloatArgument("FloatArg", -5, 5, 0, 0.25d),
+                    new FunctionContainer("Автоматическая Очистка", new BindableCollection<Argument>{
+                        new IntArgument("Число шагов", 1, 100, 10),
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
+                            if (DataManager.CurrentData.Eulers == null) return;
+
                             var ar = args as BindableCollection<Argument>;
-                            MessageBox.Show((ar[0] as IntArgument).Value.ToString() + (ar[2] as FloatArgument).Value.ToString());
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+
+                            FunctionContainer fcThis = Functions.FirstOrDefault(x => x.Name == "Автоматическая Очистка");
+                            if(fcThis != null && Functions.IndexOf(fcThis) == 0)
+                                rawEulers = DataManager.CurrentData.Eulers;
+
+                            int maxIterations = (ar[0] as IntArgument).Value;
+                            rawEulers = functions.GPU.AutomaticCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations);
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
                         removeFunc
                     ),
 
-                      new FunctionContainer("Func4", new BindableCollection<Argument>{
-                        new IntArgument("Итераций",0,10,1),
-                        new BoolArgument("useKuwahara",true),
-                        new FloatArgument("FloatArg", -5, 5, 0, 0.25d),
+                    new FunctionContainer("Расчет границ зерен", new BindableCollection<Argument>{
+                        new FloatArgument("Пороговый угол", 0, 90, 10, 0.1d),
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
+                            if (DataManager.CurrentData.Eulers == null) return;
+
                             var ar = args as BindableCollection<Argument>;
-                            MessageBox.Show((ar[0] as IntArgument).Value.ToString() + (ar[2] as FloatArgument).Value.ToString());
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+                            float tresholdAngle = (ar[0] as FloatArgument).Value;
+                            var color = DataManager.CurrentData.Settings.GrainSelectBorderColor;
+                            Mask mask = functions.GPU.GetGrainMask(rawEulers, DataManager.CurrentData.Size, tresholdAngle, new GpuColor(color.R, color.G, color.B, color.A));
+
+                            grainMask = mask;
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
                         removeFunc
                     ),
 
-                        new FunctionContainer("Func5", new BindableCollection<Argument>{
-                        new IntArgument("Итераций",0,10,1),
-                        new BoolArgument("useKuwahara",true),
-                        new FloatArgument("FloatArg", -5, 5, 0, 0.25d),
+                    new FunctionContainer("Картирование (BC/Euler/Strain...)", new BindableCollection<Argument>{
+                        new MapVariantArgument("Вариант", MapVariant.Euler),
+                        new BoolArgument("Отображать границы", true),
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
+                            if (DataManager.CurrentData.Eulers == null) return;
+
                             var ar = args as BindableCollection<Argument>;
-                            MessageBox.Show((ar[0] as IntArgument).Value.ToString() + (ar[2] as FloatArgument).Value.ToString());
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+                            MapVariant mapVariant = (ar[0] as MapVariantArgument).Value;
+                            bool displayGrainMask = (ar[1] as BoolArgument).Value;
+
+                            if(rawEulers.Length != DataManager.CurrentData.Size.x*DataManager.CurrentData.Size.y) return;
+
+                            switch (mapVariant)
+                            {
+                                case MapVariant.BandContrast:
+                                    {
+                                        colors = functions.GPU.GetColorMapBC(DataManager.CurrentData.BC, DataManager.CurrentData.Size);
+                                        break;
+                                    }
+
+                                case MapVariant.Euler:
+                                    {
+                                        colors = functions.GPU.GetColorMapEuler(rawEulers, DataManager.CurrentData.Size);
+                                        break;
+                                    }
+
+                                case MapVariant.Strain:
+                                    {
+                                        //colors = functions.GPU.GetColorMapBC(DataManager.CurrentData.BC, DataManager.CurrentData.Size);
+                                        break;
+                                    }
+                            }
+
+                            maskedColors = colors;
+
+                            if(displayGrainMask && grainMask.colors != null && colors.Length == grainMask.colors.Length)
+                            maskedColors = functions.GPU.ApplyMask(colors, grainMask, DataManager.CurrentData.Size);
+
+                            var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, maskedColors);
+                            MainImage.Source = functions.BitmapFunc.CreateBitmapSource(bmp);
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
                         removeFunc
                     ),
-
-                          new FunctionContainer("Func6", new BindableCollection<Argument>{
-                        new IntArgument("Итераций",0,10,1),
-                        new BoolArgument("useKuwahara",true),
-                        new FloatArgument("FloatArg", -5, 5, 0, 0.25d),
-                    },
-                        new FunctionWithArgumentCommand(args =>
-                        {
-                            var ar = args as BindableCollection<Argument>;
-                            MessageBox.Show((ar[0] as IntArgument).Value.ToString() + (ar[2] as FloatArgument).Value.ToString());
-                        }),
-                        moveFuncUP,
-                        moveFuncDOWN,
-                        removeFunc
-                    ),
-
 
                 });
 
@@ -172,6 +243,21 @@ namespace Diplom
             Functions.AddRange(AllFunctions);
         }
 
+        public void AutoUpdate()
+        {
+            if (DataManager.CurrentData.Settings.AutoUpdate)
+            {
+                LaunchAllFunctions();
+            }
+        }
+
+        public void LaunchAllFunctions()
+        {
+            foreach (var f in Functions)
+            {
+                f.Run();
+            }
+        }
 
         private Vector2Int GetPixelCoordinate(Image image, MouseEventArgs e)
         {
@@ -235,6 +321,7 @@ namespace Diplom
             }
 
             OpenFileUsingCommandLineArgs();
+            bufferEulers = DataManager.CurrentData.Eulers;
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -263,6 +350,8 @@ namespace Diplom
             try
             {
                 DataManager.LoadEbsdFromExcel(pathToFile);
+                rawEulers = DataManager.CurrentData.Eulers;
+                bufferEulers = rawEulers;
             }
             catch (ExcelNotValidException)
             {
@@ -292,6 +381,8 @@ namespace Diplom
             try
             {
                 DataManager.Load(pathToFile);
+                rawEulers = DataManager.CurrentData.Eulers;
+                bufferEulers = rawEulers;
             }
             catch (JsonLoadException)
             {
@@ -348,27 +439,6 @@ namespace Diplom
         private void ResetImageSize_Click(object sender, RoutedEventArgs e)
         {
             MainImageContainer.Reset();
-
-            //if (DataManager.CurrentData.BC == null) return;
-            //byte[] colors = functions.GPU.GetColorMapBC(DataManager.CurrentData.BC, DataManager.CurrentData.Size);
-            //Mask mask = functions.GPU.GetGrainMask(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size, 5, new GpuColor(0, 0, 0, 0));
-            //byte[] maskedColors = functions.GPU.ApplyMask(colors, mask);
-            //var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, maskedColors);
-            //MainImage.Source = functions.BitmapFunc.CreateBitmapSource(bmp);
-
-
-            if (DataManager.CurrentData.Eulers == null) return;
-            var color = DataManager.CurrentData.Settings.GrainSelectBorderColor;
-            //DataManager.CurrentData.Eulers = functions.GPU.StandartCleanUp(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size, 1);
-
-            DataManager.CurrentData.Eulers = functions.GPU.AutomaticCleanUp(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size, 10);
-            Mask mask = functions.GPU.GetGrainMask(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size, DataManager.CurrentData.Settings.MinGrainSize, new GpuColor(color.R, color.G, color.B, color.A));
-            byte[] colors = functions.GPU.GetColorMapEuler(DataManager.CurrentData.Eulers, DataManager.CurrentData.Size);
-            byte[] maskedColors = functions.GPU.ApplyMask(colors, mask, DataManager.CurrentData.Size);
-            var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, colors);
-
-            MainImage.Source = functions.BitmapFunc.CreateBitmapSource(bmp);
-
         }
 
         private void MainImage_MouseMove(object sender, MouseEventArgs e)
@@ -378,6 +448,10 @@ namespace Diplom
             Y.Content = coords.y;
         }
 
+        private void AutoUpdateTextBox(object sender, TextChangedEventArgs e) => AutoUpdate();
+        private void AutoUpdateSlider(object sender, RoutedPropertyChangedEventArgs<double> e) => AutoUpdate();
+        private void AutoUpdateCombobox(object sender, SelectionChangedEventArgs e) => AutoUpdate();
+        private void AutoUpdateCheckbox(object sender, RoutedEventArgs e) => AutoUpdate();
 
     }
 }

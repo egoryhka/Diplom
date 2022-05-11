@@ -133,4 +133,21 @@ namespace Diplom.UI
         public bool Value { get; set; }
 
     }
+
+    public class MapVariantArgument : Argument
+    {
+        public MapVariantArgument(string _name, MapVariant _value)
+        {
+            Name = _name; Value = _value;
+
+            AllValues = Enum.GetValues(typeof(MapVariant));
+        }
+        public MapVariant Value { get; set; }
+        public Array AllValues { get; set; }
+    }
+
+    public enum MapVariant
+    {
+        BandContrast, Euler, Strain
+    }
 }

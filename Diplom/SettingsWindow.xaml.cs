@@ -63,6 +63,7 @@ namespace Diplom
 
             _settings.MinGrainSize = currentSettings.MinGrainSize;
             _settings.NmPpx = currentSettings.NmPpx;
+            _settings.AutoUpdate = currentSettings.AutoUpdate;
 
         }
 

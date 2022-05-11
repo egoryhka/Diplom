@@ -17,7 +17,8 @@ namespace Diplom.DataModule
 
         public float NmPpx { get; set; } = 0.0f;
 
-        
+        public bool AutoUpdate { get; set; } = true;
+
 
     }
 
