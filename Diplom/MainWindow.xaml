@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Diplom"
         xmlns:ui="clr-namespace:Diplom.UI"
-        xmlns:controls="clr-namespace:Diplom.UI.Controls"
         xmlns:converters="clr-namespace:Diplom.UI"
         mc:Ignorable="d"
         Title="Проект: " Width="800" Height="500"  x:Name="MainWin"
@@ -19,12 +18,63 @@
     <Window.CommandBindings>
         <CommandBinding Command="local:HotKeys.SaveCommand" Executed="SaveCurrentFileButton_Click" />
     </Window.CommandBindings>
+    <Window.Resources>
+
+        <!-- DataTemplate for IntArgument -->
+        <DataTemplate DataType="{x:Type ui:IntArgument}">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="{Binding Path=Name}"/>
+                <Slider Width="100" Minimum="{Binding Path=Min}" Maximum="{Binding Path=Max}" Value="{Binding Path=Value}"/>
+                <TextBox Width="100" Text="{Binding Path=Value}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- DataTemplate for FloatArgument -->
+        <DataTemplate DataType="{x:Type ui:FloatArgument}">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="{Binding Path=Name}"/>
+                <Slider TickFrequency="{Binding TickFrequency}" IsSnapToTickEnabled="True" Width="100" Minimum="{Binding Path=Min }" Maximum="{Binding Path=Max }" Value="{Binding Path=Value}"/>
+                <TextBox Width="100" Text="{Binding Path=Value}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- DataTemplate for BoolArgument -->
+        <DataTemplate DataType="{x:Type ui:BoolArgument}">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="{Binding Path=Name}"/>
+                <CheckBox IsChecked="{Binding Path=Value}" />
+            </StackPanel>
+        </DataTemplate>
+
+
+        <!-- DataTemplate for Function -->
+        <DataTemplate DataType="{x:Type ui:FunctionContainer}">
+
+            <Expander Margin="10,0,0,10" Background="#252526" Foreground="WhiteSmoke" BorderBrush="#acacac" BorderThickness="0.3" Header="{Binding Name}">
+                <Expander.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Icon="▲" Header="Наверх" Command="{Binding MoveUP}" CommandParameter="{Binding Path=.}"></MenuItem>
+                        <MenuItem Icon="▼" Header="Вниз" Command="{Binding MoveDOWN}" CommandParameter="{Binding Path=.}"></MenuItem>
+                        <MenuItem Header=""></MenuItem>
+                        <MenuItem Foreground="OrangeRed" Icon="❌" Header="Убрать" Command="{Binding Remove}" CommandParameter="{Binding Path=.}"></MenuItem>
+                    </ContextMenu>
+                </Expander.ContextMenu>
+
+                <StackPanel Grid.Row="1">
+                    <ItemsControl ItemsSource="{Binding Args}"/>
+                    <Button Margin="0,5,0,0" Foreground="DarkSeaGreen" BorderBrush="#acacac" BorderThickness="0.3" FontSize="16" Content="ЗАПУСК" Command="{Binding Command}" />
+                </StackPanel>
+            </Expander>
+
+        </DataTemplate>
+    </Window.Resources>
+    
 
     <Grid Background="#FF2D2D30">
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Height="22" VerticalAlignment="Top">
-            <Menu  VerticalAlignment="Center" HorizontalAlignment="Left"  Background="#FF2D2D30" Margin="2,0,0,0">
-                <MenuItem Header="Файл" Background="#FF2D2D30" BorderThickness="0" Height="20">
+            <Menu  VerticalAlignment="Center" HorizontalAlignment="Left" Background="#FF2D2D30" Margin="2,0,0,0">
+                <MenuItem Header="Файл" BorderThickness="0" Height="20">
                     <MenuItem Header="Открыть" x:Name="OpenFileButton" Click="OpenFileButton_Click">
                         <MenuItem.Icon>
                             <Image Source="Resources/OpenIcon.png"/>
@@ -76,21 +126,36 @@
                 <TabControl Grid.Column="0" Grid.ColumnSpan="2" Background="#FF2D2D30">
 
                     <TabItem Header="Функции">
+                        
+                        <!--NEW ///////////////////////////-->
                         <Grid>
+                            <Grid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Icon="➕" Header="Добавить функцию" ></MenuItem>
+                                </ContextMenu>
+                            </Grid.ContextMenu>
+                            
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                                <StackPanel x:Name="FunctionsTab" Orientation="Vertical">
-                                    <controls:CleanUpFunctionControl HorizontalAlignment="Left" Width="300" Height="100" Margin="10"></controls:CleanUpFunctionControl>
-                                    <controls:CleanUpFunctionControl HorizontalAlignment="Left" Width="300" Height="100" Margin="10"></controls:CleanUpFunctionControl>
-                                    <controls:CleanUpFunctionControl HorizontalAlignment="Left" Width="300" Height="100" Margin="10"></controls:CleanUpFunctionControl>
-                                    <controls:CleanUpFunctionControl HorizontalAlignment="Left" Width="300" Height="100" Margin="10"></controls:CleanUpFunctionControl>
-                                    <controls:CleanUpFunctionControl HorizontalAlignment="Left" Width="300" Height="100" Margin="10"></controls:CleanUpFunctionControl>
-                                    <controls:CleanUpFunctionControl HorizontalAlignment="Left" Width="300" Height="100" Margin="10"></controls:CleanUpFunctionControl>
-                                    <controls:CleanUpFunctionControl HorizontalAlignment="Left" Width="300" Height="100" Margin="10"></controls:CleanUpFunctionControl>
-                                    <controls:CleanUpFunctionControl HorizontalAlignment="Left" Width="300" Height="100" Margin="10"></controls:CleanUpFunctionControl>
+                                <StackPanel x:Name="FunctionsTab" Orientation="Vertical" Margin="0,10,0,0">
+                                    <Grid>
+                                        <!--<ScrollViewer>-->
+                                            <ItemsControl x:Name="FunctionsContainer" ItemsSource="{Binding Functions, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Width="300" HorizontalAlignment="Left" Orientation="Vertical">
+                                                        </StackPanel>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                            </ItemsControl>
+                                        <!--</ScrollViewer>-->
+
+                                    </Grid>
 
                                 </StackPanel>
                             </ScrollViewer>
                         </Grid>
+                        <!--NEW /////////////////////////// -->
+
                     </TabItem>
                     <TabItem Header="Анализ">
                         <Grid/>

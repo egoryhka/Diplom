@@ -8,7 +8,7 @@
     <Application.Resources>
         <Style TargetType="{x:Type Control}" x:Key="baseStyle">
             <Setter Property="FontFamily" Value="Microsoft JhengHei UI Light" />
-            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Foreground" Value="WhiteSmoke" />
         </Style>
 
 
@@ -300,7 +300,7 @@
 
                                 <!-- The Popup is the body of the menu which expands down or across depending on the level of the item -->
                                 <Popup IsOpen="{Binding Path=IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" Placement="Right" x:Name="SubMenuPopup" Focusable="false" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
-                                    <Border x:Name="SubMenuBorder" BorderBrush="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Menu}}}" BorderThickness="0" Padding="0">
+                                    <Border x:Name="SubMenuBorder" BorderBrush="Transparent" BorderThickness="0" Padding="0">
                                         <Grid x:Name="SubMenu" Grid.IsSharedSizeScope="True">
                                             <!-- StackPanel holds children of the menu. This is set by IsItemsHost=True -->
                                             <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
@@ -334,6 +334,7 @@
                             <Trigger Property="Role" Value="SubmenuHeader">
                                 <Setter Property="DockPanel.Dock" Value="Top"/>
                                 <Setter Property="Padding" Value="0,2,0,2"/>
+                                <Setter Property="Background" Value="#1b1b1c"/>
                             </Trigger>
 
                             <!-- Role = SubMenuItem : this is a child menu item which has children-->
@@ -345,6 +346,21 @@
                             <Trigger Property="IsSuspendingPopupAnimation" Value="true">
                                 <Setter Property="PopupAnimation" Value="Fade" TargetName="SubMenuPopup"/>
                             </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="Role" Value="SubmenuItem"/>
+                                    <Condition Property="IsMouseOver" Value="true"/>
+                                </MultiTrigger.Conditions>
+                                <Setter  Property="BorderThickness" Value="1.5,0,0,0"  TargetName="border"/>
+                            </MultiTrigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="Role" Value="SubmenuItem"/>
+                                    <Condition Property="IsMouseOver" Value="false"/>
+                                </MultiTrigger.Conditions>
+                                <Setter  Property="BorderThickness" Value="0,0,0,0"  TargetName="border"/>
+                                <Setter Property="Background" Value="#1b1b1c" TargetName="panel"/>
+                            </MultiTrigger>
 
                             <!-- If no Icon is present the we collapse the Icon Content -->
                             <Trigger Property="Icon" Value="{x:Null}">
@@ -360,12 +376,11 @@
                             <!-- Using the system colors for the Menu Highlight and IsEnabled-->
                             <Trigger Property="IsMouseOver" Value="true">
                                 <Setter Property="Background" Value="#3e3e40" TargetName="panel"/>
-                                <Setter  Property="BorderThickness" Value="1,0,0,0"  TargetName="border"/>
                             </Trigger>
-                            <Trigger Property="IsMouseOver" Value="false">
+
+                            <!--<Trigger Property="IsMouseOver" Value="false">
                                 <Setter Property="Background" Value="#2d2d30" TargetName="panel"/>
-                                <Setter  Property="BorderThickness" Value="0"  TargetName="border"/>
-                            </Trigger>
+                            </Trigger>-->
                             <Trigger Property="IsEnabled" Value="false">
                                 <Setter Property="Foreground" Value="LightGray"/>
                             </Trigger>

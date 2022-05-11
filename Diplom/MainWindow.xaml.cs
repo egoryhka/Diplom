@@ -13,8 +13,10 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using Caliburn.Micro;
 using Diplom.DataModule;
 using Diplom.FuncModule;
+using Diplom.UI;
 using Microsoft.Win32;
 
 namespace Diplom
@@ -26,12 +28,164 @@ namespace Diplom
     {
         private Functions functions;
 
+        public List<FunctionContainer> AllFunctions { get; set; } = new List<FunctionContainer>();
+
+        public BindableCollection<FunctionContainer> Functions { get; set; } = new BindableCollection<FunctionContainer>();
+
+        //-------------------------------------------
+
+        private void InitializeFunctions()
+        {
+            var moveFuncUP = new MoveFuncCommand(f =>
+            {
+                if (Functions.Count < 2) return;
+                FunctionContainer func = f as FunctionContainer;
+                if (func != null)
+                {
+                    int indexOfFunc = Functions.IndexOf(func);
+                    if (indexOfFunc > 0)
+                        SwapFunc(indexOfFunc, indexOfFunc - 1);
+                }
+            });
+
+            var moveFuncDOWN = new MoveFuncCommand(f =>
+            {
+                if (Functions.Count < 2) return;
+                FunctionContainer func = f as FunctionContainer;
+                if (func != null)
+                {
+                    int indexOfFunc = Functions.IndexOf(func);
+                    if (indexOfFunc < Functions.Count - 1)
+                        SwapFunc(indexOfFunc, indexOfFunc + 1);
+                }
+            });
+
+            var removeFunc = new MoveFuncCommand(f =>
+            {
+                if (Functions.Count == 0) return;
+                FunctionContainer func = f as FunctionContainer;
+                if (func != null)
+                {
+                    int indexOfFunc = Functions.IndexOf(func);
+                    Functions.RemoveAt(indexOfFunc);
+                }
+            });
+
+            AllFunctions.AddRange
+                (
+                new FunctionContainer[] {
+
+                    new FunctionContainer("Func1", new BindableCollection<Argument>{
+                        new IntArgument("Итераций",0,10,1),
+                        new BoolArgument("useKuwahara",true),
+                        new FloatArgument("FloatArg", -5, 5, 0, 0.1d),
+                    },
+                        new FunctionWithArgumentCommand(args =>
+                        {
+                            var ar = args as BindableCollection<Argument>;
+                            MessageBox.Show((ar[0] as IntArgument).Value.ToString() + (ar[2] as FloatArgument).Value.ToString());
+                        }),
+                        moveFuncUP,
+                        moveFuncDOWN,
+                        removeFunc
+                    ),
+
+                    new FunctionContainer("Func2", new BindableCollection<Argument>{
+                        new IntArgument("Итераций",0,10,1),
+                        new BoolArgument("useKuwahara",true),
+                        new FloatArgument("FloatArg", -5, 5, 0, 0.75d),
+                    },
+                        new FunctionWithArgumentCommand(args =>
+                        {
+                            var ar = args as BindableCollection<Argument>;
+                            MessageBox.Show((ar[0] as IntArgument).Value.ToString() + (ar[2] as FloatArgument).Value.ToString());
+                        }),
+                        moveFuncUP,
+                        moveFuncDOWN,
+                        removeFunc
+                    ),
+
+                    new FunctionContainer("Func3", new BindableCollection<Argument>{
+                        new IntArgument("Итераций",0,10,1),
+                        new BoolArgument("useKuwahara",true),
+                        new FloatArgument("FloatArg", -5, 5, 0, 0.25d),
+                    },
+                        new FunctionWithArgumentCommand(args =>
+                        {
+                            var ar = args as BindableCollection<Argument>;
+                            MessageBox.Show((ar[0] as IntArgument).Value.ToString() + (ar[2] as FloatArgument).Value.ToString());
+                        }),
+                        moveFuncUP,
+                        moveFuncDOWN,
+                        removeFunc
+                    ),
+
+                      new FunctionContainer("Func4", new BindableCollection<Argument>{
+                        new IntArgument("Итераций",0,10,1),
+                        new BoolArgument("useKuwahara",true),
+                        new FloatArgument("FloatArg", -5, 5, 0, 0.25d),
+                    },
+                        new FunctionWithArgumentCommand(args =>
+                        {
+                            var ar = args as BindableCollection<Argument>;
+                            MessageBox.Show((ar[0] as IntArgument).Value.ToString() + (ar[2] as FloatArgument).Value.ToString());
+                        }),
+                        moveFuncUP,
+                        moveFuncDOWN,
+                        removeFunc
+                    ),
+
+                        new FunctionContainer("Func5", new BindableCollection<Argument>{
+                        new IntArgument("Итераций",0,10,1),
+                        new BoolArgument("useKuwahara",true),
+                        new FloatArgument("FloatArg", -5, 5, 0, 0.25d),
+                    },
+                        new FunctionWithArgumentCommand(args =>
+                        {
+                            var ar = args as BindableCollection<Argument>;
+                            MessageBox.Show((ar[0] as IntArgument).Value.ToString() + (ar[2] as FloatArgument).Value.ToString());
+                        }),
+                        moveFuncUP,
+                        moveFuncDOWN,
+                        removeFunc
+                    ),
+
+                          new FunctionContainer("Func6", new BindableCollection<Argument>{
+                        new IntArgument("Итераций",0,10,1),
+                        new BoolArgument("useKuwahara",true),
+                        new FloatArgument("FloatArg", -5, 5, 0, 0.25d),
+                    },
+                        new FunctionWithArgumentCommand(args =>
+                        {
+                            var ar = args as BindableCollection<Argument>;
+                            MessageBox.Show((ar[0] as IntArgument).Value.ToString() + (ar[2] as FloatArgument).Value.ToString());
+                        }),
+                        moveFuncUP,
+                        moveFuncDOWN,
+                        removeFunc
+                    ),
+
+
+                });
+
+
+            Functions.AddRange(AllFunctions);
+        }
+
+
         private Vector2Int GetPixelCoordinate(Image image, MouseEventArgs e)
         {
             Point pt = e.GetPosition(image);
             pt.X *= image.Source.Width / image.ActualWidth;
             pt.Y *= image.Source.Height / image.ActualHeight;
             return new Vector2Int((int)pt.X, (int)pt.Y);
+        }
+
+        private void SwapFunc(int a, int b)
+        {
+            var buff = Functions[a];
+            Functions[a] = Functions[b];
+            Functions[b] = buff;
         }
 
         private void MainWin_Drop(object sender, DragEventArgs e)
@@ -45,7 +199,7 @@ namespace Diplom
                 {
                     OpenFile(path);
                 }
-                if (Path.GetExtension(path) == ".xlsx")
+                else if (Path.GetExtension(path) == ".xlsx")
                 {
                     ExcelImport(path);
                 }
@@ -65,6 +219,7 @@ namespace Diplom
         public MainWindow()
         {
             InitializeComponent();
+            InitializeFunctions();
 
             Closing += MainWindow_Closing;
 
