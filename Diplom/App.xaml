@@ -6,9 +6,23 @@
              StartupUri="MainWindow.xaml">
 
     <Application.Resources>
+
+        <SolidColorBrush x:Key="ForegroundBrush" Color="WhiteSmoke" />
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#2d2d30" />
+        <SolidColorBrush x:Key="BorderBrush" Color="#acacac" />
+
+        <SolidColorBrush x:Key="ThumbBrush" Color="#686868" />
+        <SolidColorBrush x:Key="SemiDarkenBrush" Color="#252525" />
+        <SolidColorBrush x:Key="DarkenBrush" Color="#161616" />
+        <SolidColorBrush x:Key="LightenBrush" Color="#3e3e42" />
+
+        <SolidColorBrush x:Key="BlueHoverBrush" Color="#FF1C97EA" />
+        <SolidColorBrush x:Key="BlueClickBrush" Color="#FF007ACC" />
+
+
         <Style TargetType="{x:Type Control}" x:Key="baseStyle">
             <Setter Property="FontFamily" Value="Microsoft JhengHei UI Light" />
-            <Setter Property="Foreground" Value="WhiteSmoke" />
+            <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}" />
         </Style>
 
 
@@ -20,13 +34,102 @@
         </Style>
 
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource baseStyle}">
-            <Setter Property="Background" Value="#FF333337"/>
+            <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+        </Style>
+
+        <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="ToggleButton">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="20" />
+                </Grid.ColumnDefinitions>
+                <Border x:Name="Border" Grid.ColumnSpan="2"
+                    Background="{StaticResource BackgroundBrush}"
+                    BorderThickness="0" />
+
+                <!--<Border 
+                    Grid.Column="0"
+                    Margin="0" 
+                    Background="{StaticResource BackgroundBrush}" 
+                    BorderThickness="0" />-->
+                <Path 
+                    x:Name="Arrow"
+                    Grid.Column="1"     
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Data="M 0 0 L 4 4 L 8 0 Z"/>
+            </Grid>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="ComboBoxTextBox" TargetType="TextBox">
+            <Border x:Name="PART_ContentHost" Focusable="False" Background="{TemplateBinding Background}" />
+        </ControlTemplate>
+
+        <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource baseStyle}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton 
+                                Name="ToggleButton" 
+                                Template="{StaticResource ComboBoxToggleButton}" 
+                                Grid.Column="2" 
+                                Focusable="false"
+                                IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}"
+                                ClickMode="Press">
+                            </ToggleButton>
+                            <ContentPresenter
+                                Name="ContentSite"
+                                IsHitTestVisible="False" 
+                                Margin="3,3,23,3"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Left" 
+                                Content="{TemplateBinding ComboBox.SelectionBoxItem}"
+                                ContentTemplate="{TemplateBinding ComboBox.SelectionBoxItemTemplate}" 
+                                ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                />
+                            <TextBox x:Name="PART_EditableTextBox"
+                                Style="{x:Null}" 
+                                Template="{StaticResource ComboBoxTextBox}" 
+                                HorizontalAlignment="Left" 
+                                VerticalAlignment="Center" 
+                                Margin="3,3,23,3"
+                                Focusable="True" 
+                                Background="Transparent"
+                                Visibility="Hidden"
+                                IsReadOnly="{TemplateBinding IsReadOnly}"/>
+                            <Popup 
+                                Name="Popup"
+                                Placement="Bottom"
+                                IsOpen="{TemplateBinding IsDropDownOpen}"
+                                AllowsTransparency="True" 
+                                Focusable="False"
+                                PopupAnimation="Slide">
+                                <Grid 
+                                    Name="DropDown"
+                                    SnapsToDevicePixels="True"                
+                                    MinWidth="{TemplateBinding ActualWidth}"
+                                    MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border 
+                                        x:Name="DropDownBorder"
+                                        Background="{StaticResource DarkenBrush}"
+                                        BorderThickness="1"/>
+                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style TargetType="{x:Type TabControl}" BasedOn="{StaticResource baseStyle}">
             <Setter Property="OverridesDefaultStyle" Value="True" />
             <Setter Property="SnapsToDevicePixels" Value="True" />
-            <Setter Property="Background" Value="#FF333337"/>
+            <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
 
             <Setter Property="Template">
                 <Setter.Value>
@@ -37,25 +140,25 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <TabPanel 
-          Name="HeaderPanel"
-          Grid.Row="0"
-          Panel.ZIndex="1" 
-          Margin="0,0,4,0" 
-          IsItemsHost="True"
-          KeyboardNavigation.TabIndex="1"
-          Background="Transparent" />
+                                Name="HeaderPanel"
+                                Grid.Row="0"
+                                Panel.ZIndex="1" 
+                                Margin="0,0,4,0" 
+                                IsItemsHost="True"
+                                KeyboardNavigation.TabIndex="1"
+                                Background="Transparent" />
                             <Border 
-          Name="Border" 
-          Grid.Row="1" 
-          BorderBrush="#acacac" 
-                               BorderThickness="0, 0.3, 0, 0" 
-          KeyboardNavigation.TabNavigation="Local"
-          KeyboardNavigation.DirectionalNavigation="Contained"
-          KeyboardNavigation.TabIndex="2" >
+                                Name="Border" 
+                                Grid.Row="1" 
+                                BorderBrush="{StaticResource BorderBrush}" 
+                                BorderThickness="0, 0.3, 0, 0" 
+                                KeyboardNavigation.TabNavigation="Local"
+                                KeyboardNavigation.DirectionalNavigation="Contained"
+                                KeyboardNavigation.TabIndex="2" >
                                 <ContentPresenter 
-            Name="PART_SelectedContentHost"
-            Margin="0"
-            ContentSource="SelectedContent" />
+                                    Name="PART_SelectedContentHost"
+                                    Margin="0"
+                                    ContentSource="SelectedContent" />
                             </Border>
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -82,10 +185,10 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF3E3E40"/>
+                    <Setter Property="Background" Value="{StaticResource LightenBrush}"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#FF007ACC"/>
+                    <Setter Property="Background" Value="{StaticResource BlueHoverBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -108,11 +211,11 @@
                                     <Condition Property="IsMouseOver" Value="True"></Condition>
                                 </MultiTrigger.Conditions>
                                 <MultiTrigger.Setters>
-                                    <Setter TargetName="Panel" Property="Background" Value="#FF1C97EA" />
+                                    <Setter TargetName="Panel" Property="Background" Value="{StaticResource BlueHoverBrush}" />
                                 </MultiTrigger.Setters>
                             </MultiTrigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Panel" Property="Background" Value="#FF007ACC" />
+                                <Setter TargetName="Panel" Property="Background" Value="{StaticResource BlueClickBrush}" />
                             </Trigger>
                             <!--<Trigger Property="IsSelected" Value="False">
                                 <Setter TargetName="Panel" Property="Background" Value="#FF2D2D30" />
@@ -124,16 +227,16 @@
         </Style>
 
         <Style TargetType="{x:Type xctk:ColorPicker}" BasedOn="{StaticResource baseStyle}">
-            <Setter Property="HeaderBackground" Value="#FF333337"/>
-            <Setter Property="TabBackground" Value="#FF333337"/>
-            <Setter Property="TabForeground" Value="White"/>
-            <Setter Property="HeaderForeground" Value="White"/>
-            <Setter Property="DropDownBackground" Value="#FF333337"/>
+            <Setter Property="HeaderBackground" Value="{StaticResource LightenBrush}"/>
+            <Setter Property="TabBackground" Value="{StaticResource LightenBrush}"/>
+            <Setter Property="TabForeground" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="HeaderForeground" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="DropDownBackground" Value="{StaticResource LightenBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
 
         <Style TargetType="{x:Type xctk:ColorPickerTabItem}" BasedOn="{StaticResource baseStyle}">
-            <Setter Property="Background" Value="#FF333337"/>
+            <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
 
@@ -148,7 +251,7 @@
                                            Height="Auto" Fill="Transparent"/>
                             <Border x:Name="Rectangle1" Margin="2.5"  HorizontalAlignment="Stretch" 
                                         VerticalAlignment="Stretch" Width="auto" Height="Auto" 
-                                        Background="#686868"/>
+                                        Background="{StaticResource ThumbBrush}"/>
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="Tag" Value="Horizontal">
@@ -164,14 +267,13 @@
         <Style x:Key="{x:Type ScrollBar}" TargetType="{x:Type ScrollBar}">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
-            <Setter Property="Foreground" Value="#3e3e42"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ScrollBar}">
-                        <Grid x:Name="GridRoot" Width="10"  Background="#3e3e42">
+                        <Grid x:Name="GridRoot" Width="10"  Background="{StaticResource LightenBrush}">
                             <Track x:Name="PART_Track" Grid.Row="0" IsDirectionReversed="true" Focusable="False">
                                 <Track.Thumb>
-                                    <Thumb x:Name="Thumb" Background="#686868" 
+                                    <Thumb x:Name="Thumb" Background="{StaticResource ThumbBrush}" 
                                                Style="{DynamicResource ScrollThumbs}"/>
                                 </Track.Thumb>
                                 <Track.IncreaseRepeatButton>
@@ -262,7 +364,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type MenuItem}">
-                        <Border x:Name="border" BorderThickness="0" BorderBrush="#007acc">
+                        <Border x:Name="border" BorderThickness="0" BorderBrush="{StaticResource BlueHoverBrush}">
                             <Grid x:Name="panel">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition x:Name="Col0" MinWidth="17" Width="Auto" SharedSizeGroup="MenuItemIconColumnGroup"/>
@@ -334,7 +436,7 @@
                             <Trigger Property="Role" Value="SubmenuHeader">
                                 <Setter Property="DockPanel.Dock" Value="Top"/>
                                 <Setter Property="Padding" Value="0,2,0,2"/>
-                                <Setter Property="Background" Value="#1b1b1c"/>
+                                <Setter Property="Background" Value="{StaticResource DarkenBrush}"/>
                             </Trigger>
 
                             <!-- Role = SubMenuItem : this is a child menu item which has children-->
@@ -359,7 +461,7 @@
                                     <Condition Property="IsMouseOver" Value="false"/>
                                 </MultiTrigger.Conditions>
                                 <Setter  Property="BorderThickness" Value="0,0,0,0"  TargetName="border"/>
-                                <Setter Property="Background" Value="#1b1b1c" TargetName="panel"/>
+                                <Setter Property="Background" Value="{StaticResource DarkenBrush}" TargetName="panel"/>
                             </MultiTrigger>
 
                             <!-- If no Icon is present the we collapse the Icon Content -->
@@ -375,15 +477,9 @@
 
                             <!-- Using the system colors for the Menu Highlight and IsEnabled-->
                             <Trigger Property="IsMouseOver" Value="true">
-                                <Setter Property="Background" Value="#3e3e40" TargetName="panel"/>
+                                <Setter Property="Background" Value="{StaticResource LightenBrush}" TargetName="panel"/>
                             </Trigger>
 
-                            <!--<Trigger Property="IsMouseOver" Value="false">
-                                <Setter Property="Background" Value="#2d2d30" TargetName="panel"/>
-                            </Trigger>-->
-                            <Trigger Property="IsEnabled" Value="false">
-                                <Setter Property="Foreground" Value="LightGray"/>
-                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -420,7 +516,7 @@
                             </VisualStateManager.VisualStateGroups>
 
                             <Grid Height="{TemplateBinding Height}">
-                                <Border Background="#000000" CornerRadius="7.5" Opacity="0.05"/>
+                                <Border Background="{StaticResource ForegroundBrush}" CornerRadius="7.5" Opacity="0.05"/>
                                 <Border BorderBrush="#000000" BorderThickness="1" CornerRadius="7.5" Opacity="0.1"/>
                                 <Grid Margin="{TemplateBinding BorderThickness}">
                                     <Border x:Name="PART_Track"/>
@@ -438,9 +534,9 @@
                                                     <TranslateTransform/>
                                                 </TransformGroup>
                                             </Grid.RenderTransform>
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="7.5">
+                                            <Border Background="{StaticResource DarkenBrush}" CornerRadius="7.5">
                                                 <Viewbox HorizontalAlignment="Left" StretchDirection="DownOnly" Margin="{TemplateBinding Padding}" SnapsToDevicePixels="True">
-                                                    <TextBlock Foreground="#ffffff" SnapsToDevicePixels="True" FontSize="{TemplateBinding FontSize}" VerticalAlignment="Center" Text="{Binding RelativeSource={RelativeSource TemplatedParent},Path=Value,StringFormat={}{0}%}" RenderTransformOrigin="0.5,0.5">
+                                                    <TextBlock Foreground="{StaticResource ForegroundBrush}" SnapsToDevicePixels="True" FontSize="{TemplateBinding FontSize}" VerticalAlignment="Center" Text="{Binding RelativeSource={RelativeSource TemplatedParent},Path=Value,StringFormat={}{0}%}" RenderTransformOrigin="0.5,0.5">
                                                         <TextBlock.RenderTransform>
                                                             <TransformGroup>
                                                                 <ScaleTransform ScaleY="1" ScaleX="-1"/>

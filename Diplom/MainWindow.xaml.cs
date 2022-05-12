@@ -38,7 +38,7 @@ namespace Diplom
         private Euler[] bufferEulers = new Euler[0];
         private Euler[] rawEulers = new Euler[0];
 
-        private bool someParameterChanged = false;
+
         //-------------------------------------------
 
         private void InitializeFunctions()
@@ -95,13 +95,13 @@ namespace Diplom
                                 MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
                                 return;
                             }
+                            int maxIterations = (ar[0] as IntArgument).Value;
 
                             FunctionContainer fcThis = Functions.FirstOrDefault(x => x.Name == "Стандартная Очистка");
                             if(fcThis != null && Functions.IndexOf(fcThis) == 0)
-                                rawEulers = DataManager.CurrentData.Eulers;
-
-                            int maxIterations = (ar[0] as IntArgument).Value;
-                            rawEulers = functions.GPU.StandartCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations);
+                                functions.GPU.StandartCleanUp(bufferEulers, DataManager.CurrentData.Size, maxIterations, ref rawEulers);
+                            else
+                                functions.GPU.StandartCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations, ref rawEulers);
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -121,13 +121,13 @@ namespace Diplom
                                 MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
                                 return;
                             }
+                            int maxIterations = (ar[0] as IntArgument).Value;
 
                             FunctionContainer fcThis = Functions.FirstOrDefault(x => x.Name == "Kuwahara Очистка");
                             if(fcThis != null && Functions.IndexOf(fcThis) == 0)
-                                rawEulers = DataManager.CurrentData.Eulers;
-
-                            int maxIterations = (ar[0] as IntArgument).Value;
-                            rawEulers = functions.GPU.KuwaharaCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations);
+                                functions.GPU.KuwaharaCleanUp(bufferEulers, DataManager.CurrentData.Size, maxIterations, ref rawEulers);
+                            else
+                                functions.GPU.KuwaharaCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations, ref rawEulers);
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -147,13 +147,13 @@ namespace Diplom
                                 MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
                                 return;
                             }
+                            int maxIterations = (ar[0] as IntArgument).Value;
 
                             FunctionContainer fcThis = Functions.FirstOrDefault(x => x.Name == "Автоматическая Очистка");
                             if(fcThis != null && Functions.IndexOf(fcThis) == 0)
-                                rawEulers = DataManager.CurrentData.Eulers;
-
-                            int maxIterations = (ar[0] as IntArgument).Value;
-                            rawEulers = functions.GPU.AutomaticCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations);
+                                functions.GPU.AutomaticCleanUp(bufferEulers, DataManager.CurrentData.Size, maxIterations, ref rawEulers);
+                            else
+                                functions.GPU.AutomaticCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations, ref rawEulers);
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -161,7 +161,7 @@ namespace Diplom
                     ),
 
                     new FunctionContainer("Расчет границ зерен", new BindableCollection<Argument>{
-                        new FloatArgument("Пороговый угол", 0, 90, 10, 0.1d),
+                        new FloatArgument("Пороговый угол", 0, 180, 10, 0.1d),
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
@@ -201,7 +201,7 @@ namespace Diplom
                             MapVariant mapVariant = (ar[0] as MapVariantArgument).Value;
                             bool displayGrainMask = (ar[1] as BoolArgument).Value;
 
-                            if(rawEulers.Length != DataManager.CurrentData.Size.x*DataManager.CurrentData.Size.y) return;
+                            //if(rawEulers.Length != DataManager.CurrentData.Size.x*DataManager.CurrentData.Size.y) return;
 
                             switch (mapVariant)
                             {
@@ -226,11 +226,12 @@ namespace Diplom
 
                             maskedColors = colors;
 
-                            if(displayGrainMask && grainMask.colors != null && colors.Length == grainMask.colors.Length)
+                            if(displayGrainMask && grainMask.colors != null /*&& colors.Length == grainMask.colors.Length*/)
                             maskedColors = functions.GPU.ApplyMask(colors, grainMask, DataManager.CurrentData.Size);
 
                             var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, maskedColors);
                             MainImage.Source = functions.BitmapFunc.CreateBitmapSource(bmp);
+
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -321,7 +322,7 @@ namespace Diplom
             }
 
             OpenFileUsingCommandLineArgs();
-            bufferEulers = DataManager.CurrentData.Eulers;
+
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
