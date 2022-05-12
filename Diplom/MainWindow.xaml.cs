@@ -99,9 +99,9 @@ namespace Diplom
 
                             FunctionContainer fcThis = Functions.FirstOrDefault(x => x.Name == "Стандартная Очистка");
                             if(fcThis != null && Functions.IndexOf(fcThis) == 0)
-                                functions.GPU.StandartCleanUp(bufferEulers, DataManager.CurrentData.Size, maxIterations, ref rawEulers);
+                               rawEulers = functions.GPU.StandartCleanUp(bufferEulers, DataManager.CurrentData.Size, maxIterations);
                             else
-                                functions.GPU.StandartCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations, ref rawEulers);
+                               rawEulers = functions.GPU.StandartCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations);
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -125,9 +125,9 @@ namespace Diplom
 
                             FunctionContainer fcThis = Functions.FirstOrDefault(x => x.Name == "Kuwahara Очистка");
                             if(fcThis != null && Functions.IndexOf(fcThis) == 0)
-                                functions.GPU.KuwaharaCleanUp(bufferEulers, DataManager.CurrentData.Size, maxIterations, ref rawEulers);
+                                rawEulers = functions.GPU.KuwaharaCleanUp(bufferEulers, DataManager.CurrentData.Size, maxIterations);
                             else
-                                functions.GPU.KuwaharaCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations, ref rawEulers);
+                                rawEulers = functions.GPU.KuwaharaCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations);
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -151,9 +151,9 @@ namespace Diplom
 
                             FunctionContainer fcThis = Functions.FirstOrDefault(x => x.Name == "Автоматическая Очистка");
                             if(fcThis != null && Functions.IndexOf(fcThis) == 0)
-                                functions.GPU.AutomaticCleanUp(bufferEulers, DataManager.CurrentData.Size, maxIterations, ref rawEulers);
+                                rawEulers = functions.GPU.AutomaticCleanUp(bufferEulers, DataManager.CurrentData.Size, maxIterations);
                             else
-                                functions.GPU.AutomaticCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations, ref rawEulers);
+                                rawEulers = functions.GPU.AutomaticCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations);
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -241,7 +241,7 @@ namespace Diplom
                 });
 
 
-            Functions.AddRange(AllFunctions);
+            // Functions.AddRange(AllFunctions);
         }
 
         public void AutoUpdate()
@@ -454,5 +454,12 @@ namespace Diplom
         private void AutoUpdateCombobox(object sender, SelectionChangedEventArgs e) => AutoUpdate();
         private void AutoUpdateCheckbox(object sender, RoutedEventArgs e) => AutoUpdate();
 
+        private void AddFunction_Click(object sender, RoutedEventArgs e)
+        {
+
+            new FunctionsListWindow(Functions, AllFunctions.Except(Functions)).ShowDialog();
+
+
+        }
     }
 }

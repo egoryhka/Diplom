@@ -42,7 +42,7 @@
         <DataTemplate DataType="{x:Type ui:BoolArgument}">
             <StackPanel Orientation="Horizontal">
                 <Label Content="{Binding Path=Name}"/>
-                <CheckBox IsChecked="{Binding Path=Value}" Checked="AutoUpdateCheckbox" Unchecked="AutoUpdateCheckbox" />
+                <CheckBox VerticalAlignment="Center" IsChecked="{Binding Path=Value}" Checked="AutoUpdateCheckbox" Unchecked="AutoUpdateCheckbox" />
             </StackPanel>
         </DataTemplate>
 
@@ -62,7 +62,7 @@
                     <ContextMenu>
                         <MenuItem Icon="▲" Header="Наверх" Command="{Binding MoveUP}" CommandParameter="{Binding Path=.}"></MenuItem>
                         <MenuItem Icon="▼" Header="Вниз" Command="{Binding MoveDOWN}" CommandParameter="{Binding Path=.}"></MenuItem>
-                        <MenuItem Header=""></MenuItem>
+                        <!--<MenuItem Header=""></MenuItem>-->
                         <MenuItem Foreground="OrangeRed" Icon="❌" Header="Убрать" Command="{Binding Remove}" CommandParameter="{Binding Path=.}"></MenuItem>
                     </ContextMenu>
                 </Expander.ContextMenu>
@@ -138,7 +138,7 @@
                         <Grid>
                             <Grid.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Icon="➕" Header="Добавить функцию" ></MenuItem>
+                                    <MenuItem Icon="➕" Header="Добавить функцию" Click="AddFunction_Click"></MenuItem>
                                 </ContextMenu>
                             </Grid.ContextMenu>
 

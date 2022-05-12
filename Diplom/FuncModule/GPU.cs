@@ -439,15 +439,15 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
             return new Mask() { colors = res };
         }
 
-        public/* Euler[]*/ void AutomaticCleanUp(Euler[] eulers, Vector2Int size, int maxIterations, ref Euler[] target)
+        public Euler[] AutomaticCleanUp(Euler[] eulers, Vector2Int size, int maxIterations)
         {
             int i = 0;
             int unsolvedCount = CPU.CountUnsolved(eulers);
             while (i++ < maxIterations)
             {
-                if (unsolvedCount == 0) return /*eulers*/;
+                if (unsolvedCount == 0) return eulers;
 
-                /*eulers = */ KuwaharaCleanUp(eulers, size, 1, ref target);
+                eulers = KuwaharaCleanUp(eulers, size, 1);
 
                 int newUnsolvedCount = CPU.CountUnsolved(eulers);
 
@@ -457,14 +457,14 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
 
             while (unsolvedCount > 0)
             {
-                /*eulers = */ StandartCleanUp(eulers, size, 1, ref target);
+                eulers = StandartCleanUp(eulers, size, 1);
                 unsolvedCount = CPU.CountUnsolved(eulers);
             }
 
-            //return eulers;
+            return eulers;
         }
 
-        public /*Euler[]*/ void StandartCleanUp(Euler[] eulers, Vector2Int size, int iterations, ref Euler[] target)
+        public Euler[] StandartCleanUp(Euler[] eulers, Vector2Int size, int iterations)
         {
             ComputeKernel kernel = Program.CreateKernel("StandartCleanUp");
 
@@ -486,15 +486,15 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
                 CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
             }
 
-            //Euler[] res = new Euler[eulers.Length];
-            CommandQueue.ReadFromBuffer(outputBuffer, ref /*res*/ target, true, null);
+            Euler[] res = new Euler[eulers.Length];
+            CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
 
             inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
 
-            //return res;
+            return res;
         }
 
-        public/* Euler[]*/ void KuwaharaCleanUp(Euler[] eulers, Vector2Int size, int iterations, ref Euler[] target)
+        public Euler[] KuwaharaCleanUp(Euler[] eulers, Vector2Int size, int iterations)
         {
             ComputeKernel kernel = Program.CreateKernel("KuwaharaCleanUp");
 
@@ -516,12 +516,12 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
                 CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
             }
 
-            //Euler[] res = new Euler[eulers.Length];
-            CommandQueue.ReadFromBuffer(outputBuffer, ref /*res*/target, true, null);
+            Euler[] res = new Euler[eulers.Length];
+            CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
 
             inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
 
-            //return res;
+            return res;
         }
 
     }

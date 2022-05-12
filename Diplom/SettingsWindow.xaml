@@ -9,11 +9,11 @@
         x:Name="SetWin"
         Title="Настройки" Height="400" Width="300"
         ResizeMode="NoResize">
-    <Grid Background="#FF2D2D30">
+    <Grid Background="{StaticResource BackgroundBrush}">
 
         <TabControl Margin="2,2,2,30" >
             <TabItem Header="Общие">
-                <Grid Background="#FF2D2D30">
+                <Grid Background="{StaticResource BackgroundBrush}">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                             <Label Content="μm/px"/>
@@ -25,7 +25,7 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Зерна">
-                <Grid Background="#FF2D2D30">
+                <Grid Background="{StaticResource BackgroundBrush}">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                             <Label Content="Минимальный размер (px)"/>
@@ -38,7 +38,7 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Фазы">
-                <Grid Background="#FF2D2D30">
+                <Grid Background="{StaticResource BackgroundBrush}">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel x:Name="PhasesStackPanel">
                             <Label Content="Фазы"/>

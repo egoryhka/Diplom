@@ -4,6 +4,12 @@ using System.Windows.Input;
 
 namespace Diplom.UI
 {
+    public class SelectableFunction
+    {
+        public FunctionContainer Function { get; set; }
+        public bool IsSelected { get; set; }
+    }
+
     public class FunctionContainer
     {
         public FunctionContainer(string _name, BindableCollection<Argument> _args, FunctionWithArgumentCommand _command, MoveFuncCommand _up, MoveFuncCommand _down, MoveFuncCommand _remove)
