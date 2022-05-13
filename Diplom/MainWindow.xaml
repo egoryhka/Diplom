@@ -177,6 +177,7 @@
 
                     <ui:ZoomBorder x:Name="MainImageContainer" Background="#FFD4D4D4" ClipToBounds="True" BorderThickness="0" HorizontalAlignment="Right" VerticalAlignment="Top"  Margin="3">
                         <Image x:Name="MainImage" ClipToBounds="True" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="Resources/EFXSes9UCfsyRVoNeQ2ZTB.png" MouseMove="MainImage_MouseMove"/>
+                        <!--{Binding mainImgBmp, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}-->
                     </ui:ZoomBorder>
 
                     <StackPanel Orientation="Horizontal" Margin="3,0,3,3" >

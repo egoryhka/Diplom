@@ -33,12 +33,14 @@ namespace Diplom
 
         public BindableCollection<FunctionContainer> Functions { get; set; } = new BindableCollection<FunctionContainer>();
 
+        //public ImageSource mainImgSource { get; set; } = 
+        //    new BitmapImage(new Uri("/Resources/EFXSes9UCfsyRVoNeQ2ZTB.png", UriKind.Relative));
+
         private byte[] colors = new byte[0];
         private Mask grainMask = new Mask();
         private byte[] maskedColors = new byte[0];
         private Euler[] bufferEulers = new Euler[0];
         private Euler[] rawEulers = new Euler[0];
-
 
         //-------------------------------------------
 
@@ -227,11 +229,14 @@ namespace Diplom
 
                             maskedColors = colors;
 
-                            if(displayGrainMask && grainMask.colors != null /*&& colors.Length == grainMask.colors.Length*/)
+                            if(displayGrainMask && grainMask.colors != null)
                             maskedColors = functions.GPU.ApplyMask(colors, grainMask, DataManager.CurrentData.Size);
 
+
                             var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, maskedColors);
-                            MainImage.Source = functions.BitmapFunc.CreateBitmapSource(bmp);
+                            var bmpImg = functions.BitmapFunc.Bitmap2BitmapImage(bmp);
+
+                            MainImage.Source = bmpImg;/*functions.BitmapFunc.CreateBitmapSource(bmp);*/
 
                         }),
                         moveFuncUP,

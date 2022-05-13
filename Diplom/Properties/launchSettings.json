@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Diplom": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}
