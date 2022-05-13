@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Diplom.DataModule;
 
 namespace Diplom.UI
 {
@@ -12,6 +13,11 @@ namespace Diplom.UI
         private UIElement child = null;
         private Point origin;
         private Point start;
+
+        public Label label;
+        public Image image;
+
+        public double zoom;
 
         private TranslateTransform GetTranslateTransform(UIElement element)
         {
@@ -104,6 +110,8 @@ namespace Diplom.UI
 
                 tt.X = Math.Clamp(absoluteX - relative.X * st.ScaleX, childWidth - childWidth * st.ScaleX, 0);
                 tt.Y = Math.Clamp(absoluteY - relative.Y * st.ScaleY, childHeight - childHeight * st.ScaleY, 0);
+
+                label.Content = Math.Round(image.Source.Width / 2d * DataManager.CurrentData.Settings.NmPpx, 5).ToString() + " µm";
             }
         }
 

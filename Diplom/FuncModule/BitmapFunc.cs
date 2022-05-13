@@ -19,17 +19,8 @@ namespace Diplom.FuncModule
 
         }
 
-        public BitmapSource CreateBitmapSource(Bitmap bitmap)
-        {
-            if (bitmap == null)
-                throw new ArgumentNullException("bitmap");
-
-            return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                bitmap.GetHbitmap(),
-                IntPtr.Zero,
-                Int32Rect.Empty,
-                BitmapSizeOptions.FromEmptyOptions());
-        }
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(IntPtr hObject);
 
         public Bitmap ByteArrayToBitmap(Vector2Int size, byte[] bytes)
         {
@@ -46,12 +37,7 @@ namespace Diplom.FuncModule
             return bmp;
         }
 
-
-
-        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        public static extern bool DeleteObject(IntPtr hObject);
-
-        public BitmapSource Bitmap2BitmapImage(Bitmap bitmap)
+        public BitmapSource BitmapToBitmapSource(Bitmap bitmap)
         {
             IntPtr hBitmap = bitmap.GetHbitmap();
             BitmapSource retval;

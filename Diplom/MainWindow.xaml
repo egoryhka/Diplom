@@ -69,8 +69,8 @@
 
                 <StackPanel Grid.Row="1">
                     <ItemsControl ItemsSource="{Binding Args}"/>
-                    <Button Margin="0,5,0,0" Foreground="DarkSeaGreen" BorderBrush="#acacac" BorderThickness="0.3" FontSize="16" Content="ЗАПУСК" Command="{Binding Command}" > 
-                        
+                    <Button Margin="0,5,0,0" Foreground="DarkSeaGreen" BorderBrush="#acacac" BorderThickness="0.3" FontSize="16" Content="ЗАПУСК" Command="{Binding Command}" >
+
                     </Button>
                 </StackPanel>
             </Expander>
@@ -129,8 +129,8 @@
                 <ColumnDefinition Width="2*" MinWidth="{Binding ElementName=MainWin, Path=ActualWidth, Converter={converters:PercentageConverter}, ConverterParameter='0,25'}"/>
             </Grid.ColumnDefinitions>
 
-            <Border BorderThickness="0.3" Margin="2" BorderBrush="#FFACACAC">
-                <TabControl Grid.Column="0" Grid.ColumnSpan="2" Background="#FF2D2D30">
+            <Border Grid.Column="0" BorderThickness="0.3" Margin="2" BorderBrush="#FFACACAC">
+                <TabControl Grid.ColumnSpan="2" Background="#FF2D2D30">
 
                     <TabItem Header="Функции">
 
@@ -170,28 +170,40 @@
                 </TabControl>
             </Border>
 
-            <GridSplitter  Grid.Column="1" ResizeBehavior="PreviousAndNext" BorderThickness="0"  Width="5" Background="#FF252526" Margin="2" HorizontalAlignment="Center"/>
+            <GridSplitter  Grid.Column="1" ResizeBehavior="PreviousAndNext" BorderThickness="0"  Width="5" Background="{StaticResource SemiDarkenBrush}" Margin="2" HorizontalAlignment="Center"/>
 
-            <Border BorderBrush="#FFACACAC" BorderThickness="0.3" Margin="2" Grid.Column="2" HorizontalAlignment="Center">
+            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0.3" Margin="2" Grid.Column="2" HorizontalAlignment="Center">
                 <StackPanel x:Name="ImageStackPanel"  Orientation="Vertical">
 
-                    <ui:ZoomBorder x:Name="MainImageContainer" Background="#FFD4D4D4" ClipToBounds="True" BorderThickness="0" HorizontalAlignment="Right" VerticalAlignment="Top"  Margin="3">
+                    <ui:ZoomBorder x:Name="MainImageContainer" Background="{StaticResource BorderBrush}" ClipToBounds="True" BorderThickness="0" Margin="3,3,3,0">
                         <Image x:Name="MainImage" ClipToBounds="True" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="Resources/EFXSes9UCfsyRVoNeQ2ZTB.png" MouseMove="MainImage_MouseMove"/>
-                        <!--{Binding mainImgBmp, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}-->
                     </ui:ZoomBorder>
 
-                    <StackPanel Orientation="Horizontal" Margin="3,0,3,3" >
-                        <Button x:Name="ResetImageSize" BorderThickness="0" HorizontalAlignment="Right" Height="25" Width="25" Click="ResetImageSize_Click">
-                            <Image Width="18" Height="18" Source="Resources/ResetImageSize.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
-                            <Button.ToolTip>
-                                <ToolTip>Вернуть размер</ToolTip>
-                            </Button.ToolTip>
-                        </Button>
+                    <StackPanel Margin="3,0,3,3" Orientation="Vertical">
+                    
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Height="5" Background="{StaticResource ThumbBrush}" VerticalAlignment="Top"/>
+                            <Label Grid.Column="1" x:Name="MainImageScaleLabel" Content="10 µm" HorizontalAlignment="Right"/>
+                        </Grid>
 
-                        <Label x:Name="X"/>
-                        <Label x:Name="Y"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                            <Button x:Name="ResetImageSize" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Right" Height="25" Width="25" Click="ResetImageSize_Click">
+                                <Image Width="18" Height="18" Source="Resources/ResetImageSize.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                <Button.ToolTip>
+                                    <ToolTip>Вернуть размер</ToolTip>
+                                </Button.ToolTip>
+                            </Button>
+
+                            <Label x:Name="X" VerticalAlignment="Top" Width="50" Content="x: 100"/>
+                            <Label x:Name="Y" VerticalAlignment="Top" Width="50" Content="y: 100"/>
+                        </StackPanel>
+
+
                     </StackPanel>
-
                 </StackPanel>
             </Border>
 

@@ -33,15 +33,11 @@ namespace Diplom
 
         public BindableCollection<FunctionContainer> Functions { get; set; } = new BindableCollection<FunctionContainer>();
 
-        //public ImageSource mainImgSource { get; set; } = 
-        //    new BitmapImage(new Uri("/Resources/EFXSes9UCfsyRVoNeQ2ZTB.png", UriKind.Relative));
-
         private byte[] colors = new byte[0];
         private Mask grainMask = new Mask();
         private byte[] maskedColors = new byte[0];
         private Euler[] bufferEulers = new Euler[0];
         private Euler[] rawEulers = new Euler[0];
-
         //-------------------------------------------
 
         private void InitializeFunctions()
@@ -232,11 +228,8 @@ namespace Diplom
                             if(displayGrainMask && grainMask.colors != null)
                             maskedColors = functions.GPU.ApplyMask(colors, grainMask, DataManager.CurrentData.Size);
 
-
                             var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, maskedColors);
-                            var bmpImg = functions.BitmapFunc.Bitmap2BitmapImage(bmp);
-
-                            MainImage.Source = bmpImg;/*functions.BitmapFunc.CreateBitmapSource(bmp);*/
+                            MainImage.Source = functions.BitmapFunc.BitmapToBitmapSource(bmp);
 
                         }),
                         moveFuncUP,
@@ -266,7 +259,7 @@ namespace Diplom
             }
         }
 
-        private Vector2Int GetPixelCoordinate(Image image, MouseEventArgs e)
+        public Vector2Int GetPixelCoordinate(Image image, MouseEventArgs e)
         {
             Point pt = e.GetPosition(image);
             pt.X *= image.Source.Width / image.ActualWidth;
@@ -279,6 +272,31 @@ namespace Diplom
             var buff = Functions[a];
             Functions[a] = Functions[b];
             Functions[b] = buff;
+        }
+
+
+        #region --------------------- MAIN WINDOW ---------------------
+        public MainWindow()
+        {
+            InitializeComponent();
+            InitializeFunctions();
+
+            MainImageContainer.label = MainImageScaleLabel;
+            MainImageContainer.image = MainImage;
+            Closing += MainWindow_Closing;
+
+            try
+            {
+                functions = new Functions();
+            }
+            catch (ProgramBuildException)
+            {
+                MessageBox.Show("Ошибка сборки!\nВозможно файл 'GpuCode.c'\nотсутствует или поврежден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                Closing -= MainWindow_Closing;
+                Close();
+            }
+
+            OpenFileUsingCommandLineArgs();
         }
 
         private void MainWin_Drop(object sender, DragEventArgs e)
@@ -297,38 +315,6 @@ namespace Diplom
                     ExcelImport(path);
                 }
             }
-        }
-
-        private void OpenFileUsingCommandLineArgs()
-        {
-            string[] args = Environment.GetCommandLineArgs();
-            if (args.Length >= 2)
-            {
-                string pathToFile = args[1];
-                OpenFile(pathToFile);
-            }
-        }
-
-        public MainWindow()
-        {
-            InitializeComponent();
-            InitializeFunctions();
-
-            Closing += MainWindow_Closing;
-
-            try
-            {
-                functions = new Functions();
-            }
-            catch (ProgramBuildException)
-            {
-                MessageBox.Show("Ошибка сборки!\nВозможно файл 'GpuCode.c'\nотсутствует или поврежден", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                Closing -= MainWindow_Closing;
-                Close();
-            }
-
-            OpenFileUsingCommandLineArgs();
-
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -351,6 +337,22 @@ namespace Diplom
                 }
             }
         }
+        #endregion
+
+
+        #region --------------------- SAVE OPEN ---------------------
+        private void SaveFile()
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+
+            saveFileDialog.Filter = "diplom files (*.dip)|*.dip";
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                string pathToFile = saveFileDialog.FileName;
+                DataManager.Save(pathToFile);
+                Title = DataManager.ProjectName;
+            }
+        }
 
         private void ExcelImport(string pathToFile)
         {
@@ -370,19 +372,6 @@ namespace Diplom
             }
         }
 
-        private void SaveFile()
-        {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-
-            saveFileDialog.Filter = "diplom files (*.dip)|*.dip";
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                string pathToFile = saveFileDialog.FileName;
-                DataManager.Save(pathToFile);
-                Title = DataManager.ProjectName;
-            }
-        }
-
         private void OpenFile(string pathToFile)
         {
             try
@@ -399,10 +388,31 @@ namespace Diplom
             Title = DataManager.ProjectName;
         }
 
-        private void SaveFileButton_Click(object sender, RoutedEventArgs e)
+        private void OpenFileUsingCommandLineArgs()
         {
-            SaveFile();
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length >= 2)
+            {
+                string pathToFile = args[1];
+                OpenFile(pathToFile);
+            }
         }
+        #endregion
+
+
+        #region --------------------- EVENT HANDLERS ---------------------
+        private void ExcelImportButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Excel files (*.xlsx)|*.xlsx";
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string pathToFile = openFileDialog.FileName;
+                ExcelImport(pathToFile);
+            }
+        }
+
+        private void SaveFileButton_Click(object sender, RoutedEventArgs e) => SaveFile();
 
         private void SaveCurrentFileButton_Click(object sender, RoutedEventArgs e)
         {
@@ -427,33 +437,18 @@ namespace Diplom
             }
         }
 
-        private void ExcelImportButton_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Excel files (*.xlsx)|*.xlsx";
-            if (openFileDialog.ShowDialog() == true)
-            {
-                string pathToFile = openFileDialog.FileName;
-                ExcelImport(pathToFile);
-            }
-        }
-
-        private void SettingsButton_Click(object sender, RoutedEventArgs e)
-        {
-            new SettingsWindow().ShowDialog();
-        }
-
-        private void ResetImageSize_Click(object sender, RoutedEventArgs e)
-        {
-            MainImageContainer.Reset();
-        }
-
         private void MainImage_MouseMove(object sender, MouseEventArgs e)
         {
             Vector2Int coords = GetPixelCoordinate(MainImage, e);
-            X.Content = coords.x;
-            Y.Content = coords.y;
+            X.Content = "x: " + coords.x.ToString();
+            Y.Content = "y: " + coords.y.ToString();
         }
+
+        private void SettingsButton_Click(object sender, RoutedEventArgs e) => new SettingsWindow().ShowDialog();
+        private void AddFunction_Click(object sender, RoutedEventArgs e) => new FunctionsListWindow(Functions, AllFunctions.Except(Functions)).ShowDialog();
+        private void ResetImageSize_Click(object sender, RoutedEventArgs e) => MainImageContainer.Reset();
+
+        //--------------------------------------------
 
         private void AutoUpdateTextBox(object sender, TextChangedEventArgs e) => AutoUpdate();
         private void AutoUpdateSlider(object sender, RoutedPropertyChangedEventArgs<double> e) => AutoUpdate();
@@ -472,12 +467,8 @@ namespace Diplom
         private void NumericTextboxFloat_PreviewTextInput(object sender, TextCompositionEventArgs e) =>
             e.Handled = !IsTextAllowedFloat(e.Text);
 
-        private void AddFunction_Click(object sender, RoutedEventArgs e)
-        {
 
-            new FunctionsListWindow(Functions, AllFunctions.Except(Functions)).ShowDialog();
+        #endregion
 
-
-        }
     }
 }
