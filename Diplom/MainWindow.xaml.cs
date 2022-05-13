@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -83,7 +84,7 @@ namespace Diplom
                 new FunctionContainer[] {
 
                      new FunctionContainer("Стандартная Очистка", new BindableCollection<Argument>{
-                        new IntArgument("Число шагов", 1, 50, 5),
+                        new IntArgument("Число шагов", 1, 12, 1),
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
@@ -109,7 +110,7 @@ namespace Diplom
                     ),
 
                     new FunctionContainer("Kuwahara Очистка", new BindableCollection<Argument>{
-                        new IntArgument("Число шагов", 1, 30, 15),
+                        new IntArgument("Число шагов", 1, 30, 5),
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
@@ -135,7 +136,7 @@ namespace Diplom
                     ),
 
                     new FunctionContainer("Автоматическая Очистка", new BindableCollection<Argument>{
-                        new IntArgument("Число шагов", 1, 100, 10),
+                        new IntArgument("Число шагов", 1, 10, 1),
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
@@ -453,6 +454,18 @@ namespace Diplom
         private void AutoUpdateSlider(object sender, RoutedPropertyChangedEventArgs<double> e) => AutoUpdate();
         private void AutoUpdateCombobox(object sender, SelectionChangedEventArgs e) => AutoUpdate();
         private void AutoUpdateCheckbox(object sender, RoutedEventArgs e) => AutoUpdate();
+
+        private static readonly Regex _regexInt = new Regex("[^0-9-]+"); //regex that matches disallowed text
+        private static readonly Regex _regexFloat = new Regex("[^0-9,-]+"); //regex that matches disallowed text
+
+        private static bool IsTextAllowedInt(string text) => !_regexInt.IsMatch(text);
+        private static bool IsTextAllowedFloat(string text) => !_regexFloat.IsMatch(text);
+
+
+        private void NumericTextboxInt_PreviewTextInput(object sender, TextCompositionEventArgs e) =>
+            e.Handled = !IsTextAllowedInt(e.Text);
+        private void NumericTextboxFloat_PreviewTextInput(object sender, TextCompositionEventArgs e) =>
+            e.Handled = !IsTextAllowedFloat(e.Text);
 
         private void AddFunction_Click(object sender, RoutedEventArgs e)
         {

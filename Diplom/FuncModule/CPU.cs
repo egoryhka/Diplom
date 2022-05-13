@@ -15,9 +15,10 @@ namespace Diplom.FuncModule
 
         }
 
-        public static int CountUnsolved(Euler[] eulers)
-        {
-            return eulers.Count(x => x.x == 0 && x.y == 0 && x.z == 0);
-        }
+        public static int CountUnsolved(Euler[] eulers) => eulers.Count(x => x.x == 0 && x.y == 0 && x.z == 0);
+
+
+
+
     }
 }
