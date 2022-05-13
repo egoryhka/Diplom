@@ -27,7 +27,7 @@ namespace Diplom
         public FunctionsListWindow(BindableCollection<FunctionContainer> existingFunctions, IEnumerable<FunctionContainer> avaliableFunctions)
         {
             InitializeComponent();
-            foreach(var f in avaliableFunctions)
+            foreach (var f in avaliableFunctions)
             {
                 FunctionsToSelect.Add(new SelectableFunction() { Function = f, IsSelected = false });
             }
@@ -37,7 +37,11 @@ namespace Diplom
 
         private void ApplyFunctionsButton_Click(object sender, RoutedEventArgs e)
         {
-            existingFuncs.AddRange(FunctionsToSelect.Where(x => x.IsSelected).Select(x => x.Function));
+            var selectedFunctions = FunctionsToSelect.Where(x => x.IsSelected).Select(x => x.Function);
+            foreach (var f in selectedFunctions)
+            {
+                existingFuncs.Insert(0, f);
+            }
             Close();
         }
 

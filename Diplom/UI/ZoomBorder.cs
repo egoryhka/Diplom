@@ -17,7 +17,7 @@ namespace Diplom.UI
         public Label label;
         public Image image;
 
-        public double zoom;
+        public double zoom = 1.0d;
 
         private TranslateTransform GetTranslateTransform(UIElement element)
         {
@@ -74,6 +74,8 @@ namespace Diplom.UI
                 var tt = GetTranslateTransform(child);
                 tt.X = 0.0;
                 tt.Y = 0.0;
+
+                label.Content = Math.Round(image.Source.Width / 2d * DataManager.CurrentData.Settings.NmPpx / st.ScaleX, 5).ToString() + " µm";
             }
         }
 
@@ -87,11 +89,11 @@ namespace Diplom.UI
                 var tt = GetTranslateTransform(child);
 
                 double zoom = e.Delta > 0 ? .2 : -.2;
-                double zoomCorrected = zoom * st.ScaleX;
+                double zoomCorrected = zoom /** st.ScaleX*/;
                 double nextScaleX = st.ScaleX + zoomCorrected;
                 double nextScaleY = st.ScaleY + zoomCorrected;
 
-                if (!(e.Delta > 0) && (nextScaleX <= 1 || nextScaleY <= 1))
+                if (e.Delta < 0 && (nextScaleX <= 1 || nextScaleY <= 1))
                 {
                     Reset();
                     return;
@@ -111,7 +113,7 @@ namespace Diplom.UI
                 tt.X = Math.Clamp(absoluteX - relative.X * st.ScaleX, childWidth - childWidth * st.ScaleX, 0);
                 tt.Y = Math.Clamp(absoluteY - relative.Y * st.ScaleY, childHeight - childHeight * st.ScaleY, 0);
 
-                label.Content = Math.Round(image.Source.Width / 2d * DataManager.CurrentData.Settings.NmPpx, 5).ToString() + " µm";
+                label.Content = Math.Round(image.Source.Width / 2d * DataManager.CurrentData.Settings.NmPpx/ st.ScaleX, 5).ToString() + " µm";
             }
         }
 

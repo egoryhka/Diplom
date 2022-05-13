@@ -121,6 +121,8 @@ namespace Diplom.DataModule
                             CurrentData.Points[i] = point;
                         }
 
+                        CurrentData.Settings.NmPpx = float.Parse(rows[1].ItemArray[2].ToString());
+
                         CurrentData.Settings.Phases.Clear();
                         foreach (int phase in CurrentData.Points.Select(x => x.Phase).Distinct().OrderBy(x => x))
                         {
