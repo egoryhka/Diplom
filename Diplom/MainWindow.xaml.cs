@@ -34,10 +34,15 @@ namespace Diplom
         public BindableCollection<FunctionContainer> Functions { get; set; } = new BindableCollection<FunctionContainer>();
 
         private byte[] colors = new byte[0];
-        private Mask grainMask = new Mask();
         private byte[] maskedColors = new byte[0];
-        private Euler[] bufferEulers = new Euler[0];
+
+        private Mask grainMask = new Mask();
+        private Grain[] rawGrains = new Grain[0];
+
         private Euler[] rawEulers = new Euler[0];
+        private Euler[] bufferEulers = new Euler[0];
+
+        private System.Drawing.Bitmap mainImgBitmapBuffer;
         //-------------------------------------------
 
         private void InitializeFunctions()
@@ -173,10 +178,40 @@ namespace Diplom
                                 return;
                             }
                             float tresholdAngle = (ar[0] as FloatArgument).Value;
-                            var color = DataManager.CurrentData.Settings.GrainSelectBorderColor;
+                            var color = DataManager.CurrentData.Settings.GrainsBorderColor;
+                            if(color.R == 0 && color.G == 0 && color.B == 0) color = Color.FromArgb(color.A, 1, 1, 1);
+
                             Mask mask = functions.GPU.GetGrainMask(rawEulers, DataManager.CurrentData.Size, tresholdAngle, new GpuColor(color.R, color.G, color.B, color.A));
 
                             grainMask = mask;
+                        }),
+                        moveFuncUP,
+                        moveFuncDOWN,
+                        removeFunc
+                    ),
+
+                    new FunctionContainer("Обнаружение зерен", new BindableCollection<Argument>{
+                        new FloatArgument("Минимальный размер, µm", 0, 50, DataManager.CurrentData.Settings.NmPpx * 2, DataManager.CurrentData.Settings.NmPpx),
+                        new BoolArgument("Использовать общий параметр", false),
+                    },
+                        new FunctionWithArgumentCommand(args =>
+                        {
+                            if (DataManager.CurrentData.Eulers == null || grainMask.colors.Length == 0) return;
+
+                            var ar = args as BindableCollection<Argument>;
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+                            float minSize = (ar[0] as FloatArgument).Value;
+                            bool useGlobalMinSize = (ar[1] as BoolArgument).Value;
+
+                            if(useGlobalMinSize)
+                                rawGrains = functions.CPU.DefineGrains(grainMask, DataManager.CurrentData.Settings.MinGrainSize);
+                            else
+                                rawGrains = functions.CPU.DefineGrains(grainMask, minSize);
+
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -199,8 +234,6 @@ namespace Diplom
                             }
                             MapVariant mapVariant = (ar[0] as MapVariantArgument).Value;
                             bool displayGrainMask = (ar[1] as BoolArgument).Value;
-
-                            //if(rawEulers.Length != DataManager.CurrentData.Size.x*DataManager.CurrentData.Size.y) return;
 
                             switch (mapVariant)
                             {
@@ -229,6 +262,8 @@ namespace Diplom
                             maskedColors = functions.GPU.ApplyMask(colors, grainMask, DataManager.CurrentData.Size);
 
                             var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, maskedColors);
+                            mainImgBitmapBuffer = bmp;
+
                             MainImage.Source = functions.BitmapFunc.BitmapToBitmapSource(bmp);
 
                         }),
@@ -274,6 +309,20 @@ namespace Diplom
             Functions[b] = buff;
         }
 
+        private void SelectGrain(Grain grain)
+        {
+            if (grain.Edges == null || grain.Points == null) return;
+
+            var bmp = (System.Drawing.Bitmap)mainImgBitmapBuffer.Clone();
+            foreach (var p in grain.Edges)
+            {
+                var selectColor = DataManager.CurrentData.Settings.GrainSelectBorderColor;
+
+                bmp.SetPixel((int)p.x, (int)p.y, System.Drawing.Color.FromArgb(selectColor.A, selectColor.R, selectColor.G, selectColor.B));
+            }
+
+            MainImage.Source = functions.BitmapFunc.BitmapToBitmapSource(bmp);
+        }
 
         #region --------------------- MAIN WINDOW ---------------------
         public MainWindow()
@@ -442,6 +491,18 @@ namespace Diplom
             Vector2Int coords = GetPixelCoordinate(MainImage, e);
             X.Content = "x: " + coords.x.ToString();
             Y.Content = "y: " + coords.y.ToString();
+        }
+
+        private void MainImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (rawGrains.Length == 0) return;
+
+            Vector2Int coords = GetPixelCoordinate(MainImage, e);
+
+            Grain grain = rawGrains.FirstOrDefault(x =>
+            x.Points.Contains(new Vector2(coords.x, coords.y)) || x.Edges.Contains(new Vector2(coords.x, coords.y)));
+
+            SelectGrain(grain);
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e) => new SettingsWindow().ShowDialog();

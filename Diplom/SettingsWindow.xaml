@@ -30,6 +30,10 @@
                         <StackPanel>
                             <Label Content="Минимальный размер (px)"/>
                             <TextBox x:Name="MinGrainSizeTextBox" Text="{Binding ElementName=SetWin, Path=_settings.MinGrainSize}" Height="25" Width="Auto"/>
+                            <Label Content="Цвет границ"/>
+                            <xctk:ColorPicker Name="GrainsBorderColorPicker" SelectedColor="{Binding ElementName=SetWin, Path=_settings.GrainsBorderColor}" >
+                            </xctk:ColorPicker>
+
                             <Label Content="Цвет выделения"/>
                             <xctk:ColorPicker Name="GrainSelectBorderColorPicker" SelectedColor="{Binding ElementName=SetWin, Path=_settings.GrainSelectBorderColor}" >
                             </xctk:ColorPicker>

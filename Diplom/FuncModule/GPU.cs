@@ -330,7 +330,7 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
 
             try
             {
-               // string gpuCode = File.ReadAllText(Directory.GetCurrentDirectory() + @"\GpuCode.c");
+                // string gpuCode = File.ReadAllText(Directory.GetCurrentDirectory() + @"\GpuCode.c");
 
                 Program = new ComputeProgram(Context, /*gpuCode*/reserveGpuCode);
                 Program.Build(Devices, "", null, IntPtr.Zero);
@@ -526,7 +526,7 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
 
     }
 
-    public class Mask { public byte[] colors; }
+    public class Mask { public byte[] colors = new byte[] { }; }
 
     public class ProgramBuildException : Exception { }
 }
