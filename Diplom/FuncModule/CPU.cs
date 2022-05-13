@@ -35,7 +35,7 @@ namespace Diplom.FuncModule
                         Grain grain = new Grain() { Edges = new List<Vector2>(), Points = new List<Vector2>() };
                         FloodFillGrain(new Vector2(x, y), ref grain, ref grainPointsDefined, grainMask);
 
-                        if (grain.Size >= minSize)
+                        if (grain.Size * MathF.Pow(DataManager.CurrentData.Settings.NmPpx, 2) >= minSize )
                             definedGrains.Add(grain);
                     }
                 }

@@ -187,7 +187,7 @@
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
                             <Border Grid.Column="0" Height="5" Background="{StaticResource ThumbBrush}" VerticalAlignment="Top"/>
-                            <Label Grid.Column="1" x:Name="MainImageScaleLabel" Content="10 µm" HorizontalAlignment="Right"/>
+                            <Label Grid.Column="1" x:Name="MainImageScaleLabel" Content="0 µm" HorizontalAlignment="Right"/>
                         </Grid>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">

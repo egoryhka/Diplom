@@ -21,7 +21,7 @@ namespace Diplom
     /// </summary>
     public partial class SettingsWindow : Window
     {
-        private static readonly Regex _numericOnlyRegex = new Regex("[^0-9.-]+");
+        private static readonly Regex _regexFloat = new Regex("[^0-9.-]+"); //regex that matches disallowed text
 
         public Settings _settings { get; set; } = new Settings();
 
@@ -30,9 +30,7 @@ namespace Diplom
             LoadCurrentSettings();
             InitializeComponent();
 
-            MinGrainSizeTextBox.PreviewTextInput += (object sender, TextCompositionEventArgs e) => { e.Handled = !CheckNumeric(e.Text); };
-
-            foreach(var phase in _settings.Phases)
+            foreach (var phase in _settings.Phases)
             {
                 CreatePhaseNameEditor(phase);
             }
@@ -81,7 +79,7 @@ namespace Diplom
             TextBox phaseNameTextBox = new TextBox();
             phaseNameTextBox.Height = 25;
             phaseNameTextBox.Width = Double.NaN;
-            
+
             Binding binding = new Binding()
             {
                 Source = _settings,
@@ -99,12 +97,11 @@ namespace Diplom
 
         }
 
-     
 
-        private static bool CheckNumeric(string text)
-        {
-            return !_numericOnlyRegex.IsMatch(text);
-        }
+        private static bool IsTextAllowedFloat(string text) => !_regexFloat.IsMatch(text);
+
+        private void NumericTextboxFloat_PreviewTextInput(object sender, TextCompositionEventArgs e) =>
+    e.Handled = !IsTextAllowedFloat(e.Text);
 
     }
 }

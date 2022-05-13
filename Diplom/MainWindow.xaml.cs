@@ -191,7 +191,7 @@ namespace Diplom
                     ),
 
                     new FunctionContainer("Обнаружение зерен", new BindableCollection<Argument>{
-                        new FloatArgument("Минимальный размер, µm", 0, 50, DataManager.CurrentData.Settings.NmPpx * 2, DataManager.CurrentData.Settings.NmPpx),
+                        new FloatArgument("Минимальный размер, µm²", 0, 200, 0.1f, 0.005f),
                         new BoolArgument("Использовать общий параметр", false),
                     },
                         new FunctionWithArgumentCommand(args =>
@@ -517,7 +517,7 @@ namespace Diplom
         private void AutoUpdateCheckbox(object sender, RoutedEventArgs e) => AutoUpdate();
 
         private static readonly Regex _regexInt = new Regex("[^0-9-]+"); //regex that matches disallowed text
-        private static readonly Regex _regexFloat = new Regex("[^0-9,-]+"); //regex that matches disallowed text
+        private static readonly Regex _regexFloat = new Regex("[^0-9.-]+"); //regex that matches disallowed text
 
         private static bool IsTextAllowedInt(string text) => !_regexInt.IsMatch(text);
         private static bool IsTextAllowedFloat(string text) => !_regexFloat.IsMatch(text);

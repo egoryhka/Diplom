@@ -17,7 +17,7 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                             <Label Content="μm/px"/>
-                            <TextBox x:Name="NmPpx" Text="{Binding ElementName=SetWin, Path=_settings.NmPpx}" Height="25" Width="Auto"/>
+                            <TextBox x:Name="NmPpx" Text="{Binding ElementName=SetWin, Path=_settings.NmPpx}" Height="25" Width="Auto" PreviewTextInput="NumericTextboxFloat_PreviewTextInput"/>
                             <Label Content="AutoUpdate"/>
                             <CheckBox x:Name="AutoUpdate" IsChecked="{Binding ElementName=SetWin, Path=_settings.AutoUpdate}" Height="25" Width="Auto"/>
                         </StackPanel>
@@ -28,7 +28,7 @@
                 <Grid Background="{StaticResource BackgroundBrush}">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
-                            <Label Content="Минимальный размер (px)"/>
+                            <Label Content="Минимальный размер, µm²"/>
                             <TextBox x:Name="MinGrainSizeTextBox" Text="{Binding ElementName=SetWin, Path=_settings.MinGrainSize}" Height="25" Width="Auto"/>
                             <Label Content="Цвет границ"/>
                             <xctk:ColorPicker Name="GrainsBorderColorPicker" SelectedColor="{Binding ElementName=SetWin, Path=_settings.GrainsBorderColor}" >
