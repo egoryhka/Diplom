@@ -21,7 +21,9 @@ namespace Diplom.FuncModule
             BuildProgramm();
         }
 
-        private const string reserveGpuCode = @"
+        private const string gpuCode = @"
+
+
 struct Euler
 {
 	float x;
@@ -172,10 +174,10 @@ __kernel void GetGrainMask(__global euler* in, int width, int height, float Miss
 
 	bool isEdge = false;
 
-	if (!isEdge && y > 0) { if (angleBetween(in[id], in[idUp]) > MissOrientationTreshold) isEdge = true; }
-	if (!isEdge && y < height) { if (angleBetween(in[id], in[idDown]) > MissOrientationTreshold) isEdge = true; }
-	if (!isEdge && x > 0) { if (angleBetween(in[id], in[idLeft]) > MissOrientationTreshold) isEdge = true; }
-	if (!isEdge && x < width) { if (angleBetween(in[id], in[idRight]) > MissOrientationTreshold) isEdge = true; }
+	if (!isEdge && y > 1) { if (angleBetween(in[id], in[idUp]) > MissOrientationTreshold) isEdge = true; }
+	if (!isEdge && y < height - 1) { if (angleBetween(in[id], in[idDown]) > MissOrientationTreshold) isEdge = true; }
+	if (!isEdge && x > 1) { if (angleBetween(in[id], in[idLeft]) > MissOrientationTreshold) isEdge = true; }
+	if (!isEdge && x < width - 1) { if (angleBetween(in[id], in[idRight]) > MissOrientationTreshold) isEdge = true; }
 
 	int outId = id * 4;
 	if (isEdge) {
@@ -184,6 +186,59 @@ __kernel void GetGrainMask(__global euler* in, int width, int height, float Miss
 		out[outId + 2] = convert_int(grainMaskColor.x);
 		out[outId + 3] = convert_int(grainMaskColor.w);
 	}
+}
+
+__kernel void GetStrainMaskKAM(__global euler* in, int width, int height, int FrameSize, __global uchar* out)
+{
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+	int id = (int)(x + y * width);
+	int outId = id * 4;
+
+	int idUp = (int)(x + (y + 1) * width);
+	int idDown = (int)(x + (y - 1) * width);
+	int idLeft = (int)((x - 1) + y * width);
+	int idRight = (int)((x + 1) + y * width);
+
+	int idUpLeft = (int)((x - 1) + (y + 1) * width);
+	int idDownLeft = (int)((x - 1) + (y - 1) * width);
+	int idUpRight = (int)((x + 1) + (y + 1) * width);
+	int idDownRight = (int)((x + 1) + (y - 1) * width);
+
+	float upDeviation = 0.0f;
+	float downDeviation = 0.0f;
+	float leftDeviation = 0.0f;
+	float rightDeviation = 0.0f;
+
+	float upLeftDeviation = 0.0f;
+	float downLeftDeviation = 0.0f;
+	float upRightDeviation = 0.0f;
+	float downRightDeviation = 0.0f;
+
+	float min = 360.0f;
+	float max = 0.0f;
+
+	float n = 0.0f;
+
+	if (y > 0) { n = n + 1.0f; upDeviation = angleBetween(in[id], in[idUp]); if (upDeviation < min) min = upDeviation; if (upDeviation > max) max = upDeviation; }
+	if (y < height) { n = n + 1.0f; downDeviation = angleBetween(in[id], in[idDown]); if (downDeviation < min) min = downDeviation; if (downDeviation > max) max = downDeviation; }
+	if (x > 0) { n = n + 1.0f; leftDeviation = angleBetween(in[id], in[idLeft]); if (leftDeviation < min) min = leftDeviation; if (leftDeviation > max) max = leftDeviation; }
+	if (x < width) { n = n + 1.0f; rightDeviation = angleBetween(in[id], in[idRight]); if (rightDeviation < min) min = rightDeviation; if (rightDeviation > max) max = rightDeviation; }
+
+	if (y > 0 && x > 0) { n = n + 1.0f; upLeftDeviation = angleBetween(in[id], in[idUpLeft]); if (upLeftDeviation < min) min = upLeftDeviation; if (upLeftDeviation > max) max = upLeftDeviation; }
+	if (y < height && x > 0) { n = n + 1.0f; downLeftDeviation = angleBetween(in[id], in[idDownLeft]); if (downLeftDeviation < min) min = downLeftDeviation; if (downLeftDeviation > max) max = downLeftDeviation; }
+	if (y > 0 && x < width) { n = n + 1.0f; upRightDeviation = angleBetween(in[id], in[idUpRight]); if (upRightDeviation < min) min = upRightDeviation; if (upRightDeviation > max) max = upRightDeviation; }
+	if (y < height && x < width) { n = n + 1.0f; downRightDeviation = angleBetween(in[id], in[idDownRight]); if (downRightDeviation < min) min = downRightDeviation; if (downRightDeviation > max) max = downRightDeviation; }
+
+	float averageDeviation = (upDeviation + downDeviation + leftDeviation + rightDeviation + upLeftDeviation + downLeftDeviation + upRightDeviation + downRightDeviation) / n;
+
+	//RGB
+	float3 color = (float3)(100.0f, 100.0f, 100.0f);
+
+	out[outId] = convert_int(color.x);//r
+	out[outId + 1] = convert_int(color.y);//g
+	out[outId + 2] = convert_int(color.z);//b
+	out[outId + 3] = 255;
 }
 
 
@@ -316,7 +371,6 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
 	}
 }
 
-
 ";
 
         private void BuildProgramm()
@@ -330,9 +384,9 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
 
             try
             {
-                // string gpuCode = File.ReadAllText(Directory.GetCurrentDirectory() + @"\GpuCode.c");
+                string gpuCode = File.ReadAllText(Directory.GetCurrentDirectory() + @"\GpuCode.c");
 
-                Program = new ComputeProgram(Context, /*gpuCode*/reserveGpuCode);
+                Program = new ComputeProgram(Context, gpuCode);
                 Program.Build(Devices, "", null, IntPtr.Zero);
             }
             catch { throw new ProgramBuildException(); }
@@ -428,6 +482,40 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
             kernel.SetValueArgument(3, treshold);
             kernel.SetValueArgument(4, grainMaskColor);
             kernel.SetMemoryArgument(5, outputBuffer);
+
+            CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+
+            byte[] res = new byte[eulers.Length * 4];
+            CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
+
+            inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
+
+            return new Mask() { colors = res };
+        }
+
+        public Mask GetStrainMaskKAM(Euler[] eulers, Vector2Int size, GpuColor lowCol, GpuColor hoghCol, float referenceDeviation)
+        {
+            try
+            {
+                BuildProgramm();
+            }
+            catch { }
+
+
+            ComputeKernel kernel = Program.CreateKernel("GetStrainMaskKAM");
+
+            ComputeBuffer<Euler> inputBuffer
+                = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
+            ComputeBuffer<byte> outputBuffer
+                = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new byte[eulers.Length * 4]);
+
+            kernel.SetMemoryArgument(0, inputBuffer);
+            kernel.SetValueArgument(1, size.x);
+            kernel.SetValueArgument(2, size.y);
+            kernel.SetValueArgument(3, lowCol);
+            kernel.SetValueArgument(4, hoghCol);
+            kernel.SetValueArgument(5, referenceDeviation);
+            kernel.SetMemoryArgument(6, outputBuffer);
 
             CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 

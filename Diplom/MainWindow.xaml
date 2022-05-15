@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Diplom"
         xmlns:ui="clr-namespace:Diplom.UI"
         xmlns:converters="clr-namespace:Diplom.UI"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="Проект: " Width="800" Height="500"  x:Name="MainWin"
         Icon="Resources/Diplom.ico"
@@ -43,6 +44,14 @@
             <StackPanel Orientation="Horizontal">
                 <Label Content="{Binding Path=Name}"/>
                 <CheckBox VerticalAlignment="Center" IsChecked="{Binding Path=Value}" Checked="AutoUpdateCheckbox" Unchecked="AutoUpdateCheckbox" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- DataTemplate for BoolArgument -->
+        <DataTemplate DataType="{x:Type ui:ColorArgument}">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="{Binding Path=Name}"/>
+                <xctk:ColorPicker SelectedColor="{Binding Path=Value}" />
             </StackPanel>
         </DataTemplate>
 
@@ -180,7 +189,7 @@
                     </ui:ZoomBorder>
 
                     <StackPanel Margin="3,0,3,3" Orientation="Vertical">
-                    
+
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1*"/>

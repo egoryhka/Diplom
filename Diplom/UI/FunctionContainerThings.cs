@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using System;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Diplom.UI
 {
@@ -137,6 +138,16 @@ namespace Diplom.UI
             Name = _name; Value = _value;
         }
         public bool Value { get; set; }
+
+    }
+
+    public class ColorArgument : Argument
+    {
+        public ColorArgument(string _name, Color _value)
+        {
+            Name = _name; Value = _value;
+        }
+        public Color Value { get; set; }
 
     }
 

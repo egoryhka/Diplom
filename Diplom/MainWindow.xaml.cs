@@ -36,6 +36,8 @@ namespace Diplom
         private byte[] colors = new byte[0];
         private byte[] maskedColors = new byte[0];
 
+        private Mask strainMask = new Mask();
+
         private Mask grainMask = new Mask();
         private Grain[] rawGrains = new Grain[0];
 
@@ -218,9 +220,41 @@ namespace Diplom
                         removeFunc
                     ),
 
+                    new FunctionContainer("Расчет напряжений", new BindableCollection<Argument>{
+                        new ColorArgument("Low", Color.FromArgb(255, 255, 255, 255)),
+                        new ColorArgument("High", Color.FromArgb(255, 255, 255, 255)),
+                        new FloatArgument("Reference Deviation"/* "Максимальное отклонение"*/, 0f, 5, 2.5f, 0.1f),
+                    },
+                        new FunctionWithArgumentCommand(args =>
+                        {
+                            if (DataManager.CurrentData.Eulers == null) return;
+
+                            var ar = args as BindableCollection<Argument>;
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+                            Color lowColor = (ar[0] as ColorArgument).Value;
+                            Color highColor = (ar[1] as ColorArgument).Value;
+                            float referenceDeviation = (ar[2] as FloatArgument).Value;
+
+                            GpuColor lowGpuColor = new GpuColor(lowColor.R, lowColor.G, lowColor.B, lowColor.A);
+                            GpuColor highGpuColor = new GpuColor(highColor.R, highColor.G, highColor.B, highColor.A);
+
+                            Mask mask = functions.GPU.GetStrainMaskKAM(rawEulers, DataManager.CurrentData.Size, lowGpuColor, highGpuColor, referenceDeviation);
+
+                            strainMask = mask;
+                        }),
+                        moveFuncUP,
+                        moveFuncDOWN,
+                        removeFunc
+                    ),
+
                     new FunctionContainer("Картирование (BC/Euler/Strain...)", new BindableCollection<Argument>{
                         new MapVariantArgument("Вариант", MapVariant.Euler),
-                        new BoolArgument("Отображать границы", true),
+                        new BoolArgument("Отображать границы", false),
+                        new BoolArgument("Отображать напряжения", false),
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
@@ -234,6 +268,7 @@ namespace Diplom
                             }
                             MapVariant mapVariant = (ar[0] as MapVariantArgument).Value;
                             bool displayGrainMask = (ar[1] as BoolArgument).Value;
+                            bool displayStrainMask = (ar[2] as BoolArgument).Value;
 
                             switch (mapVariant)
                             {
@@ -249,17 +284,15 @@ namespace Diplom
                                         break;
                                     }
 
-                                case MapVariant.Strain:
-                                    {
-                                        //colors = functions.GPU.GetColorMapBC(DataManager.CurrentData.BC, DataManager.CurrentData.Size);
-                                        break;
-                                    }
                             }
 
                             maskedColors = colors;
 
                             if(displayGrainMask && grainMask.colors != null && grainMask.colors.Length != 0)
-                            maskedColors = functions.GPU.ApplyMask(colors, grainMask, DataManager.CurrentData.Size);
+                            maskedColors = functions.GPU.ApplyMask(maskedColors, grainMask, DataManager.CurrentData.Size);
+
+                            if(displayStrainMask && strainMask.colors != null && strainMask.colors.Length != 0)
+                            maskedColors = functions.GPU.ApplyMask(maskedColors, strainMask, DataManager.CurrentData.Size);
 
                             var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, maskedColors);
                             mainImgBitmapBuffer = bmp;

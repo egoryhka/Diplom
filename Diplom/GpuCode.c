@@ -149,10 +149,10 @@ __kernel void GetGrainMask(__global euler* in, int width, int height, float Miss
 
 	bool isEdge = false;
 
-	if (!isEdge && y > 0) { if (angleBetween(in[id], in[idUp]) > MissOrientationTreshold) isEdge = true; }
-	if (!isEdge && y < height) { if (angleBetween(in[id], in[idDown]) > MissOrientationTreshold) isEdge = true; }
-	if (!isEdge && x > 0) { if (angleBetween(in[id], in[idLeft]) > MissOrientationTreshold) isEdge = true; }
-	if (!isEdge && x < width) { if (angleBetween(in[id], in[idRight]) > MissOrientationTreshold) isEdge = true; }
+	if (!isEdge && y > 1) { if (angleBetween(in[id], in[idUp]) > MissOrientationTreshold) isEdge = true; }
+	if (!isEdge && y < height - 1) { if (angleBetween(in[id], in[idDown]) > MissOrientationTreshold) isEdge = true; }
+	if (!isEdge && x > 1) { if (angleBetween(in[id], in[idLeft]) > MissOrientationTreshold) isEdge = true; }
+	if (!isEdge && x < width - 1) { if (angleBetween(in[id], in[idRight]) > MissOrientationTreshold) isEdge = true; }
 
 	int outId = id * 4;
 	if (isEdge) {
@@ -161,6 +161,78 @@ __kernel void GetGrainMask(__global euler* in, int width, int height, float Miss
 		out[outId + 2] = convert_int(grainMaskColor.x);
 		out[outId + 3] = convert_int(grainMaskColor.w);
 	}
+}
+
+__kernel void GetStrainMaskKAM(__global euler* in, int width, int height, float4 lowCol, float4 highCol, float referenceDeviation, __global uchar* out)
+{
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+	int id = (int)(x + y * width);
+	int outId = id * 4;
+
+	int idUp = (int)(x + (y + 1) * width);
+	int idDown = (int)(x + (y - 1) * width);
+	int idLeft = (int)((x - 1) + y * width);
+	int idRight = (int)((x + 1) + y * width);
+
+	int idUpLeft = (int)((x - 1) + (y + 1) * width);
+	int idDownLeft = (int)((x - 1) + (y - 1) * width);
+	int idUpRight = (int)((x + 1) + (y + 1) * width);
+	int idDownRight = (int)((x + 1) + (y - 1) * width);
+
+	float upDeviation = 0.0f;
+	float downDeviation = 0.0f;
+	float leftDeviation = 0.0f;
+	float rightDeviation = 0.0f;
+
+	float upLeftDeviation = 0.0f;
+	float downLeftDeviation = 0.0f;
+	float upRightDeviation = 0.0f;
+	float downRightDeviation = 0.0f;
+
+	float n = 0.0f;
+
+	if (y > 0) { n = n + 1.0f; upDeviation = angleBetween(in[id], in[idUp]); }
+	if (y < height) { n = n + 1.0f; downDeviation = angleBetween(in[id], in[idDown]); }
+	if (x > 0) { n = n + 1.0f; leftDeviation = angleBetween(in[id], in[idLeft]); }
+	if (x < width) { n = n + 1.0f; rightDeviation = angleBetween(in[id], in[idRight]); }
+
+	if (y > 0 && x > 0) { n = n + 1.0f; upLeftDeviation = angleBetween(in[id], in[idUpLeft]); }
+	if (y < height && x > 0) { n = n + 1.0f; downLeftDeviation = angleBetween(in[id], in[idDownLeft]); }
+	if (y > 0 && x < width) { n = n + 1.0f; upRightDeviation = angleBetween(in[id], in[idUpRight]); }
+	if (y < height && x < width) { n = n + 1.0f; downRightDeviation = angleBetween(in[id], in[idDownRight]); }
+
+	float averageDeviation =
+		(upDeviation +
+			downDeviation +
+			leftDeviation +
+			rightDeviation +
+			upLeftDeviation +
+			downLeftDeviation +
+			upRightDeviation +
+			downRightDeviation) / n;
+
+	uchar fromR = convert_int(lowCol.x);
+	uchar fromG = convert_int(lowCol.y);
+	uchar fromB = convert_int(lowCol.z);
+
+	uchar toR = convert_int(highCol.x);
+	uchar toG = convert_int(highCol.y);
+	uchar toB = convert_int(highCol.z);
+
+	float deltaR = (toR - fromR) / referenceDeviation;
+	float deltaG = (toG - fromG) / referenceDeviation;
+	float deltaB = (toB - fromB) / referenceDeviation;
+
+	uchar R = fromR + convert_int(averageDeviation * deltaR);
+	uchar G = fromG + convert_int(averageDeviation * deltaG);
+	uchar B = fromB + convert_int(averageDeviation * deltaB);
+	//---------------
+
+	out[outId] = B;//r
+	out[outId + 1] = G;//g
+	out[outId + 2] = R;//b
+	out[outId + 3] = 255;
 }
 
 
@@ -292,5 +364,4 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
 		out[id] = average;
 	}
 }
-
 
