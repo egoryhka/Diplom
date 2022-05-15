@@ -258,7 +258,7 @@ namespace Diplom
 
                             maskedColors = colors;
 
-                            if(displayGrainMask && grainMask.colors != null)
+                            if(displayGrainMask && grainMask.colors != null && grainMask.colors.Length != 0)
                             maskedColors = functions.GPU.ApplyMask(colors, grainMask, DataManager.CurrentData.Size);
 
                             var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, maskedColors);
@@ -308,6 +308,9 @@ namespace Diplom
             Functions[a] = Functions[b];
             Functions[b] = buff;
         }
+
+        private Grain GetGrainByCoords(Vector2Int coords) => rawGrains.FirstOrDefault(x =>
+            x.Points.Contains(new Vector2(coords.x, coords.y)) || x.Edges.Contains(new Vector2(coords.x, coords.y)));
 
         private void SelectGrain(Grain grain)
         {
@@ -491,18 +494,16 @@ namespace Diplom
             Vector2Int coords = GetPixelCoordinate(MainImage, e);
             X.Content = "x: " + coords.x.ToString();
             Y.Content = "y: " + coords.y.ToString();
+
+            //if (rawGrains.Length == 0) return;
+            //SelectGrain(GetGrainByCoords(coords));
         }
 
         private void MainImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (rawGrains.Length == 0) return;
-
             Vector2Int coords = GetPixelCoordinate(MainImage, e);
-
-            Grain grain = rawGrains.FirstOrDefault(x =>
-            x.Points.Contains(new Vector2(coords.x, coords.y)) || x.Edges.Contains(new Vector2(coords.x, coords.y)));
-
-            SelectGrain(grain);
+            SelectGrain(GetGrainByCoords(coords));
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e) => new SettingsWindow().ShowDialog();
