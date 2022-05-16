@@ -51,7 +51,7 @@
         <DataTemplate DataType="{x:Type ui:ColorArgument}">
             <StackPanel Orientation="Horizontal">
                 <Label Content="{Binding Path=Name}"/>
-                <xctk:ColorPicker SelectedColor="{Binding Path=Value}" />
+                <xctk:ColorPicker SelectedColor="{Binding Path=Value}" Width="150" />
             </StackPanel>
         </DataTemplate>
 

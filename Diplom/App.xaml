@@ -227,12 +227,13 @@
         </Style>
 
         <Style TargetType="{x:Type xctk:ColorPicker}" BasedOn="{StaticResource baseStyle}">
+            <Setter Property="Height" Value="22"/>
             <Setter Property="HeaderBackground" Value="{StaticResource LightenBrush}"/>
             <Setter Property="TabBackground" Value="{StaticResource LightenBrush}"/>
             <Setter Property="TabForeground" Value="{StaticResource ForegroundBrush}"/>
             <Setter Property="HeaderForeground" Value="{StaticResource ForegroundBrush}"/>
             <Setter Property="DropDownBackground" Value="{StaticResource LightenBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="DropDownBorderThickness" Value="0"/>
         </Style>
 
         <Style TargetType="{x:Type xctk:ColorPickerTabItem}" BasedOn="{StaticResource baseStyle}">

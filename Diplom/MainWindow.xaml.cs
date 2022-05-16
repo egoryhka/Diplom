@@ -220,10 +220,11 @@ namespace Diplom
                         removeFunc
                     ),
 
-                    new FunctionContainer("Расчет напряжений", new BindableCollection<Argument>{
-                        new ColorArgument("Low", Color.FromArgb(255, 255, 255, 255)),
-                        new ColorArgument("High", Color.FromArgb(255, 255, 255, 255)),
-                        new FloatArgument("Reference Deviation"/* "Максимальное отклонение"*/, 0f, 5, 2.5f, 0.1f),
+                    new FunctionContainer("Расчет напряжений (KAM)", new BindableCollection<Argument>{
+                        new FloatArgument("Максимальное отклонение", 0f, 15, 4f, 0.25f),
+                        new IntArgument("Прозрачность", 0, 255, 255),
+                        new ColorArgument("Низкое ", Color.FromArgb(255, 80, 80, 80)),
+                        new ColorArgument("Высокое", Color.FromArgb(255, 0, 220, 220)),
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
@@ -235,14 +236,15 @@ namespace Diplom
                                 MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
                                 return;
                             }
-                            Color lowColor = (ar[0] as ColorArgument).Value;
-                            Color highColor = (ar[1] as ColorArgument).Value;
-                            float referenceDeviation = (ar[2] as FloatArgument).Value;
+                            float referenceDeviation = (ar[0] as FloatArgument).Value;
+                            int opacity = (ar[1] as IntArgument).Value;
+                            Color lowColor = (ar[2] as ColorArgument).Value;
+                            Color highColor = (ar[3] as ColorArgument).Value;
 
                             GpuColor lowGpuColor = new GpuColor(lowColor.R, lowColor.G, lowColor.B, lowColor.A);
                             GpuColor highGpuColor = new GpuColor(highColor.R, highColor.G, highColor.B, highColor.A);
 
-                            Mask mask = functions.GPU.GetStrainMaskKAM(rawEulers, DataManager.CurrentData.Size, lowGpuColor, highGpuColor, referenceDeviation);
+                            Mask mask = functions.GPU.GetStrainMaskKAM(rawEulers, DataManager.CurrentData.Size, lowGpuColor, highGpuColor, referenceDeviation, opacity);
 
                             strainMask = mask;
                         }),

@@ -11,11 +11,11 @@ namespace Diplom.DataModule
     {
         public Dictionary<int, string> Phases { get; set; } = new Dictionary<int, string>();
 
-        public Color GrainSelectBorderColor { get; set; } = Color.FromArgb(255, 255, 0, 0);
+        public Color GrainSelectBorderColor { get; set; } = Color.FromArgb(255, 255, 255, 255);
 
-        public Color GrainsBorderColor { get; set; } = Color.FromArgb(255, 255, 255, 255);
+        public Color GrainsBorderColor { get; set; } = Color.FromArgb(180, 0, 0, 0);
 
-        public int MinGrainSize { get; set; } = 50;
+        public float MinGrainSize { get; set; } = 0.05f;
 
         public float NmPpx { get; set; } = 0.0f;
 

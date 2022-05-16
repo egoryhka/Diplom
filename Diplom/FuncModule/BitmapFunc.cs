@@ -19,8 +19,7 @@ namespace Diplom.FuncModule
 
         }
 
-        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        public static extern bool DeleteObject(IntPtr hObject);
+    
 
         public Bitmap ByteArrayToBitmap(Vector2Int size, byte[] bytes)
         {
@@ -36,6 +35,10 @@ namespace Diplom.FuncModule
 
             return bmp;
         }
+
+
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(IntPtr hObject);
 
         public BitmapSource BitmapToBitmapSource(Bitmap bitmap)
         {

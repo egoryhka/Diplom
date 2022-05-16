@@ -163,7 +163,7 @@ __kernel void GetGrainMask(__global euler* in, int width, int height, float Miss
 	}
 }
 
-__kernel void GetStrainMaskKAM(__global euler* in, int width, int height, float4 lowCol, float4 highCol, float referenceDeviation, __global uchar* out)
+__kernel void GetStrainMaskKAM(__global euler* in, int width, int height, float4 lowCol, float4 highCol, float referenceDeviation, int opacity, __global uchar* out)
 {
 	int x = get_global_id(0);
 	int y = get_global_id(1);
@@ -191,16 +191,17 @@ __kernel void GetStrainMaskKAM(__global euler* in, int width, int height, float4
 	float downRightDeviation = 0.0f;
 
 	float n = 0.0f;
+	float max = referenceDeviation;
 
-	if (y > 0) { n = n + 1.0f; upDeviation = angleBetween(in[id], in[idUp]); }
-	if (y < height) { n = n + 1.0f; downDeviation = angleBetween(in[id], in[idDown]); }
-	if (x > 0) { n = n + 1.0f; leftDeviation = angleBetween(in[id], in[idLeft]); }
-	if (x < width) { n = n + 1.0f; rightDeviation = angleBetween(in[id], in[idRight]); }
+	if (y > 0) { n = n + 1.0f; upDeviation = angleBetween(in[id], in[idUp]); if (upDeviation > max) max = upDeviation; }
+	if (y < height) { n = n + 1.0f; downDeviation = angleBetween(in[id], in[idDown]); if (downDeviation > max) max = downDeviation; }
+	if (x > 0) { n = n + 1.0f; leftDeviation = angleBetween(in[id], in[idLeft]); if (leftDeviation > max) max = leftDeviation; }
+	if (x < width) { n = n + 1.0f; rightDeviation = angleBetween(in[id], in[idRight]); if (rightDeviation > max) max = rightDeviation; }
 
-	if (y > 0 && x > 0) { n = n + 1.0f; upLeftDeviation = angleBetween(in[id], in[idUpLeft]); }
-	if (y < height && x > 0) { n = n + 1.0f; downLeftDeviation = angleBetween(in[id], in[idDownLeft]); }
-	if (y > 0 && x < width) { n = n + 1.0f; upRightDeviation = angleBetween(in[id], in[idUpRight]); }
-	if (y < height && x < width) { n = n + 1.0f; downRightDeviation = angleBetween(in[id], in[idDownRight]); }
+	if (y > 0 && x > 0) { n = n + 1.0f; upLeftDeviation = angleBetween(in[id], in[idUpLeft]); if (upLeftDeviation > max) max = upLeftDeviation; }
+	if (y < height && x > 0) { n = n + 1.0f; downLeftDeviation = angleBetween(in[id], in[idDownLeft]); if (downLeftDeviation > max) max = downLeftDeviation; }
+	if (y > 0 && x < width) { n = n + 1.0f; upRightDeviation = angleBetween(in[id], in[idUpRight]); if (upRightDeviation > max) max = upRightDeviation; }
+	if (y < height && x < width) { n = n + 1.0f; downRightDeviation = angleBetween(in[id], in[idDownRight]); if (downRightDeviation > max) max = downRightDeviation; }
 
 	float averageDeviation =
 		(upDeviation +
@@ -212,27 +213,18 @@ __kernel void GetStrainMaskKAM(__global euler* in, int width, int height, float4
 			upRightDeviation +
 			downRightDeviation) / n;
 
-	uchar fromR = convert_int(lowCol.x);
-	uchar fromG = convert_int(lowCol.y);
-	uchar fromB = convert_int(lowCol.z);
+	float t = averageDeviation / max;  // referenceDeviation max
+	int R = convert_int(lowCol.x * (1.0f - t) + convert_int(highCol.x * t));
+	int G = convert_int(lowCol.y * (1.0f - t) + convert_int(highCol.y * t));
+	int B = convert_int(lowCol.z * (1.0f - t) + convert_int(highCol.z * t));
 
-	uchar toR = convert_int(highCol.x);
-	uchar toG = convert_int(highCol.y);
-	uchar toB = convert_int(highCol.z);
 
-	float deltaR = (toR - fromR) / referenceDeviation;
-	float deltaG = (toG - fromG) / referenceDeviation;
-	float deltaB = (toB - fromB) / referenceDeviation;
-
-	uchar R = fromR + convert_int(averageDeviation * deltaR);
-	uchar G = fromG + convert_int(averageDeviation * deltaG);
-	uchar B = fromB + convert_int(averageDeviation * deltaB);
 	//---------------
 
-	out[outId] = B;//r
-	out[outId + 1] = G;//g
-	out[outId + 2] = R;//b
-	out[outId + 3] = 255;
+	out[outId] = B; //r
+	out[outId + 1] = G; //g
+	out[outId + 2] = R; //b
+	out[outId + 3] = opacity;
 }
 
 

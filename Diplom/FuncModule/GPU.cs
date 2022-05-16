@@ -23,7 +23,6 @@ namespace Diplom.FuncModule
 
         private const string gpuCode = @"
 
-
 struct Euler
 {
 	float x;
@@ -188,7 +187,7 @@ __kernel void GetGrainMask(__global euler* in, int width, int height, float Miss
 	}
 }
 
-__kernel void GetStrainMaskKAM(__global euler* in, int width, int height, int FrameSize, __global uchar* out)
+__kernel void GetStrainMaskKAM(__global euler* in, int width, int height, float4 lowCol, float4 highCol, float referenceDeviation, __global uchar* out)
 {
 	int x = get_global_id(0);
 	int y = get_global_id(1);
@@ -215,29 +214,40 @@ __kernel void GetStrainMaskKAM(__global euler* in, int width, int height, int Fr
 	float upRightDeviation = 0.0f;
 	float downRightDeviation = 0.0f;
 
-	float min = 360.0f;
-	float max = 0.0f;
-
 	float n = 0.0f;
+	float max = referenceDeviation;
 
-	if (y > 0) { n = n + 1.0f; upDeviation = angleBetween(in[id], in[idUp]); if (upDeviation < min) min = upDeviation; if (upDeviation > max) max = upDeviation; }
-	if (y < height) { n = n + 1.0f; downDeviation = angleBetween(in[id], in[idDown]); if (downDeviation < min) min = downDeviation; if (downDeviation > max) max = downDeviation; }
-	if (x > 0) { n = n + 1.0f; leftDeviation = angleBetween(in[id], in[idLeft]); if (leftDeviation < min) min = leftDeviation; if (leftDeviation > max) max = leftDeviation; }
-	if (x < width) { n = n + 1.0f; rightDeviation = angleBetween(in[id], in[idRight]); if (rightDeviation < min) min = rightDeviation; if (rightDeviation > max) max = rightDeviation; }
+	if (y > 0) { n = n + 1.0f; upDeviation = angleBetween(in[id], in[idUp]); if (upDeviation > max) max = upDeviation; }
+	if (y < height) { n = n + 1.0f; downDeviation = angleBetween(in[id], in[idDown]); if (downDeviation > max) max = downDeviation; }
+	if (x > 0) { n = n + 1.0f; leftDeviation = angleBetween(in[id], in[idLeft]); if (leftDeviation > max) max = leftDeviation; }
+	if (x < width) { n = n + 1.0f; rightDeviation = angleBetween(in[id], in[idRight]); if (rightDeviation > max) max = rightDeviation; }
 
-	if (y > 0 && x > 0) { n = n + 1.0f; upLeftDeviation = angleBetween(in[id], in[idUpLeft]); if (upLeftDeviation < min) min = upLeftDeviation; if (upLeftDeviation > max) max = upLeftDeviation; }
-	if (y < height && x > 0) { n = n + 1.0f; downLeftDeviation = angleBetween(in[id], in[idDownLeft]); if (downLeftDeviation < min) min = downLeftDeviation; if (downLeftDeviation > max) max = downLeftDeviation; }
-	if (y > 0 && x < width) { n = n + 1.0f; upRightDeviation = angleBetween(in[id], in[idUpRight]); if (upRightDeviation < min) min = upRightDeviation; if (upRightDeviation > max) max = upRightDeviation; }
-	if (y < height && x < width) { n = n + 1.0f; downRightDeviation = angleBetween(in[id], in[idDownRight]); if (downRightDeviation < min) min = downRightDeviation; if (downRightDeviation > max) max = downRightDeviation; }
+	if (y > 0 && x > 0) { n = n + 1.0f; upLeftDeviation = angleBetween(in[id], in[idUpLeft]); if (upLeftDeviation > max) max = upLeftDeviation; }
+	if (y < height && x > 0) { n = n + 1.0f; downLeftDeviation = angleBetween(in[id], in[idDownLeft]); if (downLeftDeviation > max) max = downLeftDeviation; }
+	if (y > 0 && x < width) { n = n + 1.0f; upRightDeviation = angleBetween(in[id], in[idUpRight]); if (upRightDeviation > max) max = upRightDeviation; }
+	if (y < height && x < width) { n = n + 1.0f; downRightDeviation = angleBetween(in[id], in[idDownRight]); if (downRightDeviation > max) max = downRightDeviation; }
 
-	float averageDeviation = (upDeviation + downDeviation + leftDeviation + rightDeviation + upLeftDeviation + downLeftDeviation + upRightDeviation + downRightDeviation) / n;
+	float averageDeviation =
+		(upDeviation +
+			downDeviation +
+			leftDeviation +
+			rightDeviation +
+			upLeftDeviation +
+			downLeftDeviation +
+			upRightDeviation +
+			downRightDeviation) / n;
 
-	//RGB
-	float3 color = (float3)(100.0f, 100.0f, 100.0f);
+	float t = averageDeviation / max;  // referenceDeviation max
+	int R = convert_int(lowCol.x * (1.0f - t) + convert_int(highCol.x * t));
+	int G = convert_int(lowCol.y * (1.0f - t) + convert_int(highCol.y * t));
+	int B = convert_int(lowCol.z * (1.0f - t) + convert_int(highCol.z * t));
 
-	out[outId] = convert_int(color.x);//r
-	out[outId + 1] = convert_int(color.y);//g
-	out[outId + 2] = convert_int(color.z);//b
+
+	//---------------
+
+	out[outId] = B; //r
+	out[outId + 1] = G; //g
+	out[outId + 2] = R; //b
 	out[outId + 3] = 255;
 }
 
@@ -493,13 +503,20 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
             return new Mask() { colors = res };
         }
 
-        public Mask GetStrainMaskKAM(Euler[] eulers, Vector2Int size, GpuColor lowCol, GpuColor hoghCol, float referenceDeviation)
+        public Mask GetStrainMaskKAM(Euler[] eulers, Vector2Int size, GpuColor lowCol, GpuColor highCol, float referenceDeviation, int opacity)
         {
-            try
-            {
-                BuildProgramm();
-            }
-            catch { }
+
+            // USE FOR RUNTIME TESTING
+
+            //        try
+            //        {
+            //Context.Dispose();
+            //Program.Dispose();
+            //CommandQueue.Dispose(); 
+
+            //            BuildProgramm();
+            //        }
+            //        catch { }
 
 
             ComputeKernel kernel = Program.CreateKernel("GetStrainMaskKAM");
@@ -513,9 +530,10 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
             kernel.SetValueArgument(1, size.x);
             kernel.SetValueArgument(2, size.y);
             kernel.SetValueArgument(3, lowCol);
-            kernel.SetValueArgument(4, hoghCol);
+            kernel.SetValueArgument(4, highCol);
             kernel.SetValueArgument(5, referenceDeviation);
-            kernel.SetMemoryArgument(6, outputBuffer);
+			kernel.SetValueArgument(6, opacity);
+			kernel.SetMemoryArgument(7, outputBuffer);
 
             CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 
