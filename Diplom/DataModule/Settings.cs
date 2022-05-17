@@ -9,7 +9,7 @@ namespace Diplom.DataModule
 {
     public class Settings
     {
-        public Dictionary<int, string> Phases { get; set; } = new Dictionary<int, string>();
+        public List<Phase> Phases { get; set; } = new List<Phase>();
 
         public Color GrainSelectBorderColor { get; set; } = Color.FromArgb(255, 255, 255, 255);
 

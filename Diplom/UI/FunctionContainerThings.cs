@@ -165,6 +165,6 @@ namespace Diplom.UI
 
     public enum MapVariant
     {
-        BandContrast, Euler, Strain
+        BandContrast, Euler, Phases
     }
 }

@@ -19,6 +19,13 @@ namespace Diplom.DataModule
         public Euler Euler;
     }
 
+    public class Phase
+    {
+        public int Index { get; set; }
+        public string Name { get; set; }
+        public System.Windows.Media.Color Color { get; set; }
+    }
+
     public struct Vector2
     {
         public Vector2(float _x, float _y) { x = _x; y = _y; }
@@ -33,7 +40,7 @@ namespace Diplom.DataModule
 
     public struct GpuColor
     {
-        public GpuColor(float _r, float _g, float _b, float _a) { r = _r; g = _g; b = _b;  a = _a; }
+        public GpuColor(float _r, float _g, float _b, float _a) { r = _r; g = _g; b = _b; a = _a; }
         public float r, g, b, a;
     }
 
@@ -50,4 +57,5 @@ namespace Diplom.DataModule
         public List<Vector2> Points;
         public List<Vector2> Edges;
     }
+
 }

@@ -193,7 +193,7 @@ namespace Diplom
                     ),
 
                     new FunctionContainer("Обнаружение зерен", new BindableCollection<Argument>{
-                        new FloatArgument("Минимальный размер, µm²", 0, 200, 0.1f, 0.005f),
+                        new FloatArgument("Минимальный размер, µm²", 0, 200, 0.05f, 0.005f),
                         new BoolArgument("Использовать общий параметр", false),
                     },
                         new FunctionWithArgumentCommand(args =>
@@ -221,9 +221,9 @@ namespace Diplom
                     ),
 
                     new FunctionContainer("Расчет напряжений (KAM)", new BindableCollection<Argument>{
-                        new FloatArgument("Максимальное отклонение", 0f, 15, 4f, 0.25f),
-                        new IntArgument("Прозрачность", 0, 255, 255),
-                        new ColorArgument("Низкое ", Color.FromArgb(255, 80, 80, 80)),
+                        new FloatArgument("Максимальное отклонение", 0f, 15, 2.5f, 0.25f),
+                        new IntArgument("Прозрачность", 0, 255, 120),
+                        new ColorArgument("Низкое ", Color.FromArgb(255, 0, 0, 0)),
                         new ColorArgument("Высокое", Color.FromArgb(255, 0, 220, 220)),
                     },
                         new FunctionWithArgumentCommand(args =>
@@ -541,6 +541,7 @@ namespace Diplom
             SelectGrain(GetGrainByCoords(coords));
         }
 
+        private void LaunchAllButton_Click(object sender, RoutedEventArgs e) => LaunchAllFunctions();
         private void SettingsButton_Click(object sender, RoutedEventArgs e) => new SettingsWindow().ShowDialog();
         private void AddFunction_Click(object sender, RoutedEventArgs e) => new FunctionsListWindow(Functions, AllFunctions.Except(Functions)).ShowDialog();
         private void ResetImageSize_Click(object sender, RoutedEventArgs e) => MainImageContainer.Reset();
@@ -566,6 +567,7 @@ namespace Diplom
 
 
         #endregion
+
 
     }
 }

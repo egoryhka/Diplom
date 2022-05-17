@@ -13,7 +13,7 @@
 
         <SolidColorBrush x:Key="ThumbBrush" Color="#686868" />
         <SolidColorBrush x:Key="SemiDarkenBrush" Color="#252525" />
-        <SolidColorBrush x:Key="DarkenBrush" Color="#161616" />
+        <SolidColorBrush x:Key="DarkenBrush" Color="#1e1e1e" />
         <SolidColorBrush x:Key="LightenBrush" Color="#3e3e42" />
 
         <SolidColorBrush x:Key="BlueHoverBrush" Color="#FF1C97EA" />
@@ -172,8 +172,7 @@
         </Style>
 
         <Style TargetType="{x:Type Button}" BasedOn="{StaticResource baseStyle}">
-            <Setter Property="Background" Value="Transparent"/>
-
+            <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">

@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Diplom.DataModule;
+using Caliburn.Micro;
 
 namespace Diplom
 {
@@ -25,15 +26,17 @@ namespace Diplom
 
         public Settings _settings { get; set; } = new Settings();
 
+        public BindableCollection<Phase> _phases { get; set; } = new BindableCollection<Phase>();
+
         public SettingsWindow()
         {
             LoadCurrentSettings();
             InitializeComponent();
 
-            foreach (var phase in _settings.Phases)
-            {
-                CreatePhaseNameEditor(phase);
-            }
+            //foreach (var phase in _settings.Phases)
+            //{
+            //    CreatePhaseNameEditor(phase);
+            //}
 
         }
 
@@ -41,6 +44,7 @@ namespace Diplom
         private void ApplySettingsButton_Click(object sender, RoutedEventArgs e)
         {
             DataManager.CurrentData.Settings = _settings;
+            DataManager.CurrentData.Settings.Phases = _phases.ToList();
             Close();
         }
 
@@ -52,10 +56,9 @@ namespace Diplom
         private void LoadCurrentSettings()
         {
             var currentSettings = DataManager.CurrentData.Settings;
-            foreach (var phase in currentSettings.Phases)
-            {
-                _settings.Phases.Add(phase.Key, phase.Value);
-            }
+
+            _phases.AddRange(currentSettings.Phases);
+
             _settings.GrainsBorderColor = currentSettings.GrainsBorderColor;
             _settings.GrainSelectBorderColor = currentSettings.GrainSelectBorderColor;
 
@@ -65,37 +68,37 @@ namespace Diplom
 
         }
 
-        private void CreatePhaseNameEditor(KeyValuePair<int, string> phase)
-        {
-            DockPanel EditorPanel = new DockPanel() { LastChildFill = true };
+        //private void CreatePhaseNameEditor(KeyValuePair<int, string> phase)
+        //{
+        //    DockPanel EditorPanel = new DockPanel() { LastChildFill = true };
 
-            TextBlock phaseNumberText = new TextBlock();
-            phaseNumberText.Text = phase.Key.ToString();
-            phaseNumberText.Width = 20;
-            phaseNumberText.Margin = new Thickness(5);
-            phaseNumberText.VerticalAlignment = VerticalAlignment.Center;
-            DockPanel.SetDock(phaseNumberText, Dock.Left);
+        //    TextBlock phaseNumberText = new TextBlock();
+        //    phaseNumberText.Text = phase.Key.ToString();
+        //    phaseNumberText.Width = 20;
+        //    phaseNumberText.Margin = new Thickness(5);
+        //    phaseNumberText.VerticalAlignment = VerticalAlignment.Center;
+        //    DockPanel.SetDock(phaseNumberText, Dock.Left);
 
-            TextBox phaseNameTextBox = new TextBox();
-            phaseNameTextBox.Height = 25;
-            phaseNameTextBox.Width = Double.NaN;
+        //    TextBox phaseNameTextBox = new TextBox();
+        //    phaseNameTextBox.Height = 25;
+        //    phaseNameTextBox.Width = Double.NaN;
 
-            Binding binding = new Binding()
-            {
-                Source = _settings,
-                Path = new PropertyPath($"Phases[{phase.Key}]"),
-                Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
-            };
+        //    Binding binding = new Binding()
+        //    {
+        //        Source = _settings,
+        //        Path = new PropertyPath($"Phases[{phase.Key}]"),
+        //        Mode = BindingMode.TwoWay,
+        //        UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        //    };
 
-            phaseNameTextBox.SetBinding(TextBox.TextProperty, binding);
+        //    phaseNameTextBox.SetBinding(TextBox.TextProperty, binding);
 
-            EditorPanel.Children.Add(phaseNumberText);
-            EditorPanel.Children.Add(phaseNameTextBox);
+        //    EditorPanel.Children.Add(phaseNumberText);
+        //    EditorPanel.Children.Add(phaseNameTextBox);
 
-            PhasesStackPanel.Children.Add(EditorPanel);
+        //    PhasesStackPanel.Children.Add(EditorPanel);
 
-        }
+        //}
 
 
         private static bool IsTextAllowedFloat(string text) => !_regexFloat.IsMatch(text);

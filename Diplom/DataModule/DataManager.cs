@@ -13,7 +13,7 @@ namespace Diplom.DataModule
 {
     public static class DataManager
     {
-        public static Data CurrentData;
+        public static Data CurrentData { get; set; }
         public static string ProjectName
         {
             get
@@ -124,9 +124,9 @@ namespace Diplom.DataModule
                         CurrentData.Settings.NmPpx = float.Parse(rows[1].ItemArray[2].ToString());
 
                         CurrentData.Settings.Phases.Clear();
-                        foreach (int phase in CurrentData.Points.Select(x => x.Phase).Distinct().OrderBy(x => x))
+                        foreach (int phaseIndex in CurrentData.Points.Select(x => x.Phase).Distinct().OrderBy(x => x))
                         {
-                            CurrentData.Settings.Phases.Add(phase, "phaseName");
+                            CurrentData.Settings.Phases.Add(new Phase() { Index = phaseIndex, Name = "phaseName", Color = System.Windows.Media.Color.FromArgb(255, 255, 255, 255) });
                         }
 
                         CurrentData.Initialize();
