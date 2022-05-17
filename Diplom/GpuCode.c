@@ -101,6 +101,23 @@ __kernel void Bc2Color(__global int* in, int width, int height, __global uchar* 
 	out[outlinearId + 3] = 255; // A
 }
 
+__kernel void Phase2Color(__global int* in, __global float4* phaseColors, int width, int height, __global uchar* out)
+{
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+
+	int inlinearId = (int)(x + y * width);
+	int phaseIndex = in[inlinearId];
+
+	int4 col = (int4)(phaseColors[phaseIndex].x, phaseColors[phaseIndex].y, phaseColors[phaseIndex].z, phaseColors[phaseIndex].w);
+
+	int outlinearId = (int)((x + y * width) * 4);
+	out[outlinearId] = col.z; // R
+	out[outlinearId + 1] = col.y; // G
+	out[outlinearId + 2] = col.x; // B
+	out[outlinearId + 3] = 255; // A
+}
+
 __kernel void ApplyMask(__global uchar* in, __global uchar* mask, int width, int height, __global uchar* out)
 {
 	int x = get_global_id(0);

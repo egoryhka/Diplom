@@ -450,6 +450,38 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
             return outColors;
         }
 
+        public byte[] GetColorMapPhases(int[] phaseIndexes, Phase[] phases, Vector2Int size)
+        {
+            ComputeKernel kernel = Program.CreateKernel("Phase2Color");
+            if (kernel == null) return null;
+
+            GpuColor[] phaseColors = new GpuColor[phases.Max(x => x.Index) + 1];
+            foreach (Phase p in phases)
+            {
+                phaseColors[p.Index] = new GpuColor(p.Color.R, p.Color.G, p.Color.B, p.Color.A);
+            }
+
+            ComputeBuffer<byte> outColorBuffer = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite, size.x * size.y * 4);
+            ComputeBuffer<GpuColor> phaseColorsBuffer = new ComputeBuffer<GpuColor>(Context, ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.CopyHostPointer, phaseColors);
+            ComputeBuffer<int> phaseIndexesBuffer = new ComputeBuffer<int>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, phaseIndexes);
+
+            kernel.SetMemoryArgument(0, phaseIndexesBuffer);
+            kernel.SetMemoryArgument(1, phaseColorsBuffer);
+            kernel.SetValueArgument(2, size.x);
+            kernel.SetValueArgument(3, size.y);
+            kernel.SetMemoryArgument(4, outColorBuffer);
+
+            CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+
+            byte[] outColors = new byte[outColorBuffer.Count]; // output
+            CommandQueue.ReadFromBuffer(outColorBuffer, ref outColors, true, null);
+
+            kernel.Dispose(); outColorBuffer.Dispose(); phaseIndexesBuffer.Dispose(); phaseColorsBuffer.Dispose();
+
+
+            return outColors;
+        }
+
         public byte[] ApplyMask(byte[] inputColors, Mask mask, Vector2Int size)
         {
             ComputeKernel kernel = Program.CreateKernel("ApplyMask");
@@ -532,8 +564,8 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
             kernel.SetValueArgument(3, lowCol);
             kernel.SetValueArgument(4, highCol);
             kernel.SetValueArgument(5, referenceDeviation);
-			kernel.SetValueArgument(6, opacity);
-			kernel.SetMemoryArgument(7, outputBuffer);
+            kernel.SetValueArgument(6, opacity);
+            kernel.SetMemoryArgument(7, outputBuffer);
 
             CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 

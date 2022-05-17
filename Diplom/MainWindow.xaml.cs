@@ -44,6 +44,8 @@ namespace Diplom
         private Euler[] rawEulers = new Euler[0];
         private Euler[] bufferEulers = new Euler[0];
 
+        private int[] rawPhaseIndexes = new int[0];
+
         private System.Drawing.Bitmap mainImgBitmapBuffer;
         //-------------------------------------------
 
@@ -253,7 +255,7 @@ namespace Diplom
                         removeFunc
                     ),
 
-                    new FunctionContainer("Картирование (BC/Euler/Strain...)", new BindableCollection<Argument>{
+                    new FunctionContainer("Картирование (BC/Euler/Phase...)", new BindableCollection<Argument>{
                         new MapVariantArgument("Вариант", MapVariant.Euler),
                         new BoolArgument("Отображать границы", false),
                         new BoolArgument("Отображать напряжения", false),
@@ -286,6 +288,13 @@ namespace Diplom
                                         break;
                                     }
 
+                                case MapVariant.Phases:
+                                    {
+                                        colors = functions.GPU.GetColorMapPhases(rawPhaseIndexes,
+                                            DataManager.CurrentData.Settings.Phases.ToArray(),
+                                            DataManager.CurrentData.Size);
+                                        break;
+                                    }
                             }
 
                             maskedColors = colors;
@@ -448,6 +457,7 @@ namespace Diplom
                 DataManager.LoadEbsdFromExcel(pathToFile);
                 rawEulers = DataManager.CurrentData.Eulers;
                 bufferEulers = rawEulers;
+                rawPhaseIndexes = DataManager.CurrentData.Points.Select(x => x.Phase).ToArray();
             }
             catch (ExcelNotValidException)
             {
@@ -466,6 +476,7 @@ namespace Diplom
                 DataManager.Load(pathToFile);
                 rawEulers = DataManager.CurrentData.Eulers;
                 bufferEulers = rawEulers;
+                rawPhaseIndexes = DataManager.CurrentData.Points.Select(x => x.Phase).ToArray();
             }
             catch (JsonLoadException)
             {
