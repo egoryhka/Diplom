@@ -235,7 +235,6 @@ __kernel void GetStrainMaskKAM(__global euler* in, int width, int height, float4
 	int G = convert_int(lowCol.y * (1.0f - t) + convert_int(highCol.y * t));
 	int B = convert_int(lowCol.z * (1.0f - t) + convert_int(highCol.z * t));
 
-
 	//---------------
 
 	out[outId] = B; //r
