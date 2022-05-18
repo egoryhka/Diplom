@@ -125,6 +125,23 @@ __kernel void Bc2Color(__global int* in, int width, int height, __global uchar* 
 	out[outlinearId + 3] = 255; // A
 }
 
+__kernel void Phase2Color(__global int* in, __global float4* phaseColors, int width, int height, __global uchar* out)
+{
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+
+	int inlinearId = (int)(x + y * width);
+	int phaseIndex = in[inlinearId];
+
+	int4 col = (int4)(phaseColors[phaseIndex].x, phaseColors[phaseIndex].y, phaseColors[phaseIndex].z, phaseColors[phaseIndex].w);
+
+	int outlinearId = (int)((x + y * width) * 4);
+	out[outlinearId] = col.z; // R
+	out[outlinearId + 1] = col.y; // G
+	out[outlinearId + 2] = col.x; // B
+	out[outlinearId + 3] = 255; // A
+}
+
 __kernel void ApplyMask(__global uchar* in, __global uchar* mask, int width, int height, __global uchar* out)
 {
 	int x = get_global_id(0);
@@ -187,7 +204,7 @@ __kernel void GetGrainMask(__global euler* in, int width, int height, float Miss
 	}
 }
 
-__kernel void GetStrainMaskKAM(__global euler* in, int width, int height, float4 lowCol, float4 highCol, float referenceDeviation, __global uchar* out)
+__kernel void GetStrainMaskKAM(__global euler* in, int width, int height, float4 lowCol, float4 highCol, float referenceDeviation, int opacity, __global uchar* out)
 {
 	int x = get_global_id(0);
 	int y = get_global_id(1);
@@ -242,13 +259,12 @@ __kernel void GetStrainMaskKAM(__global euler* in, int width, int height, float4
 	int G = convert_int(lowCol.y * (1.0f - t) + convert_int(highCol.y * t));
 	int B = convert_int(lowCol.z * (1.0f - t) + convert_int(highCol.z * t));
 
-
 	//---------------
 
 	out[outId] = B; //r
 	out[outId + 1] = G; //g
 	out[outId + 2] = R; //b
-	out[outId + 3] = 255;
+	out[outId + 3] = opacity;
 }
 
 

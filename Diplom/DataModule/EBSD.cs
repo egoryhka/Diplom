@@ -26,6 +26,13 @@ namespace Diplom.DataModule
         public System.Windows.Media.Color Color { get; set; }
     }
 
+    public struct Vector3
+    {
+        public Vector3(float _x, float _y, float _z) { x = _x; y = _y; z = _z; }
+        public float x, y, z;
+        public float length => MathF.Sqrt(x * x + y * y + z * z);
+    }
+
     public struct Vector2
     {
         public Vector2(float _x, float _y) { x = _x; y = _y; }

@@ -143,7 +143,6 @@
 
                     <TabItem Header="Функции">
 
-                        <!--NEW ///////////////////////////-->
                         <Grid  Background="{StaticResource DarkenBrush}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*" />
@@ -157,28 +156,33 @@
 
                             <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                                 <StackPanel x:Name="FunctionsTab" Orientation="Vertical" Margin="0,10,0,0">
-                                   
-                                        <ItemsControl x:Name="FunctionsContainer" ItemsSource="{Binding Functions, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <StackPanel HorizontalAlignment="Left" Orientation="Vertical">
-                                                    </StackPanel>
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                        </ItemsControl>
+
+                                    <ItemsControl x:Name="FunctionsContainer" ItemsSource="{Binding Functions, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel HorizontalAlignment="Left" Orientation="Vertical">
+                                                </StackPanel>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
 
                                 </StackPanel>
                             </ScrollViewer>
 
-                            <Button x:Name="LaunchAllButton" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Margin="5" Foreground="DarkSeaGreen" BorderBrush="#acacac" BorderThickness="0.3" FontSize="16" Content="ЗАПУСК" Click="LaunchAllButton_Click" >
-
-                            </Button>
+                            <Button x:Name="LaunchAllButton"
+                                    VerticalAlignment="Stretch" 
+                                    HorizontalAlignment="Stretch" 
+                                    Grid.Row="1" Margin="5" 
+                                    Foreground="DarkSeaGreen" BorderBrush="#acacac" BorderThickness="0.3"
+                                    FontSize="16" Content="ЗАПУСК" Click="LaunchAllButton_Click" />
                         </Grid>
-                        <!--NEW /////////////////////////// -->
-
                     </TabItem>
+                    
                     <TabItem Header="Анализ">
-                        <Grid/>
+                        <Grid Background="{StaticResource DarkenBrush}">
+                            
+                            
+                        </Grid>
                     </TabItem>
                 </TabControl>
             </Border>

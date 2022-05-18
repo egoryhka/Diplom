@@ -255,6 +255,39 @@ namespace Diplom
                         removeFunc
                     ),
 
+                    new FunctionContainer("Расчет напряжений (GOS)", new BindableCollection<Argument>{
+                        new FloatArgument("Максимальное отклонение", 0f, 270, 20f, 10f),
+                        new IntArgument("Прозрачность", 0, 255, 120),
+                        new ColorArgument("Низкое ", Color.FromArgb(255, 0, 100, 0)),
+                        new ColorArgument("Высокое", Color.FromArgb(255, 255, 255, 255)),
+                    },
+                        new FunctionWithArgumentCommand(args =>
+                        {
+                            if (DataManager.CurrentData.Eulers == null || rawGrains.Length == 0) return;
+
+                            var ar = args as BindableCollection<Argument>;
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+                            float referenceDeviation = (ar[0] as FloatArgument).Value;
+                            int opacity = (ar[1] as IntArgument).Value;
+                            Color lowColor = (ar[2] as ColorArgument).Value;
+                            Color highColor = (ar[3] as ColorArgument).Value;
+
+                            GpuColor lowGpuColor = new GpuColor(lowColor.R, lowColor.G, lowColor.B, lowColor.A);
+                            GpuColor highGpuColor = new GpuColor(highColor.R, highColor.G, highColor.B, highColor.A);
+
+                            Mask mask = functions.CPU.GetStrainMaskGOS(rawEulers, rawGrains, DataManager.CurrentData.Size, lowGpuColor, highGpuColor, referenceDeviation, opacity);
+
+                            strainMask = mask;
+                        }),
+                        moveFuncUP,
+                        moveFuncDOWN,
+                        removeFunc
+                    ),
+
                     new FunctionContainer("Картирование (BC/Euler/Phase...)", new BindableCollection<Argument>{
                         new MapVariantArgument("Вариант", MapVariant.Euler),
                         new BoolArgument("Отображать границы", false),
