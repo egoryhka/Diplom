@@ -44,7 +44,6 @@ namespace Diplom.FuncModule
             return definedGrains.ToArray();
         }
 
-
         private void FloodFillGrain(Vector2 pt, ref Grain grain, ref bool[,] grainPointsDefined, Mask grainMask)
         {
             Vector2Int size = DataManager.CurrentData.Size;
