@@ -7,6 +7,7 @@
         xmlns:ui="clr-namespace:Diplom.UI"
         xmlns:converters="clr-namespace:Diplom.UI"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
         Title="Проект: " Width="800" Height="500"  x:Name="MainWin"
         Icon="Resources/Diplom.ico"
@@ -76,20 +77,63 @@
                     </ContextMenu>
                 </Expander.ContextMenu>
 
-                <StackPanel Grid.Row="1">
+                <StackPanel>
                     <ItemsControl ItemsSource="{Binding Args}"/>
                     <Button Margin="0,5,0,0" Foreground="DarkSeaGreen" BorderBrush="#acacac" BorderThickness="0.3" FontSize="16" Content="ЗАПУСК" Command="{Binding Command}" >
 
                     </Button>
                 </StackPanel>
             </Expander>
-
         </DataTemplate>
+
+        <!-- DataTemplate for Analys -->
+        <DataTemplate DataType="{x:Type ui:AnalysContainer}">
+
+            <Expander Header="{Binding Name}" IsExpanded="True" Margin="10,0,10,10" Padding="5" Background="{StaticResource SemiDarkenBrush}" Foreground="{StaticResource ForegroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0.5">
+                <Expander.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Foreground="OrangeRed" Icon="❌" Header="Убрать" Command="{Binding Remove}" CommandParameter="{Binding Path=.}"></MenuItem>
+                    </ContextMenu>
+                </Expander.ContextMenu>
+
+                <StackPanel>
+                    <ItemsControl ItemsSource="{Binding AnalysData}"/>
+                    <Button Margin="0,5,0,0" Foreground="DarkSeaGreen" BorderBrush="#acacac" BorderThickness="0.3" FontSize="16" Content="ОБНОВИТЬ" Command="{Binding Command}" >
+
+                    </Button>
+                </StackPanel>
+            </Expander>
+        </DataTemplate>
+
+        <!-- DataTemplate for Diagram -->
+        <DataTemplate DataType="{x:Type ui:Diagram}">
+            <StackPanel>
+                <oxy:Plot Title="{Binding Name}" Height="200" TextColor="WhiteSmoke" >
+                    <oxy:Plot.Axes>
+                        <oxy:CategoryAxis IsZoomEnabled="False" IsPanEnabled="False" Labels="{Binding CategoriesLabels}" Position="Bottom" Title="{Binding xName}"/>
+                        <oxy:LinearAxis IsZoomEnabled="False" IsPanEnabled="False" Position="Left" Title="{Binding yName}"/>
+                    </oxy:Plot.Axes>
+                    <oxy:Plot.Series>
+                        <oxy:ColumnSeries ItemsSource="{Binding Values}"/>
+                    </oxy:Plot.Series>
+                </oxy:Plot>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- DataTemplate for Table -->
+        <DataTemplate DataType="{x:Type ui:Table}">
+            <StackPanel>
+                <DataGrid IsReadOnly="True" ItemsSource="{Binding Values}">
+                    
+                </DataGrid>
+            </StackPanel>
+        </DataTemplate>
+
+
     </Window.Resources>
 
 
     <Grid Background="{StaticResource BackgroundBrush}">
-
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Height="22" VerticalAlignment="Top">
             <Menu  VerticalAlignment="Center" HorizontalAlignment="Left" Background="#FF2D2D30" Margin="2,0,0,0">
                 <MenuItem Header="Файл" BorderThickness="0" Height="20">
@@ -177,11 +221,26 @@
                                     FontSize="16" Content="ЗАПУСК" Click="LaunchAllButton_Click" />
                         </Grid>
                     </TabItem>
-                    
+
                     <TabItem Header="Анализ">
                         <Grid Background="{StaticResource DarkenBrush}">
-                            
-                            
+                            <Grid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Icon="➕" Header="Добавить анализ" Click="AddAnalys_Click"></MenuItem>
+                                </ContextMenu>
+                            </Grid.ContextMenu>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                <StackPanel Orientation="Vertical" Margin="0,10,0,0">
+                                    <ItemsControl x:Name="AnalysisBlockContainer" ItemsSource="{Binding AnalysBlocks, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel HorizontalAlignment="Stretch" Orientation="Vertical">
+                                                </StackPanel>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </ScrollViewer>
                         </Grid>
                     </TabItem>
                 </TabControl>

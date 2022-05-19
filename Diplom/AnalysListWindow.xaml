@@ -1,0 +1,51 @@
+﻿<Window x:Class="Diplom.AnalysListWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Diplom"
+        xmlns:ui="clr-namespace:Diplom.UI"
+        mc:Ignorable="d"
+        x:Name="AnalysWin"
+        Title="Анализ" Height="400" Width="300"
+        ResizeMode="NoResize">
+
+
+    <Window.Resources>
+        <!-- DataTemplate for Analys -->
+        <DataTemplate DataType="{x:Type ui:SelectableAnalys}">
+            <StackPanel Orientation="Horizontal" Margin="10,0,0,10" Background="{StaticResource SemiDarkenBrush}" >
+                <Label Content="{Binding Analys.Name}"/>
+                <CheckBox VerticalAlignment="Center" IsChecked="{Binding IsSelected}"/>
+            </StackPanel>
+
+        </DataTemplate>
+    </Window.Resources>
+
+
+
+    <Grid Background="{StaticResource BackgroundBrush}">
+
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto">
+            <ItemsControl x:Name="AnalysisContainer" ItemsSource="{Binding AnalysToSelect, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:AnalysListWindow}}}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Width="300" HorizontalAlignment="Left" Orientation="Vertical">
+                        </StackPanel>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Orientation="Horizontal">
+            <Button x:Name="ApplySettingsButton" Content="Применить" Width="148" Margin="2,0,0,0" Click="ApplyAnalysisButton_Click"/>
+            <Button x:Name="DenySettingsButton" Content="Отмена" Width="148" Margin="0,0,2,0" Click="DenyAnalysisButton_Click"/>
+        </StackPanel>
+
+    </Grid>
+</Window>

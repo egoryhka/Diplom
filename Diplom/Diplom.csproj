@@ -56,6 +56,12 @@
     <Reference Include="Cloo">
       <HintPath>..\..\..\..\SUMMER_PRACTICE\EBSD_Analyse\Cloo.dll</HintPath>
     </Reference>
+    <Reference Include="OxyPlot">
+      <HintPath>..\..\..\..\SUMMER_PRACTICE\EBSD_Analyse\WpfApp\bin\Debug\net5.0-windows\OxyPlot.dll</HintPath>
+    </Reference>
+    <Reference Include="OxyPlot.Wpf">
+      <HintPath>..\..\..\..\SUMMER_PRACTICE\EBSD_Analyse\WpfApp\bin\Debug\net5.0-windows\OxyPlot.Wpf.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

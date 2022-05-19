@@ -19,6 +19,8 @@ using Diplom.DataModule;
 using Diplom.FuncModule;
 using Diplom.UI;
 using Microsoft.Win32;
+using OxyPlot;
+using OxyPlot.Series;
 
 namespace Diplom
 {
@@ -28,10 +30,15 @@ namespace Diplom
     public partial class MainWindow : Window
     {
         private Functions functions;
+        //----------------------------------------
+        public List<AnalysContainer> AllAnalysBlocks { get; set; } = new List<AnalysContainer>();
+        public BindableCollection<AnalysContainer> AnalysBlocks { get; set; } = new BindableCollection<AnalysContainer>();
 
+        //----------------------------------------
         public List<FunctionContainer> AllFunctions { get; set; } = new List<FunctionContainer>();
-
         public BindableCollection<FunctionContainer> Functions { get; set; } = new BindableCollection<FunctionContainer>();
+
+        //----------------------------------------
 
         private byte[] colors = new byte[0];
         private byte[] maskedColors = new byte[0];
@@ -355,6 +362,101 @@ namespace Diplom
             // Functions.AddRange(AllFunctions);
         }
 
+        private void InitializeAnalysBlocks()
+        {
+
+            var removeAnalysBlock = new MoveAnalysBlockCommand(f =>
+            {
+                if (AnalysBlocks.Count == 0) return;
+                AnalysContainer analysBlock = f as AnalysContainer;
+                if (analysBlock != null)
+                {
+                    int indexOfFunc = AnalysBlocks.IndexOf(analysBlock);
+                    AnalysBlocks.RemoveAt(indexOfFunc);
+                }
+            });
+
+            AllAnalysBlocks.AddRange
+                (
+                new AnalysContainer[] {
+
+                    new AnalysContainer("Распределение размеров зерен", new BindableCollection<AnalysData>{
+                        new Diagram("Диаграмма", "Размер, µm²","Количество, шт"),
+                    },
+                        new AnalysWithArgumentCommand(args =>
+                        {
+                            if (DataManager.CurrentData.Eulers == null || rawGrains.Length == 0) return;
+
+                            var ar = args as BindableCollection<AnalysData>;
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+                            var points = (ar[0] as Diagram).Values;
+                            var categoriesLabels = (ar[0] as Diagram).CategoriesLabels;
+                            points.Clear();
+                            categoriesLabels.Clear();
+
+                            List<float> categoriesIndexes = new List<float>();
+                            Grain[] orderedGrains = rawGrains.OrderBy(x => x.Size).ToArray();
+
+                            for (int i = 0; i < orderedGrains.Last().Size / 100f; i+=100)
+                            {
+                                categoriesIndexes.Add(i * DataManager.CurrentData.Settings.NmPpx * DataManager.CurrentData.Settings.NmPpx);
+                            }
+                            for (int i = 0; i < categoriesIndexes.Count-1; i++)
+                            {
+                                int count = orderedGrains.Count(x =>
+                                                                    x.Size * DataManager.CurrentData.Settings.NmPpx *
+                                                                    DataManager.CurrentData.Settings.NmPpx > categoriesIndexes[i] &&
+                                                                    x.Size * DataManager.CurrentData.Settings.NmPpx *
+                                                                    DataManager.CurrentData.Settings.NmPpx < categoriesIndexes[i+1]);
+
+                                points.Add(new ColumnItem(count));
+                                categoriesLabels.Add(categoriesIndexes[i].ToString());
+                            }
+
+                        }),
+                        removeAnalysBlock
+                    ),
+
+
+                    new AnalysContainer("Фазовый состав", new BindableCollection<AnalysData>{
+                        new UI.Table("Диаграмма"),
+                    },
+                        new AnalysWithArgumentCommand(args =>
+                        {
+                            if (DataManager.CurrentData.Eulers == null || rawGrains.Length == 0) return;
+
+                            var ar = args as BindableCollection<AnalysData>;
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+                            var tableValues = (ar[0] as UI.Table).Values;
+                            tableValues.Clear();
+
+                            foreach(var p in DataManager.CurrentData.Settings.Phases)
+                            {
+                                int count = DataManager.CurrentData.Points.Count(x=>x.Phase==p.Index);
+                                float percent = 100f* ((float)count/DataManager.CurrentData.Points.Length);
+                                tableValues.Add(new PhaseConsist(){Name=p.Name, Count =  count, Percent=percent});
+                            }
+                        }),
+                        removeAnalysBlock
+                    ),
+
+
+                });
+
+
+            // Functions.AddRange(AllFunctions);
+            AnalysBlocks.AddRange(AllAnalysBlocks);
+
+        }
+
         public void AutoUpdate()
         {
             if (DataManager.CurrentData.Settings.AutoUpdate)
@@ -409,6 +511,7 @@ namespace Diplom
         {
             InitializeComponent();
             InitializeFunctions();
+            InitializeAnalysBlocks();
 
             MainImageContainer.label = MainImageScaleLabel;
             MainImageContainer.image = MainImage;
@@ -588,6 +691,8 @@ namespace Diplom
         private void LaunchAllButton_Click(object sender, RoutedEventArgs e) => LaunchAllFunctions();
         private void SettingsButton_Click(object sender, RoutedEventArgs e) => new SettingsWindow().ShowDialog();
         private void AddFunction_Click(object sender, RoutedEventArgs e) => new FunctionsListWindow(Functions, AllFunctions.Except(Functions)).ShowDialog();
+
+        private void AddAnalys_Click(object sender, RoutedEventArgs e) => new AnalysListWindow(AnalysBlocks, AllAnalysBlocks.Except(AnalysBlocks)).ShowDialog();
         private void ResetImageSize_Click(object sender, RoutedEventArgs e) => MainImageContainer.Reset();
 
         //--------------------------------------------
