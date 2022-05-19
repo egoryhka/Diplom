@@ -410,7 +410,7 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
 
             try
             {
-                string gpuCode = File.ReadAllText(Directory.GetCurrentDirectory() + @"\GpuCode.c");
+                //string gpuCode = File.ReadAllText(Directory.GetCurrentDirectory() + @"\GpuCode.c");
 
                 Program = new ComputeProgram(Context, gpuCode);
                 Program.Build(Devices, "", null, IntPtr.Zero);
@@ -609,7 +609,8 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
                 unsolvedCount = newUnsolvedCount;
             }
 
-            while (unsolvedCount > 0)
+            i = 0;
+            while (unsolvedCount > 0 && i++ < maxIterations)
             {
                 eulers = StandartCleanUp(eulers, size, 1);
                 unsolvedCount = CPU.CountUnsolved(eulers);
