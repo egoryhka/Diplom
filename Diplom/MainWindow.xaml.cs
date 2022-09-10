@@ -488,6 +488,8 @@ namespace Diplom
             Functions[b] = buff;
         }
 
+
+        // ПЕРЕНЕСТИ В DATA MODULE
         private Grain GetGrainByCoords(Vector2Int coords) => rawGrains.FirstOrDefault(x =>
             x.Points.Contains(new Vector2(coords.x, coords.y)) || x.Edges.Contains(new Vector2(coords.x, coords.y)));
 
@@ -702,7 +704,7 @@ namespace Diplom
         private void AutoUpdateCombobox(object sender, SelectionChangedEventArgs e) => AutoUpdate();
         private void AutoUpdateCheckbox(object sender, RoutedEventArgs e) => AutoUpdate();
 
-        private static readonly Regex _regexInt = new Regex("[^0-9-]+"); //regex that matches disallowed text
+        private static readonly Regex _regexInt = new Regex("[^0-9-]+");    //regex that matches disallowed text
         private static readonly Regex _regexFloat = new Regex("[^0-9.-]+"); //regex that matches disallowed text
 
         private static bool IsTextAllowedInt(string text) => !_regexInt.IsMatch(text);

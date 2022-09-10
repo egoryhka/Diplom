@@ -18,6 +18,5 @@ namespace Diplom.FuncModule
             CPU = new CPU();
             BitmapFunc = new BitmapFunc();
         }
-
     }
 }

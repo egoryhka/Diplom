@@ -13,7 +13,6 @@ namespace Diplom.FuncModule
     {
         private ComputeContext Context;
         private ComputeProgram Program;
-
         private ComputeCommandQueue CommandQueue;
 
         public GPU()
@@ -406,7 +405,6 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
 
             List<ComputeDevice> Devices = new List<ComputeDevice>();
             Devices.AddRange(ComputePlatform.Platforms[0].Devices);
-
 
             try
             {
