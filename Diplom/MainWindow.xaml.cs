@@ -1,26 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using Diplom.DataModule;
 using Diplom.FuncModule;
 using Diplom.UI;
 using Microsoft.Win32;
-using OxyPlot;
 using OxyPlot.Series;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Diplom
 {
@@ -33,11 +25,9 @@ namespace Diplom
         //----------------------------------------
         public List<AnalysContainer> AllAnalysBlocks { get; set; } = new List<AnalysContainer>();
         public BindableCollection<AnalysContainer> AnalysBlocks { get; set; } = new BindableCollection<AnalysContainer>();
-
         //----------------------------------------
         public List<FunctionContainer> AllFunctions { get; set; } = new List<FunctionContainer>();
         public BindableCollection<FunctionContainer> Functions { get; set; } = new BindableCollection<FunctionContainer>();
-
         //----------------------------------------
 
         private byte[] colors = new byte[0];
@@ -355,9 +345,7 @@ namespace Diplom
                         moveFuncDOWN,
                         removeFunc
                     ),
-
                 });
-
 
             // Functions.AddRange(AllFunctions);
         }
@@ -447,14 +435,10 @@ namespace Diplom
                         }),
                         removeAnalysBlock
                     ),
-
-
                 });
-
 
             // Functions.AddRange(AllFunctions);
             AnalysBlocks.AddRange(AllAnalysBlocks);
-
         }
 
         public void AutoUpdate()
@@ -573,7 +557,6 @@ namespace Diplom
         }
         #endregion
 
-
         #region --------------------- SAVE OPEN ---------------------
         private void SaveFile()
         {
@@ -634,7 +617,6 @@ namespace Diplom
             }
         }
         #endregion
-
 
         #region --------------------- EVENT HANDLERS ---------------------
         private void ExcelImportButton_Click(object sender, RoutedEventArgs e)
@@ -718,7 +700,6 @@ namespace Diplom
 
 
         #endregion
-
 
     }
 }

@@ -1,11 +1,7 @@
 ﻿using Caliburn.Micro;
-using OxyPlot;
-using OxyPlot.Axes;
 using OxyPlot.Series;
 using System;
-using System.Collections.Generic;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Diplom.UI
 {
@@ -25,12 +21,10 @@ namespace Diplom.UI
             Remove = _remove;
             Command.args = _analysData;
         }
-
         public string Name { get; set; }
 
         public AnalysWithArgumentCommand Command { get; set; }
         public MoveAnalysBlockCommand Remove { get; set; }
-
         public BindableCollection<AnalysData> AnalysData { get; set; } = new BindableCollection<AnalysData>();
     }
 
@@ -95,7 +89,6 @@ namespace Diplom.UI
     public abstract class AnalysData
     {
         public string Name { get; set; }
-
     }
 
     public class Diagram : AnalysData
@@ -129,5 +122,4 @@ namespace Diplom.UI
         public float Percent { get; set; }
 
     }
-    //public class CategItem : CategorizedItem { }
 }

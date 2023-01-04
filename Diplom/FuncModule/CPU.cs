@@ -1,19 +1,13 @@
-﻿using System;
+﻿using Diplom.DataModule;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Diplom.DataModule;
 
 namespace Diplom.FuncModule
 {
     public class CPU
     {
-        public CPU()
-        {
-
-        }
+        public CPU() { }
 
         public static int CountUnsolved(Euler[] eulers) => eulers.Count(x => x.x == 0 && x.y == 0 && x.z == 0);
 
@@ -40,7 +34,6 @@ namespace Diplom.FuncModule
                     }
                 }
             }
-
             return definedGrains.ToArray();
         }
 
@@ -77,8 +70,6 @@ namespace Diplom.FuncModule
                     }
                 }
             }
-
-            return;
         }
 
         public Mask GetStrainMaskGOS(Euler[] eulers, Grain[] grains, Vector2Int size, GpuColor lowCol, GpuColor highCol, float referenceDeviation, int opacity)
@@ -90,14 +81,12 @@ namespace Diplom.FuncModule
             {
                 List<Vector2> allGrainPoints = grain.Points; allGrainPoints.AddRange(grain.Edges);
                 Euler sumOrient = new Euler();
-
                 foreach (Vector2 p in allGrainPoints)
                 {
                     sumOrient = Eul_sum(sumOrient, eulers[(int)(p.x + p.y * size.x)]);
                 }
 
                 Euler avgOrient = new Euler(sumOrient.x / allGrainPoints.Count, sumOrient.y / allGrainPoints.Count, sumOrient.z / allGrainPoints.Count);
-
                 foreach (Vector2 p in allGrainPoints)
                 {
                     int linearId = (int)(p.x + p.y * size.x);
@@ -107,7 +96,6 @@ namespace Diplom.FuncModule
 
             float maxDev = referenceDeviation;
             foreach (float dev in deviations) if (dev > maxDev) maxDev = dev;
-
 
             for (int y = 0; y < deviations.GetLength(1); y++)
             {
@@ -126,15 +114,10 @@ namespace Diplom.FuncModule
                     res[outId + 1] = (byte)G; //g
                     res[outId + 2] = (byte)R; //b
                     res[outId + 3] = (byte)opacity;
-
                 }
             }
-
             return new Mask() { colors = res };
         }
-
-
-
 
         private Euler Eul_sum(Euler a, Euler b) => new Euler(a.x + b.x, a.y + b.y, a.z + b.z);
 
@@ -142,10 +125,8 @@ namespace Diplom.FuncModule
         {
             Vector3 a = new Vector3(1, 1, 1);
             Vector3 b = new Vector3(1, 1, 1);
-
             a = RotateVector(a, eul1);
             b = RotateVector(b, eul2);
-
             return Rad2Deg * (MathF.Acos(Dot(a, b) / (a.length * b.length)));
         }
 
@@ -162,6 +143,5 @@ namespace Diplom.FuncModule
 
         private const float Deg2Rad = 0.0174533f;
         private const float Rad2Deg = 57.2958f;
-
     }
 }

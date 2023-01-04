@@ -99,7 +99,6 @@ namespace Diplom.UI
     public abstract class Argument
     {
         public string Name { get; set; }
-
     }
 
     public class IntArgument : Argument
@@ -113,8 +112,6 @@ namespace Diplom.UI
 
         public int Max { get; set; }
         public int Min { get; set; }
-
-
     }
 
     public class FloatArgument : Argument
@@ -138,7 +135,6 @@ namespace Diplom.UI
             Name = _name; Value = _value;
         }
         public bool Value { get; set; }
-
     }
 
     public class ColorArgument : Argument
@@ -148,7 +144,6 @@ namespace Diplom.UI
             Name = _name; Value = _value;
         }
         public Color Value { get; set; }
-
     }
 
     public class MapVariantArgument : Argument

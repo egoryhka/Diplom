@@ -1,25 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Diplom.DataModule;
+using System;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Diplom.DataModule;
 
 namespace Diplom.FuncModule
 {
     public class BitmapFunc
     {
-        public BitmapFunc()
-        {
-
-        }
-
-    
+        public BitmapFunc() { }
 
         public Bitmap ByteArrayToBitmap(Vector2Int size, byte[] bytes)
         {
@@ -35,7 +25,6 @@ namespace Diplom.FuncModule
 
             return bmp;
         }
-
 
         [System.Runtime.InteropServices.DllImport("gdi32.dll")]
         public static extern bool DeleteObject(IntPtr hObject);

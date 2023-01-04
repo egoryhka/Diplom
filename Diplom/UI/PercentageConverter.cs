@@ -10,7 +10,6 @@ namespace Diplom.UI
         private static PercentageConverter _instance;
 
         #region IValueConverter Members
-
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return System.Convert.ToDouble(value) * System.Convert.ToDouble(parameter);
@@ -20,7 +19,6 @@ namespace Diplom.UI
         {
             throw new NotImplementedException();
         }
-
         #endregion
 
         public override object ProvideValue(IServiceProvider serviceProvider)

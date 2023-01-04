@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Cloo;
+﻿using Cloo;
 using Diplom.DataModule;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Diplom.FuncModule
 {
@@ -492,7 +489,6 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
 
             kernel.Dispose(); outColorBuffer.Dispose(); phaseIndexesBuffer.Dispose(); phaseColorsBuffer.Dispose();
 
-
             return outColors;
         }
 
@@ -551,7 +547,6 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
 
         public Mask GetStrainMaskKAM(Euler[] eulers, Vector2Int size, GpuColor lowCol, GpuColor highCol, float referenceDeviation, int opacity)
         {
-
             // USE FOR RUNTIME TESTING
 
             //        try
@@ -563,7 +558,6 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
             //            BuildProgramm();
             //        }
             //        catch { }
-
 
             ComputeKernel kernel = Program.CreateKernel("GetStrainMaskKAM");
 
@@ -676,7 +670,6 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
 
             return res;
         }
-
     }
 
     public class Mask { public byte[] colors = new byte[] { }; }

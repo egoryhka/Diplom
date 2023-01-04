@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows.Media;
 
 namespace Diplom.DataModule
@@ -16,5 +12,4 @@ namespace Diplom.DataModule
         public float NmPpx { get; set; } = 0.0f;
         public bool AutoUpdate { get; set; } = true;
     }
-
 }

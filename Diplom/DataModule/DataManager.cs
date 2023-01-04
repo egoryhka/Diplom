@@ -1,13 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Office.Interop.Excel;
 
 namespace Diplom.DataModule
 {
@@ -157,15 +153,11 @@ namespace Diplom.DataModule
                     break;
                 }
             }
-
             return valid;
         }
-
     }
 
     public class ExcelNotValidException : Exception { }
     public class ReadExcelException : Exception { }
     public class JsonLoadException : Exception { }
-
-
 }

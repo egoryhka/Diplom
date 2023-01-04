@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Diplom.DataModule;
+using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Diplom.DataModule;
 
 namespace Diplom.UI
 {
@@ -80,7 +80,6 @@ namespace Diplom.UI
         }
 
         #region Child Events
-
         private void child_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (child != null)
@@ -98,7 +97,6 @@ namespace Diplom.UI
                     Reset();
                     return;
                 }
-
 
                 Point relative = e.GetPosition(child);
                 double absoluteX = relative.X * st.ScaleX + tt.X;
@@ -157,7 +155,6 @@ namespace Diplom.UI
                 }
             }
         }
-
         #endregion
     }
 }
