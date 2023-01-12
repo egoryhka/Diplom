@@ -33,6 +33,27 @@ float brightness(int4 col) {
 	return 0.2126 * col.x + 0.7152 * col.y + 0.0722 * col.z;
 }
 
+int3 rainbow(float t) {
+
+	float a = (1.0f - t) / 0.25f;	//invert and group
+	int X = floor(a);	//this is the integer part
+	X = clamp(X, 0, 4);
+	int Y = floor(255.0f * (a - X)); //fractional part from 0 to 255
+
+	int r = 0; int g = 0; int b = 0;
+
+	switch (X)
+	{
+	case 0: r = 255; g = Y; b = 0; break;
+	case 1: r = 255 - Y; g = 255; b = 0; break;
+	case 2: r = 0; g = 255; b = Y; break;
+	case 3: r = 0; g = 255 - Y; b = 255; break;
+	case 4: r = 0; g = 0; b = 255; break;
+	}
+
+	return (int3)(r, g, b);
+}
+
 float deviation(euler e1, euler e2, euler e3, euler M)
 {
 	int4 mCol = eulerToColor(M);
@@ -153,7 +174,7 @@ __kernel void ApplyMask(__global uchar* in, __global uchar* mask, int width, int
 }
 
 
-__kernel void GetGrainMask(__global euler* in, int width, int height, float MissOrientationTreshold, float4 grainMaskColor, __global uchar* out)
+__kernel void GetGrainMask(__global euler* in, int width, int height, float lowAngleTreshold, float highAngleTreshold, float4 lowColor, float4 highColor, __global uchar* out)
 {
 	int x = get_global_id(0);
 	int y = get_global_id(1);
@@ -165,22 +186,45 @@ __kernel void GetGrainMask(__global euler* in, int width, int height, float Miss
 	int idRight = (int)((x + 1) + y * width);
 
 	bool isEdge = false;
+	float max = 0.0f;
 
-	if (!isEdge && y > 1) { if (angleBetween(in[id], in[idUp]) > MissOrientationTreshold) isEdge = true; }
+	if (y > 1 && y < height - 1 && x > 1 && x < width - 1) {
+		float leftDev = angleBetween(in[id], in[idLeft]);
+		float rightDev = angleBetween(in[id], in[idRight]);
+		float upDev = angleBetween(in[id], in[idUp]);
+		float downDev = angleBetween(in[id], in[idDown]);
+		if (leftDev > max)max = leftDev;
+		if (rightDev > max)max = leftDev;
+		if (upDev > max)max = leftDev;
+		if (downDev > max)max = leftDev;
+
+		if (max >= lowAngleTreshold) isEdge = true;
+	}
+
+	/*if (!isEdge && y > 1) { if ( > MissOrientationTreshold) isEdge = true; }
 	if (!isEdge && y < height - 1) { if (angleBetween(in[id], in[idDown]) > MissOrientationTreshold) isEdge = true; }
 	if (!isEdge && x > 1) { if (angleBetween(in[id], in[idLeft]) > MissOrientationTreshold) isEdge = true; }
-	if (!isEdge && x < width - 1) { if (angleBetween(in[id], in[idRight]) > MissOrientationTreshold) isEdge = true; }
+	if (!isEdge && x < width - 1) { if (angleBetween(in[id], in[idRight]) > MissOrientationTreshold) isEdge = true; }*/
 
 	int outId = id * 4;
 	if (isEdge) {
-		out[outId] = convert_int(grainMaskColor.z);
-		out[outId + 1] = convert_int(grainMaskColor.y);
-		out[outId + 2] = convert_int(grainMaskColor.x);
-		out[outId + 3] = convert_int(grainMaskColor.w);
+		if (max >= lowAngleTreshold && max <= highAngleTreshold) {
+			out[outId] = convert_int(lowColor.z);
+			out[outId + 1] = convert_int(lowColor.y);
+			out[outId + 2] = convert_int(lowColor.x);
+			out[outId + 3] = convert_int(lowColor.w);
+		}
+		else {
+			out[outId] = convert_int(highColor.z);
+			out[outId + 1] = convert_int(highColor.y);
+			out[outId + 2] = convert_int(highColor.x);
+			out[outId + 3] = convert_int(highColor.w);
+		}
+
 	}
 }
 
-__kernel void GetStrainMaskKAM(__global euler* in, int width, int height, float4 lowCol, float4 highCol, float referenceDeviation, int opacity, __global uchar* out)
+__kernel void GetStrainMaskKAM(__global euler* in, int width, int height/*, float4 lowCol, float4 highCol*/, float referenceDeviation, int opacity, __global uchar* out)
 {
 	int x = get_global_id(0);
 	int y = get_global_id(1);
@@ -230,16 +274,23 @@ __kernel void GetStrainMaskKAM(__global euler* in, int width, int height, float4
 			upRightDeviation +
 			downRightDeviation) / n;
 
-	float t = averageDeviation / max;  // referenceDeviation max
-	int R = convert_int(lowCol.x * (1.0f - t) + convert_int(highCol.x * t));
+	float t = averageDeviation / referenceDeviation;  // referenceDeviation max
+	/*int R = convert_int(lowCol.x * (1.0f - t) + convert_int(highCol.x * t));
 	int G = convert_int(lowCol.y * (1.0f - t) + convert_int(highCol.y * t));
-	int B = convert_int(lowCol.z * (1.0f - t) + convert_int(highCol.z * t));
+	int B = convert_int(lowCol.z * (1.0f - t) + convert_int(highCol.z * t));*/
+
+	int3 col = rainbow(t);
 
 	//---------------
 
-	out[outId] = B; //r
-	out[outId + 1] = G; //g
-	out[outId + 2] = R; //b
+	//out[outId] =  B; //r
+	//out[outId + 1] = G; //g
+	//out[outId + 2] = R; //b
+
+	out[outId] = col.z; //r
+	out[outId + 1] = col.y; //g
+	out[outId + 2] = col.x; //b
+
 	out[outId + 3] = opacity;
 }
 

@@ -10,6 +10,24 @@ namespace Diplom.DataModule
     public static class DataManager
     {
         public static Data CurrentData { get; set; }
+
+        public static byte[] Colors = new byte[0];
+        public static byte[] MaskedColors = new byte[0];
+        
+        public static Mask StrainMask = new Mask();
+        
+        public static Mask GrainMask = new Mask();
+        public static Grain[] RawGrains = new Grain[0];
+        
+        public static Euler[] RawEulers = new Euler[0];
+        public static Euler[] BufferEulers = new Euler[0];
+        
+        public static int[] RawPhaseIndexes = new int[0];
+        // ----------------------------------------------
+
+        public static Grain GetGrainByCoords(Vector2Int coords) => RawGrains.FirstOrDefault(x =>
+           x.Points.Contains(new Vector2(coords.x, coords.y)) || x.Edges.Contains(new Vector2(coords.x, coords.y)));
+
         public static string ProjectName
         {
             get

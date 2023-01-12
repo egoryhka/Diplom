@@ -30,19 +30,6 @@ namespace Diplom
         public BindableCollection<FunctionContainer> Functions { get; set; } = new BindableCollection<FunctionContainer>();
         //----------------------------------------
 
-        private byte[] colors = new byte[0];
-        private byte[] maskedColors = new byte[0];
-
-        private Mask strainMask = new Mask();
-
-        private Mask grainMask = new Mask();
-        private Grain[] rawGrains = new Grain[0];
-
-        private Euler[] rawEulers = new Euler[0];
-        private Euler[] bufferEulers = new Euler[0];
-
-        private int[] rawPhaseIndexes = new int[0];
-
         private System.Drawing.Bitmap mainImgBitmapBuffer;
         //-------------------------------------------
 
@@ -104,9 +91,9 @@ namespace Diplom
 
                             FunctionContainer fcThis = Functions.FirstOrDefault(x => x.Name == "Стандартная Очистка");
                             if(fcThis != null && Functions.IndexOf(fcThis) == 0)
-                               rawEulers = functions.GPU.StandartCleanUp(bufferEulers, DataManager.CurrentData.Size, maxIterations);
+                              DataManager.RawEulers = functions.GPU.StandartCleanUp(DataManager.BufferEulers, DataManager.CurrentData.Size, maxIterations);
                             else
-                               rawEulers = functions.GPU.StandartCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations);
+                               DataManager.RawEulers = functions.GPU.StandartCleanUp(DataManager.RawEulers, DataManager.CurrentData.Size, maxIterations);
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -130,9 +117,9 @@ namespace Diplom
 
                             FunctionContainer fcThis = Functions.FirstOrDefault(x => x.Name == "Kuwahara Очистка");
                             if(fcThis != null && Functions.IndexOf(fcThis) == 0)
-                                rawEulers = functions.GPU.KuwaharaCleanUp(bufferEulers, DataManager.CurrentData.Size, maxIterations);
+                                DataManager.RawEulers = functions.GPU.KuwaharaCleanUp(DataManager.BufferEulers, DataManager.CurrentData.Size, maxIterations);
                             else
-                                rawEulers = functions.GPU.KuwaharaCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations);
+                                DataManager.RawEulers = functions.GPU.KuwaharaCleanUp(DataManager.RawEulers, DataManager.CurrentData.Size, maxIterations);
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -156,9 +143,9 @@ namespace Diplom
 
                             FunctionContainer fcThis = Functions.FirstOrDefault(x => x.Name == "Автоматическая Очистка");
                             if(fcThis != null && Functions.IndexOf(fcThis) == 0)
-                                rawEulers = functions.GPU.AutomaticCleanUp(bufferEulers, DataManager.CurrentData.Size, maxIterations);
+                                DataManager.RawEulers = functions.GPU.AutomaticCleanUp(DataManager.BufferEulers, DataManager.CurrentData.Size, maxIterations);
                             else
-                                rawEulers = functions.GPU.AutomaticCleanUp(rawEulers, DataManager.CurrentData.Size, maxIterations);
+                                DataManager.RawEulers = functions.GPU.AutomaticCleanUp(DataManager.RawEulers, DataManager.CurrentData.Size, maxIterations);
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -166,7 +153,10 @@ namespace Diplom
                     ),
 
                     new FunctionContainer("Расчет границ зерен", new BindableCollection<Argument>{
-                        new FloatArgument("Пороговый угол", 0, 180, 10, 0.1d),
+                        new FloatArgument("Угол низ.", 0, 180, 2, 0.1d),
+                        new FloatArgument("Угол выс.", 0, 180, 10, 0.1d),
+                        new ColorArgument("Цвет низ.", Color.FromArgb(200,0, 0, 200)),
+                        new ColorArgument("Цвет выс.", Color.FromArgb(200, 0, 200, 0)),
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
@@ -178,13 +168,22 @@ namespace Diplom
                                 MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
                                 return;
                             }
-                            float tresholdAngle = (ar[0] as FloatArgument).Value;
+                            float lowAngle = (ar[0] as FloatArgument).Value;
+                            float highAngle = (ar[1] as FloatArgument).Value;
+                            Color lowColor = (ar[2] as ColorArgument).Value;
+                            Color highColor = (ar[3] as ColorArgument).Value;
+
                             var color = DataManager.CurrentData.Settings.GrainsBorderColor;
                             if(color.R == 0 && color.G == 0 && color.B == 0) color = Color.FromArgb(color.A, 1, 1, 1);
 
-                            Mask mask = functions.GPU.GetGrainMask(rawEulers, DataManager.CurrentData.Size, tresholdAngle, new GpuColor(color.R, color.G, color.B, color.A));
+                            Mask mask = functions.GPU.GetGrainMask(
+                                DataManager.RawEulers,
+                                DataManager.CurrentData.Size,
+                                lowAngle,highAngle,
+                                new GpuColor(lowColor.R, lowColor.G, lowColor.B, lowColor.A),
+                                new GpuColor(highColor.R, highColor.G, highColor.B, highColor.A));
 
-                            grainMask = mask;
+                            DataManager.GrainMask = mask;
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -197,7 +196,7 @@ namespace Diplom
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
-                            if (DataManager.CurrentData.Eulers == null || grainMask.colors.Length == 0) return;
+                            if (DataManager.CurrentData.Eulers == null || DataManager.GrainMask.colors.Length == 0) return;
 
                             var ar = args as BindableCollection<Argument>;
                             if(ar == null)
@@ -209,10 +208,77 @@ namespace Diplom
                             bool useGlobalMinSize = (ar[1] as BoolArgument).Value;
 
                             if(useGlobalMinSize)
-                                rawGrains = functions.CPU.DefineGrains(grainMask, DataManager.CurrentData.Settings.MinGrainSize);
+                                DataManager.RawGrains = functions.CPU.DefineGrains(DataManager.GrainMask, DataManager.CurrentData.Settings.MinGrainSize);
                             else
-                                rawGrains = functions.CPU.DefineGrains(grainMask, minSize);
+                                DataManager.RawGrains = functions.CPU.DefineGrains(DataManager.GrainMask, minSize);
 
+                        }),
+                        moveFuncUP,
+                        moveFuncDOWN,
+                        removeFunc
+                    ),
+
+                    new FunctionContainer("Картирование размера зерна*", new BindableCollection<Argument>{
+                        new IntArgument("Прозрачность", 0, 255, 120),
+                    },
+                        new FunctionWithArgumentCommand(args =>
+                        {
+                            if (DataManager.CurrentData.Eulers == null) return;
+
+                            var ar = args as BindableCollection<Argument>;
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+                            int opacity = (ar[0] as IntArgument).Value;
+                            Mask mask = functions.CPU.GetGrainSizeMask(DataManager.CurrentData.Size, opacity);
+                            DataManager.StrainMask = mask; //маска не напряжения тут должна быть а другая (подумой) !!!!!!!!!!!!
+                        }),
+                        moveFuncUP,
+                        moveFuncDOWN,
+                        removeFunc
+                    ),
+
+
+                    new FunctionContainer("Картирование формы зерна*", new BindableCollection<Argument>{
+                        new IntArgument("Прозрачность", 0, 255, 120),
+                    },
+                        new FunctionWithArgumentCommand(args =>
+                        {
+                            if (DataManager.CurrentData.Eulers == null) return;
+
+                            var ar = args as BindableCollection<Argument>;
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+                            int opacity = (ar[0] as IntArgument).Value;
+                            Mask mask = functions.CPU.GetGrainAspectRatioMask(DataManager.CurrentData.Size, opacity);
+                            DataManager.StrainMask = mask; //маска не напряжения тут должна быть а другая (подумой) !!!!!!!!!!!!
+                        }),
+                        moveFuncUP,
+                        moveFuncDOWN,
+                        removeFunc
+                    ),
+
+                    new FunctionContainer("Картирование диаметра эквив.. (ECD)*", new BindableCollection<Argument>{
+                        new IntArgument("Прозрачность", 0, 255, 120),
+                    },
+                        new FunctionWithArgumentCommand(args =>
+                        {
+                            if (DataManager.CurrentData.Eulers == null) return;
+
+                            var ar = args as BindableCollection<Argument>;
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+                            int opacity = (ar[0] as IntArgument).Value;
+                            Mask mask = functions.CPU.GetGrainECDMask(DataManager.CurrentData.Size, opacity);
+                            DataManager.StrainMask = mask; //маска не напряжения тут должна быть а другая (подумой) !!!!!!!!!!!!
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -222,8 +288,8 @@ namespace Diplom
                     new FunctionContainer("Расчет напряжений (KAM)", new BindableCollection<Argument>{
                         new FloatArgument("Максимальное отклонение", 0f, 15, 2.5f, 0.25f),
                         new IntArgument("Прозрачность", 0, 255, 120),
-                        new ColorArgument("Низкое ", Color.FromArgb(255, 0, 0, 0)),
-                        new ColorArgument("Высокое", Color.FromArgb(255, 0, 220, 220)),
+                        //new ColorArgument("Низкое ", Color.FromArgb(255, 0, 0, 0)),
+                        //new ColorArgument("Высокое", Color.FromArgb(255, 0, 220, 220)),
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
@@ -237,15 +303,37 @@ namespace Diplom
                             }
                             float referenceDeviation = (ar[0] as FloatArgument).Value;
                             int opacity = (ar[1] as IntArgument).Value;
-                            Color lowColor = (ar[2] as ColorArgument).Value;
-                            Color highColor = (ar[3] as ColorArgument).Value;
+                            //Color lowColor = (ar[2] as ColorArgument).Value;
+                            //Color highColor = (ar[3] as ColorArgument).Value;
 
-                            GpuColor lowGpuColor = new GpuColor(lowColor.R, lowColor.G, lowColor.B, lowColor.A);
-                            GpuColor highGpuColor = new GpuColor(highColor.R, highColor.G, highColor.B, highColor.A);
+                            //GpuColor lowGpuColor = new GpuColor(lowColor.R, lowColor.G, lowColor.B, lowColor.A);
+                            //GpuColor highGpuColor = new GpuColor(highColor.R, highColor.G, highColor.B, highColor.A);
 
-                            Mask mask = functions.GPU.GetStrainMaskKAM(rawEulers, DataManager.CurrentData.Size, lowGpuColor, highGpuColor, referenceDeviation, opacity);
+                            Mask mask = functions.GPU.GetStrainMaskKAM(DataManager.RawEulers, DataManager.CurrentData.Size/*, lowGpuColor, highGpuColor*/, referenceDeviation, opacity);
 
-                            strainMask = mask;
+                            DataManager.StrainMask = mask;
+                        }),
+                        moveFuncUP,
+                        moveFuncDOWN,
+                        removeFunc
+                    ),
+
+                    new FunctionContainer("Расчет напряжений (KAM) CPU*", new BindableCollection<Argument>{
+                        new IntArgument("Прозрачность", 0, 255, 120),
+                    },
+                        new FunctionWithArgumentCommand(args =>
+                        {
+                            if (DataManager.CurrentData.Eulers == null) return;
+
+                            var ar = args as BindableCollection<Argument>;
+                            if(ar == null)
+                            {
+                                MessageBox.Show("АРГУМЕНТЫ ПОПУТАЛИСЬ!!!");
+                                return;
+                            }
+                            int opacity = (ar[0] as IntArgument).Value;
+                            Mask mask = functions.CPU.GetStrainMaskKAM(DataManager.RawEulers, DataManager.CurrentData.Size, opacity);
+                            DataManager.StrainMask = mask;
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -260,7 +348,7 @@ namespace Diplom
                     },
                         new FunctionWithArgumentCommand(args =>
                         {
-                            if (DataManager.CurrentData.Eulers == null || rawGrains.Length == 0) return;
+                            if (DataManager.CurrentData.Eulers == null || DataManager.RawGrains.Length == 0) return;
 
                             var ar = args as BindableCollection<Argument>;
                             if(ar == null)
@@ -276,9 +364,9 @@ namespace Diplom
                             GpuColor lowGpuColor = new GpuColor(lowColor.R, lowColor.G, lowColor.B, lowColor.A);
                             GpuColor highGpuColor = new GpuColor(highColor.R, highColor.G, highColor.B, highColor.A);
 
-                            Mask mask = functions.CPU.GetStrainMaskGOS(rawEulers, rawGrains, DataManager.CurrentData.Size, lowGpuColor, highGpuColor, referenceDeviation, opacity);
+                            Mask mask = functions.CPU.GetStrainMaskGOS(DataManager.RawEulers, DataManager.RawGrains, DataManager.CurrentData.Size, lowGpuColor, highGpuColor, referenceDeviation, opacity);
 
-                            strainMask = mask;
+                            DataManager.StrainMask = mask;
                         }),
                         moveFuncUP,
                         moveFuncDOWN,
@@ -308,34 +396,34 @@ namespace Diplom
                             {
                                 case MapVariant.BandContrast:
                                     {
-                                        colors = functions.GPU.GetColorMapBC(DataManager.CurrentData.BC, DataManager.CurrentData.Size);
+                                        DataManager.Colors = functions.GPU.GetColorMapBC(DataManager.CurrentData.BC, DataManager.CurrentData.Size);
                                         break;
                                     }
 
                                 case MapVariant.Euler:
                                     {
-                                        colors = functions.GPU.GetColorMapEuler(rawEulers, DataManager.CurrentData.Size);
+                                        DataManager.Colors = functions.GPU.GetColorMapEuler(DataManager.RawEulers, DataManager.CurrentData.Size);
                                         break;
                                     }
 
                                 case MapVariant.Phases:
                                     {
-                                        colors = functions.GPU.GetColorMapPhases(rawPhaseIndexes,
+                                        DataManager.Colors = functions.GPU.GetColorMapPhases(DataManager.RawPhaseIndexes,
                                             DataManager.CurrentData.Settings.Phases.ToArray(),
                                             DataManager.CurrentData.Size);
                                         break;
                                     }
                             }
 
-                            maskedColors = colors;
+                            DataManager.MaskedColors = DataManager.Colors;
 
-                            if(displayGrainMask && grainMask.colors != null && grainMask.colors.Length != 0)
-                            maskedColors = functions.GPU.ApplyMask(maskedColors, grainMask, DataManager.CurrentData.Size);
+                            if(displayGrainMask && DataManager.GrainMask.colors != null && DataManager.GrainMask.colors.Length != 0)
+                            DataManager.MaskedColors = functions.GPU.ApplyMask(DataManager.MaskedColors, DataManager.GrainMask, DataManager.CurrentData.Size);
 
-                            if(displayStrainMask && strainMask.colors != null && strainMask.colors.Length != 0)
-                            maskedColors = functions.GPU.ApplyMask(maskedColors, strainMask, DataManager.CurrentData.Size);
+                            if(displayStrainMask && DataManager.StrainMask.colors != null && DataManager.StrainMask.colors.Length != 0)
+                            DataManager.MaskedColors = functions.GPU.ApplyMask(DataManager.MaskedColors, DataManager.StrainMask, DataManager.CurrentData.Size);
 
-                            var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, maskedColors);
+                            var bmp = functions.BitmapFunc.ByteArrayToBitmap(DataManager.CurrentData.Size, DataManager.MaskedColors);
                             mainImgBitmapBuffer = bmp;
 
                             MainImage.Source = functions.BitmapFunc.BitmapToBitmapSource(bmp);
@@ -373,7 +461,7 @@ namespace Diplom
                     },
                         new AnalysWithArgumentCommand(args =>
                         {
-                            if (DataManager.CurrentData.Eulers == null || rawGrains.Length == 0) return;
+                            if (DataManager.CurrentData.Eulers == null || DataManager.RawGrains.Length == 0) return;
 
                             var ar = args as BindableCollection<AnalysData>;
                             if(ar == null)
@@ -387,7 +475,7 @@ namespace Diplom
                             categoriesLabels.Clear();
 
                             List<float> categoriesIndexes = new List<float>();
-                            Grain[] orderedGrains = rawGrains.OrderBy(x => x.Size).ToArray();
+                            Grain[] orderedGrains = DataManager.RawGrains.OrderBy(x => x.Size).ToArray();
 
                             for (int i = 0; i < orderedGrains.Last().Size / 100f; i+=100)
                             {
@@ -415,7 +503,7 @@ namespace Diplom
                     },
                         new AnalysWithArgumentCommand(args =>
                         {
-                            if (DataManager.CurrentData.Eulers == null || rawGrains.Length == 0) return;
+                            if (DataManager.CurrentData.Eulers == null || DataManager.RawGrains.Length == 0) return;
 
                             var ar = args as BindableCollection<AnalysData>;
                             if(ar == null)
@@ -470,12 +558,7 @@ namespace Diplom
             var buff = Functions[a];
             Functions[a] = Functions[b];
             Functions[b] = buff;
-        }
-
-
-        // ПЕРЕНЕСТИ В DATA MODULE
-        private Grain GetGrainByCoords(Vector2Int coords) => rawGrains.FirstOrDefault(x =>
-            x.Points.Contains(new Vector2(coords.x, coords.y)) || x.Edges.Contains(new Vector2(coords.x, coords.y)));
+        }      
 
         private void SelectGrain(Grain grain)
         {
@@ -576,9 +659,9 @@ namespace Diplom
             try
             {
                 DataManager.LoadEbsdFromExcel(pathToFile);
-                rawEulers = DataManager.CurrentData.Eulers;
-                bufferEulers = rawEulers;
-                rawPhaseIndexes = DataManager.CurrentData.Points.Select(x => x.Phase).ToArray();
+                DataManager.RawEulers = DataManager.CurrentData.Eulers;
+                DataManager.BufferEulers = DataManager.RawEulers;
+                DataManager.RawPhaseIndexes = DataManager.CurrentData.Points.Select(x => x.Phase).ToArray();
             }
             catch (ExcelNotValidException)
             {
@@ -595,9 +678,9 @@ namespace Diplom
             try
             {
                 DataManager.Load(pathToFile);
-                rawEulers = DataManager.CurrentData.Eulers;
-                bufferEulers = rawEulers;
-                rawPhaseIndexes = DataManager.CurrentData.Points.Select(x => x.Phase).ToArray();
+                DataManager.RawEulers = DataManager.CurrentData.Eulers;
+                DataManager.BufferEulers = DataManager.RawEulers;
+                DataManager.RawPhaseIndexes = DataManager.CurrentData.Points.Select(x => x.Phase).ToArray();
             }
             catch (JsonLoadException)
             {
@@ -661,15 +744,15 @@ namespace Diplom
             X.Content = "x: " + coords.x.ToString();
             Y.Content = "y: " + coords.y.ToString();
 
-            //if (rawGrains.Length == 0) return;
+            //if (DataManager.RawGrains.Length == 0) return;
             //SelectGrain(GetGrainByCoords(coords));
         }
 
         private void MainImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (rawGrains.Length == 0) return;
+            if (DataManager.RawGrains.Length == 0) return;
             Vector2Int coords = GetPixelCoordinate(MainImage, e);
-            SelectGrain(GetGrainByCoords(coords));
+            SelectGrain(DataManager.GetGrainByCoords(coords));
         }
 
         private void LaunchAllButton_Click(object sender, RoutedEventArgs e) => LaunchAllFunctions();

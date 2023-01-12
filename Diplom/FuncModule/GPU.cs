@@ -2,11 +2,12 @@
 using Diplom.DataModule;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Diplom.FuncModule
 {
-    public class GPU
+	public class GPU
     {
         private ComputeContext Context;
         private ComputeProgram Program;
@@ -405,7 +406,7 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
 
             try
             {
-                //string gpuCode = File.ReadAllText(Directory.GetCurrentDirectory() + @"\GpuCode.c");
+                string gpuCode = File.ReadAllText(Directory.GetCurrentDirectory() + @"\GpuCode.c");
 
                 Program = new ComputeProgram(Context, gpuCode);
                 Program.Build(Devices, "", null, IntPtr.Zero);
@@ -519,7 +520,7 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
             return res;
         }
 
-        public Mask GetGrainMask(Euler[] eulers, Vector2Int size, float treshold, GpuColor grainMaskColor)
+        public Mask GetGrainMask(Euler[] eulers, Vector2Int size, float lowAngleTreshold, float highAngleTreshold, GpuColor lowColor, GpuColor highColor)
         {
             ComputeKernel kernel = Program.CreateKernel("GetGrainMask");
 
@@ -531,9 +532,11 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
             kernel.SetMemoryArgument(0, inputBuffer);
             kernel.SetValueArgument(1, size.x);
             kernel.SetValueArgument(2, size.y);
-            kernel.SetValueArgument(3, treshold);
-            kernel.SetValueArgument(4, grainMaskColor);
-            kernel.SetMemoryArgument(5, outputBuffer);
+            kernel.SetValueArgument(3, lowAngleTreshold);
+			kernel.SetValueArgument(4, highAngleTreshold);
+			kernel.SetValueArgument(5, lowColor);
+			kernel.SetValueArgument(6, highColor);
+            kernel.SetMemoryArgument(7, outputBuffer);
 
             CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 
@@ -545,21 +548,23 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
             return new Mask() { colors = res };
         }
 
-        public Mask GetStrainMaskKAM(Euler[] eulers, Vector2Int size, GpuColor lowCol, GpuColor highCol, float referenceDeviation, int opacity)
+        public Mask GetStrainMaskKAM(Euler[] eulers, Vector2Int size/*, GpuColor lowCol, GpuColor highCol*/, float referenceDeviation, int opacity)
         {
-            // USE FOR RUNTIME TESTING
+			// USE FOR RUNTIME TESTING
 
-            //        try
-            //        {
-            //Context.Dispose();
-            //Program.Dispose();
-            //CommandQueue.Dispose(); 
+			//try
+			//{
+			//	Context.Dispose();
+			//	Program.Dispose();
+			//	CommandQueue.Dispose();
 
-            //            BuildProgramm();
-            //        }
-            //        catch { }
+			//	BuildProgramm();
+			//}
+			//catch { }
 
-            ComputeKernel kernel = Program.CreateKernel("GetStrainMaskKAM");
+			//-------------------------
+
+			ComputeKernel kernel = Program.CreateKernel("GetStrainMaskKAM");
 
             ComputeBuffer<Euler> inputBuffer
                 = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
@@ -569,11 +574,11 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
             kernel.SetMemoryArgument(0, inputBuffer);
             kernel.SetValueArgument(1, size.x);
             kernel.SetValueArgument(2, size.y);
-            kernel.SetValueArgument(3, lowCol);
-            kernel.SetValueArgument(4, highCol);
-            kernel.SetValueArgument(5, referenceDeviation);
-            kernel.SetValueArgument(6, opacity);
-            kernel.SetMemoryArgument(7, outputBuffer);
+            //kernel.SetValueArgument(3, lowCol);
+            //kernel.SetValueArgument(4, highCol);
+            kernel.SetValueArgument(3, referenceDeviation);
+            kernel.SetValueArgument(4, opacity);
+            kernel.SetMemoryArgument(5, outputBuffer);
 
             CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 
@@ -671,8 +676,6 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
             return res;
         }
     }
-
-    public class Mask { public byte[] colors = new byte[] { }; }
 
     public class ProgramBuildException : Exception { }
 }

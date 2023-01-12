@@ -124,7 +124,7 @@
         <DataTemplate DataType="{x:Type ui:Table}">
             <StackPanel>
                 <DataGrid IsReadOnly="True" ItemsSource="{Binding Values}">
-                    
+
                 </DataGrid>
             </StackPanel>
         </DataTemplate>

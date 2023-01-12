@@ -23,4 +23,6 @@ namespace Diplom.DataModule
             Size.y = Points.Length / Size.x;
         }
     }
+
+    public class Mask { public byte[] colors = new byte[] { }; }
 }
