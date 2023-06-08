@@ -7,17 +7,26 @@
         xmlns:ui="clr-namespace:Diplom.UI"
         mc:Ignorable="d"
         x:Name="FuncWin"
-        Title="Функции" Height="400" Width="300"
-        ResizeMode="NoResize">
+        Title="Функции" Height="400" Width="300" MinHeight="100"
+        ResizeMode="CanResize">
 
 
     <Window.Resources>
         <!-- DataTemplate for Function -->
         <DataTemplate DataType="{x:Type ui:SelectableFunction}">
-            <StackPanel Orientation="Horizontal" Margin="10,0,0,10" Background="{StaticResource SemiDarkenBrush}" >
-                <Label Content="{Binding Function.Name}"/>
-                <CheckBox VerticalAlignment="Center" IsChecked="{Binding IsSelected}"/>
-            </StackPanel>
+
+            <Border Margin="5" Background="{StaticResource SemiDarkenBrush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" HorizontalAlignment="Stretch">
+                        <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding Function.Name}"/>
+                    </Label>
+                    <CheckBox Grid.Column="1" Margin="5" VerticalAlignment="Center" IsChecked="{Binding IsSelected}"/>
+                </Grid>
+            </Border>
 
         </DataTemplate>
     </Window.Resources>
@@ -31,21 +40,25 @@
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
 
-        <ScrollViewer Grid.Row="0" DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="0" HorizontalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
             <ItemsControl x:Name="FunctionsContainer" ItemsSource="{Binding FunctionsToSelect, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:FunctionsListWindow}}}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <StackPanel Width="300" HorizontalAlignment="Left" Orientation="Vertical">
+                        <StackPanel Orientation="Vertical">
                         </StackPanel>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
         </ScrollViewer>
 
-        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Orientation="Horizontal">
-            <Button x:Name="ApplySettingsButton" Content="Применить" Width="148" Margin="2,0,0,0" Click="ApplyFunctionsButton_Click"/>
-            <Button x:Name="DenySettingsButton" Content="Отмена" Width="148" Margin="0,0,2,0" Click="DenyFunctionsButton_Click"/>
-        </StackPanel>
-        
+        <Grid HorizontalAlignment="Stretch" Grid.Row="1" Background="{StaticResource LightenBrush}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" x:Name="ApplySettingsButton" Content="Применить" Margin="1,2" Click="ApplyFunctionsButton_Click"/>
+                <Button Grid.Column="1" x:Name="DenySettingsButton" Content="Отмена" Margin="1,2" Click="DenyFunctionsButton_Click"/>
+        </Grid>
+                  
     </Grid>
 </Window>

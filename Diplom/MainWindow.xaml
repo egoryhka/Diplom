@@ -12,8 +12,8 @@
         Title="Проект: " Width="800" Height="500"  x:Name="MainWin"
         Icon="Resources/Diplom.ico"
         AllowDrop="True"
-        Drop="MainWin_Drop"
-        >
+        Drop="MainWin_Drop">
+    
     <Window.InputBindings>
         <KeyBinding Command="local:HotKeys.SaveCommand" Gesture="Ctrl+S" />
     </Window.InputBindings>
@@ -24,45 +24,100 @@
 
         <!-- DataTemplate for IntArgument -->
         <DataTemplate DataType="{x:Type ui:IntArgument}">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                <Label Content="{Binding Path=Name}"/>
-                <Slider VerticalAlignment="Center" Width="100" Minimum="{Binding Path=Min}" Maximum="{Binding Path=Max}" Value="{Binding Path=Value}" ValueChanged="AutoUpdateSlider"/>
-                <TextBox Margin="8,0,0,0" VerticalAlignment="Center" Width="100" Text="{Binding Path=Value}" TextChanged="AutoUpdateTextBox" PreviewTextInput="NumericTextboxInt_PreviewTextInput"/>
-            </StackPanel>
+            <Grid HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Label ToolTip="{Binding Path=Name}" Grid.Column="0">
+                    <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding Path=Name}"/>
+                </Label>
+                <Slider Grid.Column="1" VerticalAlignment="Center" Minimum="{Binding Path=Min}" Maximum="{Binding Path=Max}" Value="{Binding Path=Value}" ValueChanged="AutoUpdateSlider"/>
+                <TextBox Grid.Column="2" Margin="5" VerticalAlignment="Center" Text="{Binding Path=Value}" TextChanged="AutoUpdateTextBox" PreviewTextInput="NumericTextboxInt_PreviewTextInput"/>
+            </Grid>
         </DataTemplate>
 
         <!-- DataTemplate for FloatArgument -->
         <DataTemplate DataType="{x:Type ui:FloatArgument}">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                <Label Content="{Binding Path=Name}"/>
-                <Slider VerticalAlignment="Center" TickFrequency="{Binding TickFrequency}" IsSnapToTickEnabled="True" Width="100" Minimum="{Binding Path=Min }" Maximum="{Binding Path=Max }" Value="{Binding Path=Value}" ValueChanged="AutoUpdateSlider"/>
-                <TextBox Margin="8,0,0,0" VerticalAlignment="Center" Width="100" Text="{Binding Path=Value}" TextChanged="AutoUpdateTextBox" PreviewTextInput="NumericTextboxFloat_PreviewTextInput"/>
-            </StackPanel>
+            <Grid HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Label ToolTip="{Binding Path=Name}" Grid.Column="0">
+                    <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding Path=Name}"/>
+                </Label>
+                <Slider Grid.Column="1" VerticalAlignment="Center" TickFrequency="{Binding TickFrequency}" IsSnapToTickEnabled="True" Minimum="{Binding Path=Min }" Maximum="{Binding Path=Max }" Value="{Binding Path=Value}" ValueChanged="AutoUpdateSlider"/>
+                <TextBox Grid.Column="2" Margin="5" VerticalAlignment="Center" Text="{Binding Path=Value}" TextChanged="AutoUpdateTextBox" PreviewTextInput="NumericTextboxFloat_PreviewTextInput"/>
+            </Grid>
         </DataTemplate>
 
         <!-- DataTemplate for BoolArgument -->
         <DataTemplate DataType="{x:Type ui:BoolArgument}">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                <Label Content="{Binding Path=Name}"/>
-                <CheckBox VerticalAlignment="Center" IsChecked="{Binding Path=Value}" Checked="AutoUpdateCheckbox" Unchecked="AutoUpdateCheckbox" />
-            </StackPanel>
+            <Grid HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Label ToolTip="{Binding Path=Name}" Grid.Column="0">
+                    <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding Path=Name}"/>
+                </Label>
+                <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding Path=Value}" Checked="AutoUpdateCheckbox" Unchecked="AutoUpdateCheckbox" />
+            </Grid>
         </DataTemplate>
 
         <!-- DataTemplate for BoolArgument -->
         <DataTemplate DataType="{x:Type ui:ColorArgument}">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                <Label Content="{Binding Path=Name}"/>
-                <xctk:ColorPicker SelectedColor="{Binding Path=Value}" Width="150" />
-            </StackPanel>
+            <Grid HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Label ToolTip="{Binding Path=Name}" Grid.Column="0">
+                    <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding Path=Name}"/>
+                </Label>
+                <xctk:ColorPicker Grid.Column="1" SelectedColor="{Binding Path=Value}"/>
+            </Grid>
         </DataTemplate>
 
         <!-- DataTemplate for EnumArgument -->
         <DataTemplate DataType="{x:Type ui:MapVariantArgument}">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                <Label Content="{Binding Path=Name}"/>
-                <ComboBox ItemsSource="{Binding Path=AllValues}" SelectedItem="{Binding Path=Value}" SelectionChanged="AutoUpdateCombobox"/>
-            </StackPanel>
+            <Grid HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Label ToolTip="{Binding Path=Name}" Grid.Column="0">
+                    <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding Path=Name}"/>
+                </Label>
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Path=AllValues}" SelectedItem="{Binding Path=Value}" SelectionChanged="AutoUpdateCombobox"/>
+            </Grid>
         </DataTemplate>
+
+        <!-- DataTemplate for Expander Title -->
+        <DataTemplate x:Key="titleText">
+            <Border Height="24">
+                <TextBlock Text="{Binding}" 
+                        Margin="4 0"
+                        VerticalAlignment="Center"
+                        Foreground="White"
+                        FontSize="12" 
+                        FontWeight="Normal"
+                        Width="{Binding
+                        RelativeSource={RelativeSource
+                        Mode=FindAncestor,
+                        AncestorType={x:Type Expander}},
+                        Path=Width}"
+                        TextWrapping="NoWrap"
+                        TextTrimming="CharacterEllipsis"/>
+            </Border>
+        </DataTemplate>
+
+        <Style TargetType="{x:Type Expander}">
+            <Setter Property="HeaderTemplate" Value="{StaticResource titleText}"/>
+        </Style>
 
         <!-- DataTemplate for Function -->
         <DataTemplate DataType="{x:Type ui:FunctionContainer}">
@@ -198,13 +253,13 @@
                                 </ContextMenu>
                             </Grid.ContextMenu>
 
-                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
                                 <StackPanel x:Name="FunctionsTab" Orientation="Vertical" Margin="0,10,0,0">
 
                                     <ItemsControl x:Name="FunctionsContainer" ItemsSource="{Binding Functions, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
-                                                <StackPanel HorizontalAlignment="Left" Orientation="Vertical">
+                                                <StackPanel HorizontalAlignment="Stretch" Orientation="Vertical">
                                                 </StackPanel>
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
@@ -248,14 +303,24 @@
 
             <GridSplitter  Grid.Column="1" ResizeBehavior="PreviousAndNext" BorderThickness="0"  Width="5" Background="{StaticResource SemiDarkenBrush}" Margin="2" HorizontalAlignment="Center"/>
 
-            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0.3" Margin="2" Grid.Column="2" HorizontalAlignment="Center">
-                <StackPanel x:Name="ImageStackPanel"  Orientation="Vertical">
+            <Border Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0.3" Margin="2" HorizontalAlignment="Center">
+                <!--<StackPanel x:Name="ImageStackPanel"  Orientation="Vertical">-->
 
-                    <ui:ZoomBorder x:Name="MainImageContainer" Background="{StaticResource BorderBrush}" ClipToBounds="True" BorderThickness="0" Margin="3,3,3,0">
-                        <Image x:Name="MainImage" ClipToBounds="True" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="Resources/EFXSes9UCfsyRVoNeQ2ZTB.png" MouseMove="MainImage_MouseMove" MouseLeftButtonUp="MainImage_MouseLeftButtonUp"/>
-                    </ui:ZoomBorder>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <ScrollViewer x:Name="MainImageScrollViewer" Grid.Row="0"  VerticalScrollBarVisibility="Auto" PreviewMouseWheel="MainImageScrollViewer_PreviewMouseWheel">
+                        <ui:ZoomBorder x:Name="MainImageContainer" Background="{StaticResource BorderBrush}" ClipToBounds="True" BorderThickness="0" Margin="3,3,3,0">
+                            <Image x:Name="MainImage" ClipToBounds="True" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="Resources/EFXSes9UCfsyRVoNeQ2ZTB.png" MouseMove="MainImage_MouseMove" MouseLeftButtonUp="MainImage_MouseLeftButtonUp"/>
+                        </ui:ZoomBorder>
+                    </ScrollViewer>
 
-                    <StackPanel Margin="3,0,3,3" Orientation="Vertical">
+                    <GridSplitter  Grid.Row="1" ResizeBehavior="PreviousAndNext" BorderThickness="0"  Height="5" Background="{StaticResource SemiDarkenBrush}" Margin="2" HorizontalAlignment="Stretch"/>
+
+                    <StackPanel Grid.Row="2" VerticalAlignment="Stretch" Margin="3,0" Orientation="Vertical">
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -276,11 +341,43 @@
 
                             <Label x:Name="X" VerticalAlignment="Top" Width="50" Content="x: 100"/>
                             <Label x:Name="Y" VerticalAlignment="Top" Width="50" Content="y: 100"/>
+
                         </StackPanel>
-
-
                     </StackPanel>
-                </StackPanel>
+
+                    <Grid Grid.Row="2" Margin="3">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" VerticalAlignment="Bottom" Height="40" Click="RebuildGpuButton_Click">Пересобрать GPU</Button>
+                            <Button Grid.Column="1" VerticalAlignment="Bottom" Height="40" Click="ClearLogButton_Click">Очистить логи</Button>
+                        </Grid>
+                       
+                        <ScrollViewer  Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+
+                            <TextBlock Padding="5"
+                                Background="{StaticResource SemiDarkenBrush}" 
+                                Foreground="{StaticResource ThumbBrush}"
+                                Text="{Binding DebugText,
+                                    RelativeSource={RelativeSource FindAncestor,
+                                    AncestorType={x:Type local:MainWindow}}}"/>
+                        </ScrollViewer>
+                    </Grid>
+                   
+                  
+
+                </Grid>
+                
+                   
+                    
+                <!--</StackPanel>-->
             </Border>
 
         </Grid>

@@ -53,6 +53,22 @@ namespace Diplom.DataModule
 			if (CurrentData == null) CurrentData = new Data();
 		}
 
+		private static void Reset()
+		{
+			Colors = new byte[0];
+			MaskedColors = new byte[0];
+
+			StrainMask = new Mask();
+
+			GrainMask = new Mask();
+			RawGrains = new Grain[0];
+
+			RawEulers = new Euler[0];
+			BufferEulers = new Euler[0];
+
+			RawPhaseIndexes = new int[0];
+		}
+
 		public static void Save(string pathToFile)
 		{
 			using (StreamWriter writer = new StreamWriter(pathToFile))
@@ -76,6 +92,7 @@ namespace Diplom.DataModule
 		{
 			try
 			{
+				Reset();
 				using (JsonTextReader reader = new JsonTextReader(new StreamReader(pathToFile)))
 				{
 
@@ -100,6 +117,7 @@ namespace Diplom.DataModule
 
 			try
 			{
+				Reset();
 				connection.Open();
 
 				System.Data.DataTable Sheets = connection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);

@@ -8,17 +8,17 @@ using System.Linq;
 namespace Diplom.FuncModule
 {
 	public class GPU
-    {
-        private ComputeContext Context;
-        private ComputeProgram Program;
-        private ComputeCommandQueue CommandQueue;
+	{
+		private ComputeContext Context;
+		private ComputeProgram Program;
+		private ComputeCommandQueue CommandQueue;
+		private string buildLog = "";
+		public GPU()
+		{
+			BuildProgramm();
+		}
 
-        public GPU()
-        {
-            BuildProgramm();
-        }
-
-        private const string gpuCode = @"
+		private const string gpuCode = @"
 
 struct Euler
 {
@@ -396,286 +396,301 @@ __kernel void KuwaharaCleanUp(__global euler* in, int width, int height, __globa
 
 ";
 
-        private void BuildProgramm()
-        {
-            ComputeContextPropertyList Properties = new ComputeContextPropertyList(ComputePlatform.Platforms[0]);
-            Context = new ComputeContext(ComputeDeviceTypes.All, Properties, null, IntPtr.Zero);
+		private void BuildProgramm()
+		{
+			ComputeContextPropertyList Properties = new ComputeContextPropertyList(ComputePlatform.Platforms[0]);
+			Context = new ComputeContext(ComputeDeviceTypes.All, Properties, null, IntPtr.Zero);
 
-            List<ComputeDevice> Devices = new List<ComputeDevice>();
-            Devices.AddRange(ComputePlatform.Platforms[0].Devices);
+			List<ComputeDevice> Devices = new List<ComputeDevice>();
+			Devices.AddRange(ComputePlatform.Platforms[0].Devices);
 
-            try
-            {
-                string gpuCode = File.ReadAllText(Directory.GetCurrentDirectory() + @"\GpuCode.c");
+			try
+			{
+				buildLog = "Success!";
+				string gpuCode = File.ReadAllText(Directory.GetCurrentDirectory() + @"\GpuCode.c");
 
-                Program = new ComputeProgram(Context, gpuCode);
-                Program.Build(Devices, "", null, IntPtr.Zero);
-            }
-            catch { throw new ProgramBuildException(); }
+				Program = new ComputeProgram(Context, gpuCode);
+				Program.Build(Devices, "", null, IntPtr.Zero);
+			}
+			catch
+			{
+				//throw new ProgramBuildException(Program.GetBuildLog(Devices[0]));
+				buildLog = Program.GetBuildLog(Devices[0]);
+			}
 
-            CommandQueue = new ComputeCommandQueue(Context, Devices[0], ComputeCommandQueueFlags.None);
-        }
+			CommandQueue = new ComputeCommandQueue(Context, Devices[0], ComputeCommandQueueFlags.None);
+		}
 
-        public byte[] GetColorMapBC(int[] bc, Vector2Int size)
-        {
-            ComputeKernel kernel = Program.CreateKernel("Bc2Color");
-            if (kernel == null) return null;
+		public string RebuildProgramm()
+		{
+			// USE FOR RUNTIME TESTING
+			try
+			{
+				Context.Dispose();
+				Program.Dispose();
+				CommandQueue.Dispose();
 
-            ComputeBuffer<byte> outColorBuffer = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite, size.x * size.y * 4);
-            ComputeBuffer<int> bcBuffer = new ComputeBuffer<int>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, bc);
+				BuildProgramm(); return buildLog;
+			}
+			catch (Exception ex)
+			{
+				return ex.Message + ex.StackTrace;
+			}
+		}
 
-            kernel.SetMemoryArgument(0, bcBuffer);
-            kernel.SetValueArgument(1, size.x);
-            kernel.SetValueArgument(2, size.y);
-            kernel.SetMemoryArgument(3, outColorBuffer);
+		public byte[] GetColorMapBC(int[] bc, Vector2Int size)
+		{
+			ComputeKernel kernel = Program.CreateKernel("Bc2Color");
+			if (kernel == null) return null;
 
-            CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+			ComputeBuffer<byte> outColorBuffer = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite, size.x * size.y * 4);
+			ComputeBuffer<int> bcBuffer = new ComputeBuffer<int>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, bc);
 
-            byte[] outColors = new byte[outColorBuffer.Count]; // output
-            CommandQueue.ReadFromBuffer(outColorBuffer, ref outColors, true, null);
+			kernel.SetMemoryArgument(0, bcBuffer);
+			kernel.SetValueArgument(1, size.x);
+			kernel.SetValueArgument(2, size.y);
+			kernel.SetMemoryArgument(3, outColorBuffer);
 
-            kernel.Dispose(); outColorBuffer.Dispose(); bcBuffer.Dispose();
+			CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 
-            return outColors;
-        }
+			byte[] outColors = new byte[outColorBuffer.Count]; // output
+			CommandQueue.ReadFromBuffer(outColorBuffer, ref outColors, true, null);
 
-        public byte[] GetColorMapEuler(Euler[] eulers, Vector2Int size)
-        {
-            ComputeKernel kernel = Program.CreateKernel("Euler2Color");
-            if (kernel == null) return null;
+			kernel.Dispose(); outColorBuffer.Dispose(); bcBuffer.Dispose();
 
-            ComputeBuffer<byte> outColorBuffer = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite, size.x * size.y * 4);
-            ComputeBuffer<Euler> eulerBuffer = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
+			return outColors;
+		}
 
-            kernel.SetMemoryArgument(0, eulerBuffer);
-            kernel.SetValueArgument(1, size.x);
-            kernel.SetValueArgument(2, size.y);
-            kernel.SetMemoryArgument(3, outColorBuffer);
+		public byte[] GetColorMapEuler(Euler[] eulers, Vector2Int size)
+		{
+			ComputeKernel kernel = Program.CreateKernel("Euler2Color");
+			if (kernel == null) return null;
 
-            CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+			ComputeBuffer<byte> outColorBuffer = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite, size.x * size.y * 4);
+			ComputeBuffer<Euler> eulerBuffer = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
 
-            byte[] outColors = new byte[outColorBuffer.Count]; // output
-            CommandQueue.ReadFromBuffer(outColorBuffer, ref outColors, true, null);
+			kernel.SetMemoryArgument(0, eulerBuffer);
+			kernel.SetValueArgument(1, size.x);
+			kernel.SetValueArgument(2, size.y);
+			kernel.SetMemoryArgument(3, outColorBuffer);
 
-            kernel.Dispose(); outColorBuffer.Dispose(); eulerBuffer.Dispose();
+			CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 
-            return outColors;
-        }
+			byte[] outColors = new byte[outColorBuffer.Count]; // output
+			CommandQueue.ReadFromBuffer(outColorBuffer, ref outColors, true, null);
 
-        public byte[] GetColorMapPhases(int[] phaseIndexes, Phase[] phases, Vector2Int size)
-        {
-            ComputeKernel kernel = Program.CreateKernel("Phase2Color");
-            if (kernel == null) return null;
+			kernel.Dispose(); outColorBuffer.Dispose(); eulerBuffer.Dispose();
 
-            GpuColor[] phaseColors = new GpuColor[phases.Max(x => x.Index) + 1];
-            foreach (Phase p in phases)
-            {
-                phaseColors[p.Index] = new GpuColor(p.Color.R, p.Color.G, p.Color.B, p.Color.A);
-            }
+			return outColors;
+		}
 
-            ComputeBuffer<byte> outColorBuffer = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite, size.x * size.y * 4);
-            ComputeBuffer<GpuColor> phaseColorsBuffer = new ComputeBuffer<GpuColor>(Context, ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.CopyHostPointer, phaseColors);
-            ComputeBuffer<int> phaseIndexesBuffer = new ComputeBuffer<int>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, phaseIndexes);
+		public byte[] GetColorMapPhases(int[] phaseIndexes, Phase[] phases, Vector2Int size)
+		{
+			ComputeKernel kernel = Program.CreateKernel("Phase2Color");
+			if (kernel == null) return null;
 
-            kernel.SetMemoryArgument(0, phaseIndexesBuffer);
-            kernel.SetMemoryArgument(1, phaseColorsBuffer);
-            kernel.SetValueArgument(2, size.x);
-            kernel.SetValueArgument(3, size.y);
-            kernel.SetMemoryArgument(4, outColorBuffer);
+			GpuColor[] phaseColors = new GpuColor[phases.Max(x => x.Index) + 1];
+			foreach (Phase p in phases)
+			{
+				phaseColors[p.Index] = new GpuColor(p.Color.R, p.Color.G, p.Color.B, p.Color.A);
+			}
 
-            CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+			ComputeBuffer<byte> outColorBuffer = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite, size.x * size.y * 4);
+			ComputeBuffer<GpuColor> phaseColorsBuffer = new ComputeBuffer<GpuColor>(Context, ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.CopyHostPointer, phaseColors);
+			ComputeBuffer<int> phaseIndexesBuffer = new ComputeBuffer<int>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, phaseIndexes);
 
-            byte[] outColors = new byte[outColorBuffer.Count]; // output
-            CommandQueue.ReadFromBuffer(outColorBuffer, ref outColors, true, null);
+			kernel.SetMemoryArgument(0, phaseIndexesBuffer);
+			kernel.SetMemoryArgument(1, phaseColorsBuffer);
+			kernel.SetValueArgument(2, size.x);
+			kernel.SetValueArgument(3, size.y);
+			kernel.SetMemoryArgument(4, outColorBuffer);
 
-            kernel.Dispose(); outColorBuffer.Dispose(); phaseIndexesBuffer.Dispose(); phaseColorsBuffer.Dispose();
+			CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 
-            return outColors;
-        }
+			byte[] outColors = new byte[outColorBuffer.Count]; // output
+			CommandQueue.ReadFromBuffer(outColorBuffer, ref outColors, true, null);
 
-        public byte[] ApplyMask(byte[] inputColors, Mask mask, Vector2Int size)
-        {
-            ComputeKernel kernel = Program.CreateKernel("ApplyMask");
+			kernel.Dispose(); outColorBuffer.Dispose(); phaseIndexesBuffer.Dispose(); phaseColorsBuffer.Dispose();
 
-            ComputeBuffer<byte> inputBuffer
-                = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, inputColors);
-            ComputeBuffer<byte> maskBuffer
-                = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, mask.colors);
-            ComputeBuffer<byte> outputBuffer
-                = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new byte[inputColors.Length]);
+			return outColors;
+		}
 
-            kernel.SetMemoryArgument(0, inputBuffer);
-            kernel.SetMemoryArgument(1, maskBuffer);
-            kernel.SetValueArgument(2, size.x);
-            kernel.SetValueArgument(3, size.y);
-            kernel.SetMemoryArgument(4, outputBuffer);
+		public byte[] ApplyMask(byte[] inputColors, Mask mask, Vector2Int size)
+		{
+			ComputeKernel kernel = Program.CreateKernel("ApplyMask");
 
-            CommandQueue.Execute(kernel, null, new long[] { /*inputColors.Length*/size.x, size.y }, null, null);
+			ComputeBuffer<byte> inputBuffer
+				= new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, inputColors);
+			ComputeBuffer<byte> maskBuffer
+				= new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, mask.colors);
+			ComputeBuffer<byte> outputBuffer
+				= new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new byte[inputColors.Length]);
 
-            byte[] res = new byte[inputColors.Length];
-            CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
+			kernel.SetMemoryArgument(0, inputBuffer);
+			kernel.SetMemoryArgument(1, maskBuffer);
+			kernel.SetValueArgument(2, size.x);
+			kernel.SetValueArgument(3, size.y);
+			kernel.SetMemoryArgument(4, outputBuffer);
 
-            inputBuffer.Dispose(); maskBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
+			CommandQueue.Execute(kernel, null, new long[] { /*inputColors.Length*/size.x, size.y }, null, null);
 
-            return res;
-        }
+			byte[] res = new byte[inputColors.Length];
+			CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
 
-        public Mask GetGrainMask(Euler[] eulers, Vector2Int size, float lowAngleTreshold, float highAngleTreshold, GpuColor lowColor, GpuColor highColor)
-        {
-            ComputeKernel kernel = Program.CreateKernel("GetGrainMask");
+			inputBuffer.Dispose(); maskBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
 
-            ComputeBuffer<Euler> inputBuffer
-                = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
-            ComputeBuffer<byte> outputBuffer
-                = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new byte[eulers.Length * 4]);
+			return res;
+		}
 
-            kernel.SetMemoryArgument(0, inputBuffer);
-            kernel.SetValueArgument(1, size.x);
-            kernel.SetValueArgument(2, size.y);
-            kernel.SetValueArgument(3, lowAngleTreshold);
+		public Mask GetGrainMask(Euler[] eulers, Vector2Int size, float lowAngleTreshold, float highAngleTreshold, GpuColor lowColor, GpuColor highColor)
+		{
+			ComputeKernel kernel = Program.CreateKernel("GetGrainMask");
+
+			ComputeBuffer<Euler> inputBuffer
+				= new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
+			ComputeBuffer<byte> outputBuffer
+				= new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new byte[eulers.Length * 4]);
+
+			kernel.SetMemoryArgument(0, inputBuffer);
+			kernel.SetValueArgument(1, size.x);
+			kernel.SetValueArgument(2, size.y);
+			kernel.SetValueArgument(3, lowAngleTreshold);
 			kernel.SetValueArgument(4, highAngleTreshold);
 			kernel.SetValueArgument(5, lowColor);
 			kernel.SetValueArgument(6, highColor);
-            kernel.SetMemoryArgument(7, outputBuffer);
+			kernel.SetMemoryArgument(7, outputBuffer);
 
-            CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+			CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 
-            byte[] res = new byte[eulers.Length * 4];
-            CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
+			byte[] res = new byte[eulers.Length * 4];
+			CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
 
-            inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
+			inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
 
-            return new Mask() { colors = res };
-        }
+			return new Mask() { colors = res };
+		}
 
-        public Mask GetStrainMaskKAM(Euler[] eulers, Vector2Int size/*, GpuColor lowCol, GpuColor highCol*/, float referenceDeviation, int opacity)
-        {
-			// USE FOR RUNTIME TESTING
-
-			//try
-			//{
-			//	Context.Dispose();
-			//	Program.Dispose();
-			//	CommandQueue.Dispose();
-
-			//	BuildProgramm();
-			//}
-			//catch { }
-
-			//-------------------------
-
+		public Mask GetStrainMaskKAM(Euler[] eulers, Vector2Int size/*, GpuColor lowCol, GpuColor highCol*/, float referenceDeviation, int opacity)
+		{
 			ComputeKernel kernel = Program.CreateKernel("GetStrainMaskKAM");
 
-            ComputeBuffer<Euler> inputBuffer
-                = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
-            ComputeBuffer<byte> outputBuffer
-                = new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new byte[eulers.Length * 4]);
+			ComputeBuffer<Euler> inputBuffer
+				= new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
+			ComputeBuffer<byte> outputBuffer
+				= new ComputeBuffer<byte>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new byte[eulers.Length * 4]);
 
-            kernel.SetMemoryArgument(0, inputBuffer);
-            kernel.SetValueArgument(1, size.x);
-            kernel.SetValueArgument(2, size.y);
-            //kernel.SetValueArgument(3, lowCol);
-            //kernel.SetValueArgument(4, highCol);
-            kernel.SetValueArgument(3, referenceDeviation);
-            kernel.SetValueArgument(4, opacity);
-            kernel.SetMemoryArgument(5, outputBuffer);
+			kernel.SetMemoryArgument(0, inputBuffer);
+			kernel.SetValueArgument(1, size.x);
+			kernel.SetValueArgument(2, size.y);
+			//kernel.SetValueArgument(3, lowCol);
+			//kernel.SetValueArgument(4, highCol);
+			kernel.SetValueArgument(3, referenceDeviation);
+			kernel.SetValueArgument(4, opacity);
+			kernel.SetMemoryArgument(5, outputBuffer);
 
-            CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+			CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 
-            byte[] res = new byte[eulers.Length * 4];
-            CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
+			byte[] res = new byte[eulers.Length * 4];
+			CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
 
-            inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
+			inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
 
-            return new Mask() { colors = res };
-        }
+			return new Mask() { colors = res };
+		}
 
-        public Euler[] AutomaticCleanUp(Euler[] eulers, Vector2Int size, int maxIterations)
-        {
-            int i = 0;
-            int unsolvedCount = CPU.CountUnsolved(eulers);
-            while (i++ < maxIterations)
-            {
-                if (unsolvedCount == 0) return eulers;
+		public Euler[] AutomaticCleanUp(Euler[] eulers, Vector2Int size, int maxIterations)
+		{
+			int i = 0;
+			int unsolvedCount = CPU.CountUnsolved(eulers);
+			while (i++ < maxIterations)
+			{
+				if (unsolvedCount == 0) return eulers;
 
-                eulers = KuwaharaCleanUp(eulers, size, 1);
+				eulers = KuwaharaCleanUp(eulers, size, 1);
 
-                int newUnsolvedCount = CPU.CountUnsolved(eulers);
+				int newUnsolvedCount = CPU.CountUnsolved(eulers);
 
-                if (newUnsolvedCount == unsolvedCount) break;
-                unsolvedCount = newUnsolvedCount;
-            }
+				if (newUnsolvedCount == unsolvedCount) break;
+				unsolvedCount = newUnsolvedCount;
+			}
 
-            i = 0;
-            while (unsolvedCount > 0 && i++ < maxIterations)
-            {
-                eulers = StandartCleanUp(eulers, size, 1);
-                unsolvedCount = CPU.CountUnsolved(eulers);
-            }
+			i = 0;
+			while (unsolvedCount > 0 && i++ < maxIterations)
+			{
+				eulers = StandartCleanUp(eulers, size, 1);
+				unsolvedCount = CPU.CountUnsolved(eulers);
+			}
 
-            return eulers;
-        }
+			return eulers;
+		}
 
-        public Euler[] StandartCleanUp(Euler[] eulers, Vector2Int size, int iterations)
-        {
-            ComputeKernel kernel = Program.CreateKernel("StandartCleanUp");
+		public Euler[] StandartCleanUp(Euler[] eulers, Vector2Int size, int iterations)
+		{
+			ComputeKernel kernel = Program.CreateKernel("StandartCleanUp");
 
-            ComputeBuffer<Euler> inputBuffer
-                = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
-            ComputeBuffer<Euler> outputBuffer
-                = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new Euler[eulers.Length]);
+			ComputeBuffer<Euler> inputBuffer
+				= new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
+			ComputeBuffer<Euler> outputBuffer
+				= new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new Euler[eulers.Length]);
 
-            kernel.SetMemoryArgument(0, inputBuffer);
-            kernel.SetValueArgument(1, size.x);
-            kernel.SetValueArgument(2, size.y);
-            kernel.SetMemoryArgument(3, outputBuffer);
+			kernel.SetMemoryArgument(0, inputBuffer);
+			kernel.SetValueArgument(1, size.x);
+			kernel.SetValueArgument(2, size.y);
+			kernel.SetMemoryArgument(3, outputBuffer);
 
-            CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+			CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 
-            for (int i = 0; i < iterations - 1; i++)
-            {
-                CommandQueue.CopyBuffer(outputBuffer, inputBuffer, null);
-                CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
-            }
+			for (int i = 0; i < iterations - 1; i++)
+			{
+				CommandQueue.CopyBuffer(outputBuffer, inputBuffer, null);
+				CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+			}
 
-            Euler[] res = new Euler[eulers.Length];
-            CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
+			Euler[] res = new Euler[eulers.Length];
+			CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
 
-            inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
+			inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
 
-            return res;
-        }
+			return res;
+		}
 
-        public Euler[] KuwaharaCleanUp(Euler[] eulers, Vector2Int size, int iterations)
-        {
-            ComputeKernel kernel = Program.CreateKernel("KuwaharaCleanUp");
+		public Euler[] KuwaharaCleanUp(Euler[] eulers, Vector2Int size, int iterations)
+		{
+			ComputeKernel kernel = Program.CreateKernel("KuwaharaCleanUp");
 
-            ComputeBuffer<Euler> inputBuffer
-                = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
-            ComputeBuffer<Euler> outputBuffer
-                = new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new Euler[eulers.Length]);
+			ComputeBuffer<Euler> inputBuffer
+				= new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, eulers);
+			ComputeBuffer<Euler> outputBuffer
+				= new ComputeBuffer<Euler>(Context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, new Euler[eulers.Length]);
 
-            kernel.SetMemoryArgument(0, inputBuffer);
-            kernel.SetValueArgument(1, size.x);
-            kernel.SetValueArgument(2, size.y);
-            kernel.SetMemoryArgument(3, outputBuffer);
+			kernel.SetMemoryArgument(0, inputBuffer);
+			kernel.SetValueArgument(1, size.x);
+			kernel.SetValueArgument(2, size.y);
+			kernel.SetMemoryArgument(3, outputBuffer);
 
-            CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+			CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
 
-            for (int i = 0; i < iterations - 1; i++)
-            {
-                CommandQueue.CopyBuffer(outputBuffer, inputBuffer, null);
-                CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
-            }
+			for (int i = 0; i < iterations - 1; i++)
+			{
+				CommandQueue.CopyBuffer(outputBuffer, inputBuffer, null);
+				CommandQueue.Execute(kernel, null, new long[] { size.x, size.y }, null, null);
+			}
 
-            Euler[] res = new Euler[eulers.Length];
-            CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
+			Euler[] res = new Euler[eulers.Length];
+			CommandQueue.ReadFromBuffer(outputBuffer, ref res, true, null);
 
-            inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
+			inputBuffer.Dispose(); outputBuffer.Dispose(); kernel.Dispose();
 
-            return res;
-        }
-    }
+			return res;
+		}
+	}
 
-    public class ProgramBuildException : Exception { }
+	public class ProgramBuildException : Exception
+	{
+		public new string Message { get; }
+		public ProgramBuildException(string msg)
+		{
+			Message = msg;
+		}
+	}
 }

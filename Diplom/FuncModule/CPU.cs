@@ -65,10 +65,10 @@ namespace Diplom.FuncModule
 				int x = (int)a.x;
 				int y = (int)a.y;
 
-				if (x < size.x && x >= 0 && y < size.y && y >= 0 && grainPointsDefined[x, y] == false)//make sure we stay within bounds
+				if (x < size.x && x >= 0 && y < size.y && y >= 0 && grainPointsDefined[x, y] == false) //make sure we stay within bounds
 				{
 					int linearId = (x + y * size.x) * 4;
-					if (grainMask.colors[linearId] == 0)
+					if (grainMask.colors[linearId] == 0 && grainMask.colors[linearId+1] == 0 && grainMask.colors[linearId+2] == 0)
 					{
 						grain.Points.Add(a);
 						grainPointsDefined[x, y] = true;

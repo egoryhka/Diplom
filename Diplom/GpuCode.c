@@ -188,18 +188,18 @@ __kernel void GetGrainMask(__global euler* in, int width, int height, float lowA
 	bool isEdge = false;
 	float max = 0.0f;
 
-	if (y > 1 && y < height - 1 && x > 1 && x < width - 1) {
+	/*if (y > 1 && y < height - 1 && x > 1 && x < width - 1) {*/
 		float leftDev = angleBetween(in[id], in[idLeft]);
 		float rightDev = angleBetween(in[id], in[idRight]);
 		float upDev = angleBetween(in[id], in[idUp]);
 		float downDev = angleBetween(in[id], in[idDown]);
 		if (leftDev > max)max = leftDev;
-		if (rightDev > max)max = leftDev;
-		if (upDev > max)max = leftDev;
-		if (downDev > max)max = leftDev;
+		if (rightDev > max)max = rightDev;
+		if (upDev > max)max = upDev;
+		if (downDev > max)max = downDev;
 
 		if (max >= lowAngleTreshold) isEdge = true;
-	}
+	/*}*/
 
 	/*if (!isEdge && y > 1) { if ( > MissOrientationTreshold) isEdge = true; }
 	if (!isEdge && y < height - 1) { if (angleBetween(in[id], in[idDown]) > MissOrientationTreshold) isEdge = true; }
@@ -208,13 +208,13 @@ __kernel void GetGrainMask(__global euler* in, int width, int height, float lowA
 
 	int outId = id * 4;
 	if (isEdge) {
-		if (max >= lowAngleTreshold && max <= highAngleTreshold) {
+		if (max >= lowAngleTreshold && max < highAngleTreshold) {
 			out[outId] = convert_int(lowColor.z);
 			out[outId + 1] = convert_int(lowColor.y);
 			out[outId + 2] = convert_int(lowColor.x);
 			out[outId + 3] = convert_int(lowColor.w);
 		}
-		else {
+		else if(max >= highAngleTreshold) {
 			out[outId] = convert_int(highColor.z);
 			out[outId + 1] = convert_int(highColor.y);
 			out[outId + 2] = convert_int(highColor.x);
