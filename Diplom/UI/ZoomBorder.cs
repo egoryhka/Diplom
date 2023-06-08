@@ -155,9 +155,11 @@ namespace Diplom.UI
 					double childWidth = (double)child.GetValue(ActualWidthProperty);
 					double childHeight = (double)child.GetValue(ActualHeightProperty);
 
-					tt.X = Math.Clamp(origin.X - v.X, childWidth - childWidth * st.ScaleX, 0);
 					var parentScroll = Parent as ScrollViewer;
-					parentScroll.ScrollToVerticalOffset(parentScroll.VerticalOffset + v.Y /** st.ScaleY*/);
+					parentScroll.ScrollToVerticalOffset(parentScroll.VerticalOffset + v.Y);
+					parentScroll.ScrollToHorizontalOffset(parentScroll.HorizontalOffset + v.X);
+
+					tt.X = Math.Clamp(origin.X - v.X, childWidth - childWidth * st.ScaleX, 0);
 					tt.Y = Math.Clamp(origin.Y - v.Y, childHeight - childHeight * st.ScaleY, 0);
 				}
 			}
