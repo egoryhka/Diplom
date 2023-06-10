@@ -11,6 +11,8 @@ namespace Diplom.DataModule
 	{
 		public static Data CurrentData { get; set; }
 
+
+		// ------- In operative ---------------------
 		public static byte[] Colors = new byte[0];
 		public static byte[] MaskedColors = new byte[0];
 

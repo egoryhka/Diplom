@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -30,7 +31,7 @@ namespace Diplom
 		public List<FunctionContainer> AllFunctions { get; set; } = new List<FunctionContainer>();
 		public BindableCollection<FunctionContainer> Functions { get; set; } = new BindableCollection<FunctionContainer>();
 		//----------------------------------------
-		private System.Drawing.Bitmap mainImgBitmapBuffer;
+		private System.Drawing.Bitmap mainImgBitmapBuffer { get; set; }
 		//-------------------------------------------
 		public string DebugText
 		{
@@ -44,6 +45,9 @@ namespace Diplom
 		}
 		private string _debugText = "";
 		private Dictionary<string, int> logs = new Dictionary<string, int>();
+		//-------------------------------------------
+		private bool isMouseDrag = false;
+
 		//-------------------------------------------
 
 		private void InitializeFunctions()
@@ -596,10 +600,6 @@ namespace Diplom
 			InitializeFunctions();
 			InitializeAnalysBlocks();
 
-			MainImageContainer.label = MainImageScaleLabel;
-			MainImageContainer.image = MainImage;
-			Closing += MainWindow_Closing;
-
 			try
 			{
 				functions = new Functions();
@@ -610,6 +610,11 @@ namespace Diplom
 				Closing -= MainWindow_Closing;
 				Close();
 			}
+
+			MainImageContainer.label = MainImageScaleLabel;
+			MainImageContainer.image = MainImage;
+			mainImgBitmapBuffer = functions.BitmapFunc.ImageSourceToBitmap(MainImage.Source);
+			Closing += MainWindow_Closing;
 
 			OpenFileUsingCommandLineArgs();
 		}
@@ -758,13 +763,18 @@ namespace Diplom
 			X.Content = "x: " + coords.x.ToString();
 			Y.Content = "y: " + coords.y.ToString();
 
+			isMouseDrag = e.LeftButton == MouseButtonState.Pressed;
 			//if (DataManager.RawGrains.Length == 0) return;
 			//SelectGrain(GetGrainByCoords(coords));
 		}
 
 		private void MainImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
 		{
-			if (DataManager.RawGrains.Length == 0) return;
+			if (isMouseDrag || DataManager.RawGrains.Length == 0)
+			{
+				isMouseDrag = false;
+				return;
+			}
 			Vector2Int coords = GetPixelCoordinate(MainImage, e);
 			SelectGrain(DataManager.GetGrainByCoords(coords));
 		}

@@ -1,8 +1,10 @@
 ﻿using Diplom.DataModule;
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace Diplom.FuncModule
@@ -48,6 +50,19 @@ namespace Diplom.FuncModule
             }
 
             return retval;
+        }
+
+        public Bitmap ImageSourceToBitmap(ImageSource imageSource)
+        {
+            var bmpImg = (BitmapImage)imageSource;
+            using (MemoryStream outStream = new MemoryStream())
+            {
+                BitmapEncoder enc = new BmpBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create(bmpImg));
+                enc.Save(outStream);
+                Bitmap bitmap = new Bitmap(outStream);
+                return new Bitmap(bitmap);
+            }
         }
     }
 }

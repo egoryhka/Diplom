@@ -303,7 +303,7 @@
 
             <GridSplitter  Grid.Column="1" ResizeBehavior="PreviousAndNext" BorderThickness="0"  Width="5" Background="{StaticResource SemiDarkenBrush}" Margin="2" HorizontalAlignment="Center"/>
 
-            <Border Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0.3" Margin="2" HorizontalAlignment="Center">
+            <Border Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0.3" Margin="2" HorizontalAlignment="Stretch">
 
                 <Grid>
                     <Grid.RowDefinitions>
@@ -312,8 +312,12 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <ScrollViewer x:Name="MainImageScrollViewer" Grid.Row="0"  VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" PreviewMouseWheel="MainImageScrollViewer_PreviewMouseWheel">
-                        <ui:ZoomBorder x:Name="MainImageContainer" Background="{StaticResource BorderBrush}" ClipToBounds="True" BorderThickness="0" Margin="3,3,3,0">
-                            <Image x:Name="MainImage" ClipToBounds="True" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="Resources/EFXSes9UCfsyRVoNeQ2ZTB.png" MouseMove="MainImage_MouseMove" MouseLeftButtonUp="MainImage_MouseLeftButtonUp"/>
+                        <ui:ZoomBorder x:Name="MainImageContainer" Background="{StaticResource DarkenBrush}" ClipToBounds="True" BorderThickness="0" Margin="3,3,3,0">
+                            <Image x:Name="MainImage" ClipToBounds="True" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" MouseMove="MainImage_MouseMove" MouseLeftButtonUp="MainImage_MouseLeftButtonUp">
+                                <Image.Source>
+                                    <BitmapImage UriSource="Resources/EFXSes9UCfsyRVoNeQ2ZTB.png" />
+                                </Image.Source>
+                            </Image>
                         </ui:ZoomBorder>
                     </ScrollViewer>
 
